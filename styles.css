@@ -1,0 +1,127 @@
+/**
+ * @package mod
+ * @subpackage reservation
+ * @author Roberto Pinna (bobo@di.unipmn.it)
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+.path-mod-reservation .overbooked {
+    background-color: orange;
+}
+
+.path-mod-reservation .notopened {
+    background-color: #bf2f32;
+    color: white;
+    padding: 2px;
+}
+
+.path-mod-reservation .cancelled {
+    text-decoration: line-through;
+}
+
+.path-mod-reservation .user img {
+    vertical-align: text-top;
+}
+
+.path-mod-reservation .note {
+    display: block;
+}
+
+.path-mod-reservation .overview td {
+    text-align: center;
+}
+
+.path-mod-reservation .manualreserve {
+    text-align: center;
+}
+
+.path-mod-reservation .yourreservation {
+    font-weight: bold;
+}
+
+.path-mod-reservation .availability {
+    text-align: center;
+}
+
+.path-mod-reservation .downloadmenu {
+    text-align: center;
+}
+
+.path-mod-reservation .viewtype {
+    text-align: center;
+    float: right;
+}
+
+.path-mod-reservation .form-buttons {
+    text-align: center;
+}
+
+.path-mod-reservation .savegrades {
+    text-align: center;
+}
+.path-mod-reservation .connectedreservations {
+    text-indent: 0px;
+    margin: 0;
+    list-style: none;
+    display: inline-block;
+}
+
+/**
+ * Location edit page
+ */
+.path-admin-mod-reservation .locationform {
+    text-align: center;
+}
+
+.path-admin-mod-reservation .locationform .locationedit {
+    display: inline;
+    vertical-align: top;
+    text-align: center;
+    min-width: 20%;
+}
+
+/**
+ * Editing page
+ */
+.path-mod-reservation #collision_report {
+    padding-top: 5px;
+    padding-left: 10px;
+    display: inline-block;
+}
+
+.path-mod-reservation #collision_report .timeavailable {
+    padding: 5px;
+    padding-left: 25px;
+    background-image: url([[pix:core|i/valid]]);
+    background-repeat: no-repeat;
+    background-position: 1%;
+}
+
+.path-mod-reservation #collision_report .clashesfound {
+    padding: 5px;
+    padding-left: 25px;
+    background-image: url([[pix:core|i/caution]]);
+    background-repeat: no-repeat;
+    background-position: 1%;
+}
+
+.path-mod-reservation #collision_list {
+    display: none;
+}
+
+.path-mod-reservation #collision_list table.collisions {
+    margin: 0;
+}
+
+.path-mod-reservation .matchlist {
+    position:absolute;
+    padding:5px;
+    display:none;
+    width:50%;
+    height:200px;
+    float:left;
+    z-index: 99999;
+    background-color:white;
+    border: thin solid black;
+}
+
