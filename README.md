@@ -1,6 +1,7 @@
 moodle-mod_reservation
 ======================
 Reservation module
+
 This module permits to schedule an event with a defined reservation time.
 The main targets of this module are schedule laboratory sessions and exams but you can schedule everything you want.
 
