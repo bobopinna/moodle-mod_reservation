@@ -212,6 +212,6 @@ $string['message'] = 'Messaggio ai partecipanti';
 $string['eventrequestadded'] = 'Aggiunta richiesta di prenotazione';
 $string['eventrequestcancelled'] = 'Annullata richiesta di prenotazione';
 $string['eventrequestdeleted'] = 'Rimossa richiesta di prenotazione';
-
+$string['modulename_help'] = '<p>L\'utilizzo principale di questo modulo &egrave; la prenotazione degli studenti alle sessioni di laboratorio e agli esami ma pu&ograve; essere utilizzato per qualunque tipo di prenotazione</p><p> Il docente pu&ograve; limitare il numero di posti disponibili per il determinato evento, la data dello stesso e le date di apertura e chiusura delle prenotazioni.</p><p>Ad ogni prenotazione pu&grave; essere assegnata una valutazione o una scala di valutazione</p><p>Gli studenti possono prenotarsi e cancellare le proprie prenotazioni aggiungendo eventualmente una nota testuale.</p><p>Dopo l\'inizio dell\'evento il docente potr&agrave; attribuire le valutazioni agli utenti prenotati. Una mail di notifica verr&agrave; inviata agli studenti.</p><p>La lista delle prenotazioni pu&ograve; essere scaricata in diversi formati di file</p>';
 
 ?>
