@@ -68,7 +68,11 @@ function reservation_update_instance($reservation) {
         reservation_set_events($reservation);
       
         //$reservation = stripslashes_recursive($reservation);
-        reservation_grade_item_update($reservation);
+        if (!empty($resernation->maxgrade)) {
+            reservation_grade_item_update($reservation);
+        } else {
+            reservation_grade_item_delete($reservation);
+        }
     } else {
         error('Could not update record');
     }
