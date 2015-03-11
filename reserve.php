@@ -122,7 +122,7 @@
 
                                     // Update completion state
                                     $completion=new completion_info($course);
-                                    if ($completion->is_enabled($cm)) {
+                                    if ($completion->is_enabled($cm) && $reservation->completionreserved) {
                                         $completion->update_state($cm,COMPLETION_COMPLETE);
                                     }
 
@@ -149,7 +149,7 @@
 
                 // Update completion state
                 $completion=new completion_info($course);
-                if ($completion->is_enabled($cm)) {
+                if ($completion->is_enabled($cm) && $reservation->completionreserved) {
                     $completion->update_state($cm,COMPLETION_INCOMPLETE);
                 }
                 redirect ('view.php?id='.$cm->id, get_string('reservationcancelled', 'reservation'), 2);

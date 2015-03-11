@@ -13,7 +13,7 @@ function reservation_supports($feature) {
         case FEATURE_GROUPMEMBERSONLY:        return true;
         case FEATURE_MOD_INTRO:               return true;
         case FEATURE_COMPLETION_TRACKS_VIEWS: return false;
-        case FEATURE_COMPLETION_HAS_RULES:    return false;
+        case FEATURE_COMPLETION_HAS_RULES:    return true;
         case FEATURE_GRADE_HAS_GRADE:         return true;
         case FEATURE_GRADE_OUTCOMES:          return false;
         case FEATURE_BACKUP_MOODLE2:          return true;
@@ -114,6 +114,32 @@ function reservation_delete_instance($id) {
     reservation_grade_item_delete($reservation);
 
     return $result;
+}
+
+/**
+ * Obtains the automatic completion state for this reservation based on the condition
+ * in reservation settings.
+ *
+ * @param object $course Course
+ * @param object $cm Course-module
+ * @param int $userid User ID
+ * @param bool $type Type of comparison (or/and; can be used as return value if no conditions)
+ * @return bool True if completed, false if not, $type if conditions not set.
+ */
+function reservation_get_completion_state($course, $cm, $userid, $type) {
+    global $CFG, $DB;
+
+    // Get reservation details
+    $reservation = $DB->get_record('reservation', array('id'=>$cm->instance), '*', MUST_EXIST);
+
+    // If completion option is enabled, evaluate it and return true/false
+    if ($reservation->completionreserved) {
+        $params = array('userid'=>$userid, 'reservation'=>$reservation->id);
+        return $DB->record_exists('reservation_request', $params);
+    } else {
+        // Completion option is not enabled so just return $type
+        return $type;
+    }
 }
 
 function reservation_user_outline($course, $user, $mod, $reservation) {

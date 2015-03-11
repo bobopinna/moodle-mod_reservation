@@ -367,6 +367,22 @@ class mod_reservation_mod_form extends moodleform_mod {
         }
     }
 
+    public function get_data() {
+        $data = parent::get_data();
+        if ($data) {
+            if (!empty($data->completionunlocked)) {
+                // Turn off completion settings if the checkboxes aren't ticked
+                $autocompletion = !empty($data->completion) &&
+                    $data->completion == COMPLETION_TRACKING_AUTOMATIC;
+                if (!$autocompletion || empty($data->completionreserved)) {
+                    $data->completionreserved=0;
+                }
+            }
+        }
+
+        return $data;
+    }
+
     function validation($data, $files) {
         global $CFG;
 
@@ -389,4 +405,19 @@ class mod_reservation_mod_form extends moodleform_mod {
         }
         return $errors;
     }
+
+    public function add_completion_rules() {
+        $mform =& $this->_form;
+
+        $mform->addElement('checkbox',
+                           'completionreserved',
+                           '',
+                           get_string('completionreserved', 'reservation'));
+        return array('completionreserved');
+    }
+
+    public function completion_rule_enabled($data) {
+        return !empty($data['completionreserved']);
+    }
+
 }

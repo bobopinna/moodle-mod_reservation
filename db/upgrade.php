@@ -226,6 +226,21 @@ function xmldb_reservation_upgrade($oldversion=0) {
     if ($oldversion < 2014071500) {
         upgrade_mod_savepoint(true, 2014071500, 'reservation');
     }
+    if ($oldversion < 2015031100) {
+        upgrade_mod_savepoint(true, 2015031100, 'reservation');
+    }
+    if ($oldversion < 2015031101) {
+        // Define field conditionreserved to be added to reservation
+        $table = new xmldb_table('reservation');
+        $field = new xmldb_field('completionreserved', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'mailed');
+
+        // Conditionally launch add field parent
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        upgrade_mod_savepoint(true, 2015031101, 'reservation');
+    }
 }
 
 ?>
