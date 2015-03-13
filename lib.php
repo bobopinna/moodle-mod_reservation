@@ -134,7 +134,7 @@ function reservation_get_completion_state($course, $cm, $userid, $type) {
 
     // If completion option is enabled, evaluate it and return true/false
     if ($reservation->completionreserved) {
-        $params = array('userid'=>$userid, 'reservation'=>$reservation->id);
+        $params = array('userid'=>$userid, 'reservation'=>$reservation->id, 'timecancelled'=>0);
         return $DB->record_exists('reservation_request', $params);
     } else {
         // Completion option is not enabled so just return $type
