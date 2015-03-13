@@ -337,7 +337,6 @@
 
 
     // Get all reservation requests
-    //$requests = reservation_get_requests($reservation, ($view == 'full'), $fields, $group, $groupmode);
     $requests = reservation_get_requests($reservation, true, $fields, $group, $groupmode);
     if (!empty($requests)) {
         // Check for requests full view
