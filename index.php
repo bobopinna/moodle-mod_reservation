@@ -157,10 +157,8 @@
         if (!isset($CFG->reservation_deltatime)) {
             $CFG->reservation_deltatime = -1;
         }
-        if (($reservation->timestart+$CFG->reservation_deltatime > $now) || ($CFG->reservation_deltatime < 0)) {
-            $eventdate = userdate($reservation->timestart, get_string('strftimedate')) .' '. userdate($reservation->timestart, get_string('strftimetime'));
-        } else {
-            $eventdate = '';
+        $eventdate = userdate($reservation->timestart, get_string('strftimedate')) .' '. userdate($reservation->timestart, get_string('strftimetime'));
+        if ($reservation->timestart+$CFG->reservation_deltatime < $now) {
             $dimmed = 'class="dimmed"';
         }
 
