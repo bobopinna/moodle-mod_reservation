@@ -29,7 +29,7 @@ class mod_reservation_mod_form extends moodleform_mod {
         $mform->addRule('name', null, 'required', null, 'client');
 
 // Summary
-        $this->add_intro_editor(false, get_string('description', 'reservation'));
+        $this->standard_intro_elements(get_string('description', 'reservation'));
 //-------------------------------------------------------------------------------
 // Event Settings
         $mform->addElement('header', 'eventsettings', get_string('eventsettings', 'reservation'));
@@ -52,6 +52,7 @@ class mod_reservation_mod_form extends moodleform_mod {
         } else {
             $mform->addElement('static', 'noteachers', get_string('teachers'), get_string('noteachers', 'reservation'));
             $mform->addElement('hidden','teachers');
+            $mform->setType('teachers', PARAM_TEXT);
         }
 
         $locationgrp = array();
@@ -174,6 +175,7 @@ class mod_reservation_mod_form extends moodleform_mod {
         $reservationid = $this->_instance;
         if ($reservations = reservation_get_parentable($reservationid)) {
             if (isset($CFG->reservation_connect_to) && ($CFG->reservation_connect_to == 'site')) {
+                require_once($CFG->libdir.'/coursecatlib.php');  
                 $displaylist = coursecat::make_categories_list();
             }
             $values = array(0 => get_string('noparent', 'reservation'));
