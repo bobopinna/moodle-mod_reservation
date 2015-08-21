@@ -96,11 +96,13 @@
                                 $request = $DB->get_record('reservation_request', array('id' => $requestid));
                                 $requestnote = $DB->get_record('reservation_note', array('request' => $requestid));
                                 $requestnote = $requestnote?$requestnode:new stdClass();
-                                $DB->delete_records('reservation_request', array('id' => $requestid));
-                                $DB->delete_records('reservation_note', array('request' => $requestid));
 
+                                $DB->set_field('reservation_request', 'grade', -1, array('id' => $requestid));
                                 $userid = $DB->get_field('reservation_request', 'userid', array('id' => $requestid));
                                 reservation_update_grades($reservation, $userid);
+
+                                $DB->delete_records('reservation_request', array('id' => $requestid));
+                                $DB->delete_records('reservation_note', array('request' => $requestid));
 
                                 // Update completion state
                                 $completion=new completion_info($course);
