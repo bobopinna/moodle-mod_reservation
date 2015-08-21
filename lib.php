@@ -754,8 +754,8 @@ function reservation_set_events($reservation) {
     
             $event2->name        .= ' ('.get_string('reservations', 'reservation').')';
             $event2->description  = array();
-            $event2->description['format']= FORMAT_PLAIN;
-            $event2->description['text']  = userdate($reservation->timestart, get_string('strftimedaydatetime')).'<br />'.$reservation->location.'<br />'.$reservation->intro;
+            $event2->description['format']= FORMAT_HTML;
+            $event2->description['text']  = userdate($reservation->timestart, get_string('strftimedaydatetime')).'<br />'.$reservation->location.'<br />'.format_module_intro('reservation', $reservation, $reservation->coursemodule);
             $event2->eventtype    = 'reservation';
             $event2->timestart    = ($reservation->timeopen) != 0?$reservation->timeopen:$reservation->timemodified;
             $event2->timeduration = ($reservation->timeclose-$event2->timestart)>0?($reservation->timeclose-$event2->timestart):0;
