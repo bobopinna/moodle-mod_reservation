@@ -11,10 +11,10 @@
 ///  This fragment is called by moodle_needs_upgrading() and /admin/index.php
 /////////////////////////////////////////////////////////////////////////////////
 
-$plugin->version  = 2015031101;  // The current plugin version
+$plugin->version  = 2015111600;  // The current plugin version
 $plugin->requires = 2014051200;  // Requires this Moodle version (2.7)
 $plugin->component  = 'mod_reservation';       // The current plugin release
-$plugin->release  = '2.7';       // The current plugin release
+$plugin->release  = '2.7.1';       // The current plugin release
 $plugin->maturity = MATURITY_STABLE;
 $plugin->cron     = 60;         // Period for cron to check this plugin (secs)
 
