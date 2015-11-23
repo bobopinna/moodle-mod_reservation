@@ -9,7 +9,7 @@ Teacher can define the number of seats available for the event, event date, rese
 A reservation may have a grade or a scale.
 Students can book and unbook a seat and add a note about this reservation.
 
-After the event starts the teacher can grade the event. Students will notified by mail.
+After the event starts the teacher can grade the event. Students and teachers may will notified by mail.
 
 Reservation list may be downloaded in various formats.
 
