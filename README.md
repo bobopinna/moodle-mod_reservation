@@ -12,3 +12,11 @@ Students can book and unbook a seat and add a note about this reservation.
 After the event starts the teacher can grade the event. Students will notified by mail.
 
 Reservation list may be downloaded in various formats.
+
+- teacher can also define multiple sublimits for available seats basis on user profile fields;
+- reservation permits overbooking, also for sublimits;
+- teacher can manually reserve seats for other user;
+- teacher can send messages to reserved users;
+- admin can define which profile fields are shown in reservation list table in reservation module settings;
+- reservation can be connected to another reservation so students can reserve to only one of them;
+- managers and administrators can upload list of reservation through a CSV file;
