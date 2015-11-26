@@ -11,7 +11,7 @@
 ///  This fragment is called by moodle_needs_upgrading() and /admin/index.php
 /////////////////////////////////////////////////////////////////////////////////
 
-$plugin->version  = 2015111601;  // The current plugin version
+$plugin->version  = 2015112600;  // The current plugin version
 $plugin->requires = 2014051200;  // Requires this Moodle version (2.7)
 $plugin->component  = 'mod_reservation';       // The current plugin release
 $plugin->release  = '3.0';       // The current plugin release
