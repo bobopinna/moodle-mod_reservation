@@ -29,13 +29,18 @@ class mod_reservation_mod_form extends moodleform_mod {
         $mform->addRule('name', null, 'required', null, 'client');
 
 // Summary
-        $this->standard_intro_elements(get_string('description', 'reservation'));
+        if ($CFG->branch < 29) {
+            $this->add_intro_editor(true, get_string('description', 'reservation'));
+        } else {
+            $this->standard_intro_elements(get_string('description', 'reservation'));
+        }
 //-------------------------------------------------------------------------------
 // Event Settings
         $mform->addElement('header', 'eventsettings', get_string('eventsettings', 'reservation'));
         $mform->setExpanded('eventsettings');
 
         $context = context_course::instance($COURSE->id);
+
         $capability = 'moodle/course:viewhiddenactivities';
         if (!empty($this->_cm)) {
             $context = context_module::instance($this->_cm->id);

@@ -21,7 +21,7 @@
 
     require_course_login($course);
 
-    $coursecontext = context_course::instance($course->id); 
+    $coursecontext = context_course::instance($course->id);
 
     require_capability('moodle/course:manageactivities', $coursecontext);
 

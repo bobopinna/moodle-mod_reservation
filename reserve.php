@@ -37,7 +37,9 @@
     
     /// Update reservation
     if ($reservationid == $reservation->id) {
+        
         $context = context_module::instance($cm->id);
+
         if (isset($reserve)) {
             $now = time();
 

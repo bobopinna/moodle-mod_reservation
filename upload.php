@@ -16,7 +16,10 @@
 
     require_login();
     admin_externalpage_setup('managemodules');
-    require_capability('mod/reservation:uploadreservations', context_system::instance());
+
+    $systemcontext = context_system::instance();
+
+    require_capability('mod/reservation:uploadreservations', $systemcontext);
 
     $returnurl = new moodle_url('/mod/reservation/upload.php');
 

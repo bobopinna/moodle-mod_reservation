@@ -58,6 +58,7 @@
     $now = time();
 
     $context = context_module::instance($cm->id);
+
     $coursecontext = context_course::instance($reservation->course);
 
     $params = array(

@@ -66,13 +66,18 @@ if ($format !== FORMAT_MOODLE) {
 if ($deluser !== 0) {
     $url->param('deluser', $deluser);
 }
+
+$modulecontext = context_module::instance($cm->id);
+
 $PAGE->set_url($url);
-$PAGE->set_context(context_module::instance($cm->id));
+$PAGE->set_context($modulecontext));
 
 require_login($course->id, false, $cm);
 
-$coursecontext = context_course::instance($course->id);   // Course context
-$systemcontext = context_system::instance();   // SYSTEM context
+$coursecontext = context_course::instance($course->id);
+
+$systemcontext = context_system::instance($cm->id);
+
 require_capability('moodle/course:bulkmessaging', $coursecontext);
 
 if (empty($SESSION->reservation_messageto)) {

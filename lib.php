@@ -351,6 +351,7 @@ function reservation_cron () {
                 } else {
                     // If no teachers are defined in reservation notify to all editing teachers and managers
                     $context = context_module::instance($mod->id);
+
                     $teachers = array_keys(get_users_by_capability($context, 'mod/reservation:addinstance', 'u.id'));
                 }
                 if (!empty($teachers)) {
