@@ -70,13 +70,13 @@ if ($deluser !== 0) {
 $modulecontext = context_module::instance($cm->id);
 
 $PAGE->set_url($url);
-$PAGE->set_context($modulecontext));
+$PAGE->set_context($modulecontext);
 
 require_login($course->id, false, $cm);
 
 $coursecontext = context_course::instance($course->id);
 
-$systemcontext = context_system::instance($cm->id);
+$systemcontext = context_system::instance();
 
 require_capability('moodle/course:bulkmessaging', $coursecontext);
 
