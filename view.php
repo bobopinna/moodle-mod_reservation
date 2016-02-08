@@ -248,6 +248,7 @@
 
         if (has_capability('mod/reservation:viewrequest',$context)) { 
             if (isset($CFG->reservation_connect_to) && ($CFG->reservation_connect_to == 'site')) {
+                require_once($CFG->libdir.'/coursecatlib.php');  
                 $displaylist = coursecat::make_categories_list();
             }
             // Show connected reservations
