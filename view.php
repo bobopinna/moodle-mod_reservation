@@ -289,36 +289,37 @@
             }
 
             if ($CFG->reservation_manual_users == 'site') {
-                $participants = $DB->get_records('user', array('deleted' => 0), 'lastname ASC', 'id');
+                $participants = $DB->get_records('user', array('deleted' => 0, 'suspended' => 0), 'lastname ASC', '*');
             } else { 
                 $participants = get_enrolled_users($coursecontext, null, 0, 'u.*', 'u.lastname ASC');
             }
             if (!empty($participants)) {
                 foreach ($participants as $participant) {
-                    
-                    if ($groupmode == SEPARATEGROUPS) {
-                        if (($group != 0) && (has_capability('mod/reservation:viewrequest',$context))) {
-                            $groups = groups_get_user_groups($reservation->course, $participant->id);
-                            if (!empty($groups) && (array_search($group, $groups['0']) === false)) {
-                                continue;
-                            }
-                        } else if (!has_capability('mod/reservation:viewrequest',$context)) {
-                            $mygroups = groups_get_user_groups($reservation->course, $USER->id); 
-                            if (!empty($mygroups['0'])) {
-                                $notmember = true;
-                                $i = 0;
-                                while (($i < count($mygroups['0'])) && (!groups_is_member($mygroups['0'][$i], $participant->id))) {
-                                    $i++;
-                                } 
-                                if ($i == count($mygroups['0'])) {
+                    if (!in_array($participant->username, array('guest', 'admin'))) {
+                        if ($groupmode == SEPARATEGROUPS) {
+                            if (($group != 0) && (has_capability('mod/reservation:viewrequest',$context))) {
+                                $groups = groups_get_user_groups($reservation->course, $participant->id);
+                                if (!empty($groups) && (array_search($group, $groups['0']) === false)) {
                                     continue;
                                 }
-                            } else {
-                                continue;
+                            } else if (!has_capability('mod/reservation:viewrequest',$context)) {
+                                $mygroups = groups_get_user_groups($reservation->course, $USER->id); 
+                                if (!empty($mygroups['0'])) {
+                                    $notmember = true;
+                                    $i = 0;
+                                    while (($i < count($mygroups['0'])) && (!groups_is_member($mygroups['0'][$i], $participant->id))) {
+                                        $i++;
+                                    } 
+                                    if ($i == count($mygroups['0'])) {
+                                        continue;
+                                    }
+                                } else {
+                                    continue;
+                                }
                             }
                         }
+                        $addableusers[$participant->id] = fullname($participant);
                     }
-                    $addableusers[$participant->id] = fullname($participant);
                 }
             }
         }
