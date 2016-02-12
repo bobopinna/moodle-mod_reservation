@@ -9,7 +9,7 @@
 /// This page lists all the instances of reservation in a particular course
 
     require_once('../../config.php');
-    require($CFG->dirroot.'/course/lib.php');
+    require_once($CFG->dirroot.'/course/lib.php');
     require_once($CFG->libdir.'/tablelib.php');
     require_once('locallib.php');
 
@@ -29,7 +29,7 @@
     $PAGE->set_pagelayout('incourse');
 
     // Trigger instances list viewed event.
-    $event = \mod_reservation\event\course_module_instance_list_viewed::create(array('context' => $coursecontext)));
+    $event = \mod_reservation\event\course_module_instance_list_viewed::create(array('context' => $coursecontext));
     $event->add_record_snapshot('course', $course);
     $event->trigger();
 
