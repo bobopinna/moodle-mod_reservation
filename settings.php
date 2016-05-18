@@ -23,11 +23,6 @@ $settings->add(new admin_setting_heading('reservation_settings', get_string('res
 $settings->add(new admin_setting_configtext('reservation_max_requests', get_string('maxrequest', 'reservation'),
                    get_string('configmaxrequests', 'reservation'), '100'), PARAM_INT, 5);
 
-require_once($CFG->libdir.'/tablelib.php');
-$flexibletable = new flexible_table('flexibletable');
-$settings->add(new admin_setting_configselect('reservation_download', get_string('downloadas', 'reservation'),
-                   get_string('configdownload', 'reservation'), $flexibletable->defaultdownloadformat, $flexibletable->get_download_menu()));
-
 unset($choices);
 $choices = array();
 $choices['course'] = get_string('course');

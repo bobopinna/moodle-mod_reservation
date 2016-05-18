@@ -65,11 +65,6 @@
     $table->is_downloadable(true);
     $table->show_download_buttons_at(array(TABLE_P_TOP, TABLE_P_BOTTOM));
 
-    $downloadoptions = $table->get_download_menu();
-    if (isset($CFG->reservation_download) && !empty($CFG->reservation_download) && isset($downloadoptions[$CFG->reservation_download])) {
-        $table->defaultdownloadformat = $CFG->reservation_download;
-    }
-
     $table->is_downloading($download, clean_filename("$course->shortname $strreservations"), "$course->shortname $strreservations");
 
     $table->define_columns($tablecolumns);

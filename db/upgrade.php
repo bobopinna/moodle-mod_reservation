@@ -250,6 +250,11 @@ function xmldb_reservation_upgrade($oldversion=0) {
     if ($oldversion < 2015112600) {
         upgrade_mod_savepoint(true, 2015112600, 'reservation');
     }
+    if ($oldversion < 2016051800) {
+        set_config('reservation_download', NULL);
+
+        upgrade_mod_savepoint(true, 2016051800, 'reservation');
+    }
 }
 
 ?>
