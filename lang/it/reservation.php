@@ -17,6 +17,8 @@ $string['reservation:manualreserve'] = 'Effettuare prenotazioni per altri utenti
 $string['reservation:manualdelete'] = 'Cancellare prenotazioni di altri utenti';
 $string['reservation:downloadrequests'] = 'Scaricare l\'elenco delle prenotazioni';
 $string['reservation:addinstance'] = 'Aggiungere una nuova prenotazione';
+$string['reservation:uploadreservations'] = 'Effettuare upload prenotazioni';
+
 
 $string['availablerequests'] = 'Posti disponibili';
 $string['location'] = 'Luogo';

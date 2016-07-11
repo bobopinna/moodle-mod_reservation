@@ -17,6 +17,8 @@ $string['reservation:manualreserve'] = 'Can submit request for other users';
 $string['reservation:manualdelete'] = 'Can delete other users requests';
 $string['reservation:downloadrequests'] = 'Can download requests list';
 $string['reservation:addinstance'] = 'Add a new reservation';
+$string['reservation:uploadreservations'] = 'Can upload reservations';
+$string['search:activity'] = 'Reservation - activity information';
 
 $string['availablerequests'] = 'Available seats';
 $string['location'] = 'Place';
@@ -215,5 +217,4 @@ $string['eventrequestcancelled'] = 'Reservation request cancelled';
 $string['eventrequestdeleted'] = 'Reservation request deleted';
 $string['modulename_help'] = '<p>The main aim of this activity is schedule laboratory sessions and exams but you can schedule everything you want.</p><p>Teacher can define the number of seats available for the event, event date, reservation opening and closing date.<br />A reservation may have a grade or a scale.<br />Students can book and unbook a seat and add a note about this reservation.</p><p>After the event starts the teacher can grade the event. Students will notified by mail.</p><p>Reservation list may be downloaded in various formats.</p>';
 $string['completionreserved'] = 'Student must reserve to complete this activity';
-$string['reservation:uploadreservations'] = 'Can upload reservations';
 ?>
