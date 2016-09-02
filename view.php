@@ -499,8 +499,9 @@
 
         //Sort data as requested
         if (has_capability('mod/reservation:viewrequest',$context)) {
-            if (!empty($table->sess->sortby)) {
-                $requests = reservation_multisort($requests, $table->sess->sortby);
+            $sortby = $table->get_sort_columns();
+            if (!empty($sortby)) {
+                $requests = reservation_multisort($requests, $sortby);
             }
         }
    
