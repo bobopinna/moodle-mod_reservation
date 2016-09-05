@@ -50,6 +50,10 @@ class restore_reservation_activity_structure_step extends restore_activity_struc
             $data->teachers = implode(',', $newteachers);
         }
 
+        if (!empty($data->parent)) {
+            $data->parent = -$data->parent;
+        }
+
         $data->timestart = $this->apply_date_offset($data->timestart);
         $data->timeend = $this->apply_date_offset($data->timeend);
         $data->timeopen = $this->apply_date_offset($data->timeopen);
@@ -60,6 +64,8 @@ class restore_reservation_activity_structure_step extends restore_activity_struc
         $newitemid = $DB->insert_record('reservation', $data);
         // immediately after inserting "activity" record, call this
         $this->apply_activity_instance($newitemid);
+
+        $this->set_mapping('reservation', $oldid, $newitemid);
     }
 
     protected function process_reservation_limit($data) {
@@ -104,7 +110,35 @@ class restore_reservation_activity_structure_step extends restore_activity_struc
     }
 
     protected function after_execute() {
+
         // Add reservation related files, no need to match by itemname (just internally handled context)
         $this->add_related_files('mod_reservation', 'intro', null);
+    }
+
+    protected function after_restore() {
+        global $DB;
+
+
+        // Now that all the questions have been restored, let's process
+        // the created question_multianswer sequences (list of question ids).
+        $rs = $DB->get_recordset_sql("
+                SELECT r.id, r.parent
+                  FROM {reservation} r
+                  JOIN {backup_ids_temp} bi ON bi.newitemid = r.id
+                 WHERE bi.backupid = ?
+                   AND bi.itemname = 'reservation'",
+                array($this->get_restoreid()));
+
+        foreach ($rs as $rec) {
+            if ($rec->parent < 0) {
+                $newparentid = $this->get_mappingid('reservation', -$rec->parent);
+                if ($newparentid !== false) {
+                    $DB->set_field('reservation', 'parent', $newparentid, array('id' => $rec->id));
+                } else {
+                    $DB->set_field('reservation', 'parent', 0, array('id' => $rec->id));
+                    notify(get_string('badparent', 'reservation'));
+                }
+            }
+        }
     }
 }

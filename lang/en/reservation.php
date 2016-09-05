@@ -217,4 +217,5 @@ $string['eventrequestcancelled'] = 'Reservation request cancelled';
 $string['eventrequestdeleted'] = 'Reservation request deleted';
 $string['modulename_help'] = '<p>The main aim of this activity is schedule laboratory sessions and exams but you can schedule everything you want.</p><p>Teacher can define the number of seats available for the event, event date, reservation opening and closing date.<br />A reservation may have a grade or a scale.<br />Students can book and unbook a seat and add a note about this reservation.</p><p>After the event starts the teacher can grade the event. Students will notified by mail.</p><p>Reservation list may be downloaded in various formats.</p>';
 $string['completionreserved'] = 'Student must reserve to complete this activity';
+$string['badparent'] = 'This reservation was connected to another reservation not restored now. The connection has been removed. If needed reconnect them manually';
 ?>
