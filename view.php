@@ -797,18 +797,19 @@
                 if (!isset($currentuser)) {
                     $html = '';
                     if (($reservation->maxrequest == 0) && ($available > 0)) {
-                        $html = get_string('availablerequests', 'reservation');
+                        $html = html_writer::tag('span', get_string('availablerequests', 'reservation'), array('class' => 'available'));
                     } else if (($available > 0) || ($overbook+$available > 0)) {
                         $overbookedstring = '';
                         if ($available > 0) {
-                            $html = get_string('availablerequests', 'reservation').': '.$available;
+                            $html = html_writer::tag('span', get_string('availablerequests', 'reservation').': ', array('class' => 'available'));
+                            $html .= html_writer::tag('span', $available, array('class' => 'availablenumber'));
                         } else {
                             $html =  html_writer::tag('span',
                                                       get_string('overbookonly', 'reservation'),
                                                       array('class' => 'overbooked'));
                         }
                     } else {
-                        $html = get_string('nomorerequest', 'reservation');
+                        $html = html_writer::tag('span', get_string('nomorerequest', 'reservation'), array('class' => 'nomoreavailable'));
                     }
                     echo html_writer::tag('div', $html);
                 }
@@ -862,12 +863,12 @@
 
             if (isset($currentuser) && ($currentuser->number > 0)) {
                 if ($now > $reservation->timeclose) {
-                    echo $OUTPUT->box(get_string('justbooked', 'reservation',$currentuser->number).$currentuser->note,'center');
+                    echo $OUTPUT->box(get_string('justbooked', 'reservation',$currentuser->number).$currentuser->note,'center justbooked');
                     if (!empty($currentuser->grade)) {
-                        echo $OUTPUT->box($currentuser->grade);
+                        echo $OUTPUT->box($currentuser->grade, 'center graded');
                     }
                 } else { 
-                    echo $OUTPUT->box(get_string('alreadybooked', 'reservation').$currentuser->note,'center');
+                    echo $OUTPUT->box(get_string('alreadybooked', 'reservation').$currentuser->note,'center alreadybooked');
                 }
             }
             echo html_writer::end_tag('div');

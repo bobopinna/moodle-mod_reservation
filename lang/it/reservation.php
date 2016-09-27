@@ -49,7 +49,7 @@ $string['timeopen'] = 'Apertura prenotazioni';
 $string['timestart'] = 'Data inizio';
 $string['timeend'] = 'Data termine';
 $string['save'] = 'Salva valutazioni';
-$string['justbooked'] = 'Prenotazione registrata.<br />Posizione: {$a}';
+$string['justbooked'] = 'Posizione nell\'elenco di prenotazione: <span class="justbookednumber">{$a}</span>';
 $string['alreadybooked'] = 'Prenotazione già effettuata';
 $string['yourgrade'] = 'Il voto relativo a questa prenotazione &egrave;: {$a->grade}/{$a->maxgrade}';
 $string['yourscale'] = 'Il voto relativo a questa prenotazione &egrave;: {$a}';

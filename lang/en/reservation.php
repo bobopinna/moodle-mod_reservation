@@ -49,7 +49,7 @@ $string['timeopen'] = 'Reservation start on';
 $string['timestart'] = 'Start date';
 $string['timeend'] = 'End date';
 $string['save'] = 'Save grade';
-$string['justbooked'] = 'You are booked as: {$a}';
+$string['justbooked'] = 'You are booked as: <span class="justbookednumber">{$a}</span>';
 $string['alreadybooked'] = 'You are already booked';
 $string['yourgrade'] = 'Your grade about this reservation is: {$a->grade}/{$a->maxgrade}';
 $string['yourscale'] = 'Your grade about this reservation is: {$a}';
