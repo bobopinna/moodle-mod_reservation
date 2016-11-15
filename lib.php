@@ -584,10 +584,11 @@ function reservation_refresh_events($courseid = 0) {
             return true;
         }
     }
-    $moduleid = $DB->get_field('modules', 'id', array('name' => 'reservation'));
 
     foreach ($reservations as $reservation) {
         $DB->delete_records('event', array('modulename' => 'reservation', 'instance' => $reservation->id));
+
+        $reservation->coursemodule = get_coursemodule_from_instance('reservation', $reservation->id)->id;
         reservation_set_events($reservation);
    }
     return true;
