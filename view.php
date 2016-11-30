@@ -111,7 +111,7 @@ if (isset($action) && confirm_sesskey()) {
                             unset($requestids[$num]);
                             $request = $DB->get_record('reservation_request', array('id' => $requestid));
                             $requestnote = $DB->get_record('reservation_note', array('request' => $requestid));
-                            $requestnote = $requestnote ? $requestnode : new stdClass();
+                            $requestnote = !empty($requestnote) ? $requestnote : new stdClass();
 
                             $DB->set_field('reservation_request', 'grade', -1, array('id' => $requestid));
                             $userid = $DB->get_field('reservation_request', 'userid', array('id' => $requestid));
