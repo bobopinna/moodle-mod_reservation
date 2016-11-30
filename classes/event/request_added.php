@@ -45,7 +45,8 @@ class request_added extends \core\event\base {
      * @param \stdClass $requestnote
      * @return request_added
      */
-    public static function create_from_request(\stdClass $reservation, \context_module $context, \stdClass $request, \stdClass $requestnote) {
+    public static function create_from_request(\stdClass $reservation, \context_module $context,
+                                               \stdClass $request, \stdClass $requestnote) {
         $data = array(
             'context' => $context,
             'objectid' => $request->id,
@@ -66,8 +67,8 @@ class request_added extends \core\event\base {
      * @return string
      */
     public function get_description() {
-        return "The user with id '$this->userid' added the request with id '$this->objectid' for the reservation with the " .
-            "course module id '$this->contextinstanceid'.";
+        return "The user with id '$this->userid' added the request with id '$this->objectid' ".
+            "for the reservation with the course module id '$this->contextinstanceid'.";
     }
 
     /**
@@ -77,7 +78,14 @@ class request_added extends \core\event\base {
      */
     protected function get_legacy_logdata() {
         $request = $this->get_record_snapshot('reservation_request', $this->objectid);
-        return array($this->courseid, 'reservation', 'reserve', 'view.php?id='.$this->contextinstanceid, $request->userid, $this->contextinstanceid);
+        return array(
+            $this->courseid,
+            'reservation',
+            'reserve',
+            'view.php?id='.$this->contextinstanceid,
+            $request->userid,
+            $this->contextinstanceid
+        );
     }
 
     /**

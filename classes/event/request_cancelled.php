@@ -75,7 +75,14 @@ class request_cancelled extends \core\event\base {
      */
     protected function get_legacy_logdata() {
         $request = $this->get_record_snapshot('reservation_request', $this->objectid);
-        return array($this->courseid, 'reservation', 'cancel', 'view.php?id='.$this->contextinstanceid, $request->userid, $this->contextinstanceid);
+        return array(
+            $this->courseid,
+            'reservation',
+            'cancel',
+            'view.php?id='.$this->contextinstanceid,
+            $request->userid,
+            $this->contextinstanceid
+        );
     }
 
     /**

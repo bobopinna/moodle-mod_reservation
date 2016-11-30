@@ -1,4 +1,19 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * Bulk reservation upload forms
  *
@@ -10,7 +25,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once $CFG->libdir.'/formslib.php';
+require_once($CFG->libdir.'/formslib.php');
 
 
 /**
@@ -21,7 +36,7 @@ require_once $CFG->libdir.'/formslib.php';
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class reservation_upload_form extends moodleform {
-    function definition () {
+    public function definition () {
         $mform = $this->_form;
 
         $mform->addElement('header', 'settingsheader', get_string('upload'));
@@ -43,7 +58,7 @@ class reservation_upload_form extends moodleform {
         $mform->addElement('select', 'encoding', get_string('encoding', 'tool_uploaduser'), $choices);
         $mform->setDefault('encoding', 'UTF-8');
 
-        $choices = array('10'=>10, '20'=>20, '100'=>100, '1000'=>1000, '100000'=>100000);
+        $choices = array('10' => 10, '20' => 20, '100' => 100, '1000' => 1000, '100000' => 100000);
         $mform->addElement('select', 'previewrows', get_string('rowpreviewnum', 'tool_uploaduser'), $choices);
         $mform->setType('previewrows', PARAM_INT);
 
@@ -52,7 +67,7 @@ class reservation_upload_form extends moodleform {
 }
 
 class reservation_upload_confirm_form extends moodleform {
-    function definition () {
+    public function definition () {
         global $DB;
         $mform = $this->_form;
         $noerror = true;
@@ -62,21 +77,23 @@ class reservation_upload_confirm_form extends moodleform {
         if (!isset($data['maxsection'])) {
             $data['maxsection'] = 0;
         }
-         
+
         $mform->addElement('header', 'settingsheader', get_string('general'));
-        if (!in_array('course',$columns)) {
+        if (!in_array('course', $columns)) {
             $displaylist = coursecat::make_categories_list();
 
             $courses = $DB->get_records('course');
             if ($courses) {
                 $choices = array();
-                foreach($courses as $course) {
-                    // compartibility with course formats using field 'numsections'
+                foreach ($courses as $course) {
+                    // Compartibility with course formats using field 'numsections'.
                     $courseformatoptions = course_get_format($course)->get_format_options();
 
-                    if (array_key_exists('numsections', $courseformatoptions) && ($data['maxsection'] <= $courseformatoptions['numsections']) && ($data['maxsection'] > 0)) {
+                    $hassections = array_key_exists('numsections', $courseformatoptions);
+                    if ($hassections && ($data['maxsection'] <= $courseformatoptions['numsections']) && ($data['maxsection'] > 0)) {
                         if ($course->category != 0) {
-                            $choices[$course->shortname] = $displaylist[$course->category].' / '.$course->fullname.' ('.$course->shortname.')';
+                            $choices[$course->shortname] = $displaylist[$course->category].' / '.
+                                    $course->fullname.' ('.$course->shortname.')';
                         } else {
                             $choices[$course->shortname] = $course->fullname.' ('.$course->shortname.')';
                         }
@@ -94,7 +111,7 @@ class reservation_upload_confirm_form extends moodleform {
         }
         if ($noerror) {
             $mform->addElement('selectyesno', 'note', get_string('note', 'reservation'));
-            // hidden fields
+            // Hidden fields.
             $mform->addElement('hidden', 'iid');
             $mform->setType('iid', PARAM_INT);
             $mform->setdefault('iid', $data['iid']);
@@ -102,9 +119,7 @@ class reservation_upload_confirm_form extends moodleform {
             $this->add_action_buttons(true, get_string('importreservations', 'reservation'));
         } else {
             $mform->addElement('static', 'alert', '', get_string('nocourseswithnsections', 'reservation', $data['maxsection']));
-            $mform->addElement('cancel','cancel');
+            $mform->addElement('cancel', 'cancel');
         }
     }
 }
-
-?>

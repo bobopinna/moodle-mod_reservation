@@ -45,7 +45,8 @@ class request_deleted extends \core\event\base {
      * @param \stdClass $requestnote
      * @return request_deleted
      */
-    public static function create_from_request(\stdClass $reservation, \context_module $context, \stdClass $request, \stdClass $requestnote) {
+    public static function create_from_request(\stdClass $reservation, \context_module $context,
+                                               \stdClass $request, \stdClass $requestnote) {
         $data = array(
             'context' => $context,
             'objectid' => $request->id,
@@ -77,7 +78,14 @@ class request_deleted extends \core\event\base {
      */
     protected function get_legacy_logdata() {
         $request = $this->get_record_snapshot('reservation_request', $this->objectid);
-        return array($this->courseid, 'reservation', 'delete', 'view.php?id='.$this->contextinstanceid, $request->userid, $this->contextinstanceid);
+        return array(
+            $this->courseid,
+           'reservation',
+           'delete',
+           'view.php?id='.$this->contextinstanceid,
+           $request->userid,
+           $this->contextinstanceid
+        );
     }
 
     /**

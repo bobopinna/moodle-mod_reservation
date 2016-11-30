@@ -1,4 +1,19 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package mod
  * @subpackage reservation
@@ -217,5 +232,3 @@ $string['eventrequestdeleted'] = 'Rimossa richiesta di prenotazione';
 $string['modulename_help'] = '<p>L\'utilizzo principale di questo modulo &egrave; la prenotazione degli studenti alle sessioni di laboratorio e agli esami ma pu&ograve; essere utilizzato per qualunque tipo di prenotazione</p><p> Il docente pu&ograve; limitare il numero di posti disponibili per il determinato evento, la data dello stesso e le date di apertura e chiusura delle prenotazioni.</p><p>Ad ogni prenotazione pu&grave; essere assegnata una valutazione o una scala di valutazione</p><p>Gli studenti possono prenotarsi e cancellare le proprie prenotazioni aggiungendo eventualmente una nota testuale.</p><p>Dopo l\'inizio dell\'evento il docente potr&agrave; attribuire le valutazioni agli utenti prenotati. Una mail di notifica verr&agrave; inviata agli studenti.</p><p>La lista delle prenotazioni pu&ograve; essere scaricata in diversi formati di file</p>';
 $string['completionreserved'] = 'Lo studente deve effettuare la prenotazione per completare l\'attività';
 $string['badparent'] = 'Questa prenotazione era collegata con un\'altra che non &egrave; stata ripristinata adesso. Il collegamento &egrave; stato rimosso. Se necessario ricollegarle manualmente.';
-
-?>

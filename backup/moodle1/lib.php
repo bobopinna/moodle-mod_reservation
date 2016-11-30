@@ -1,4 +1,18 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * Provides support for the conversion of moodle1 backup to the moodle2 format
@@ -41,7 +55,6 @@ class moodle1_mod_reservation_handler extends moodle1_mod_handler {
                 'reservation', '/MOODLE_BACKUP/COURSE/MODULES/MOD/RESERVATION',
                 array(
                     'renamefields' => array(
- //                       'description' => 'intro',
                     ),
                     'newfields' => array(
                         'introformat' => 0,
@@ -65,21 +78,21 @@ class moodle1_mod_reservation_handler extends moodle1_mod_handler {
      */
     public function process_reservation($data) {
 
-        // get the course module id and context id
+        // Get the course module id and context id.
         $instanceid     = $data['id'];
         $cminfo         = $this->get_cminfo($instanceid);
         $this->moduleid = $cminfo['id'];
         $contextid      = $this->converter->get_contextid(CONTEXT_MODULE, $this->moduleid);
 
-        // get a fresh new file manager for this instance
+        // Get a fresh new file manager for this instance.
         $this->fileman = $this->converter->get_file_manager($contextid, 'mod_reservation');
 
-        // convert course files embedded into the intro
+        // Convert course files embedded into the intro.
         $this->fileman->filearea = 'intro';
         $this->fileman->itemid   = 0;
         $data['intro'] = moodle1_converter::migrate_referenced_files($data['intro'], $this->fileman);
 
-        // start writing reservation.xml
+        // Start writing reservation.xml.
         $this->open_xml_writer("activities/reservation_{$this->moduleid}/reservation.xml");
         $this->xmlwriter->begin_tag('activity', array('id' => $instanceid, 'moduleid' => $this->moduleid,
             'modulename' => 'reservation', 'contextid' => $contextid));
@@ -120,13 +133,12 @@ class moodle1_mod_reservation_handler extends moodle1_mod_handler {
      * This is executed when we reach the closing </MOD> tag of our 'reservation' path
      */
     public function on_reservation_end() {
-        // finalize reservation.xml
+        // Finalize reservation.xml.
         $this->xmlwriter->end_tag('reservation');
         $this->xmlwriter->end_tag('activity');
         $this->close_xml_writer();
 
-
-        // write inforef.xml
+        // Write inforef.xml.
         $this->open_xml_writer("activities/reservation_{$this->moduleid}/inforef.xml");
         $this->xmlwriter->begin_tag('inforef');
         $this->xmlwriter->begin_tag('fileref');

@@ -1,10 +1,27 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package mod
  * @subpackage reservation
  * @author Roberto Pinna (bobo@di.unipmn.it)
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+defined('MOODLE_INTERNAL') || die();
 
 /**
  * Gets a full reservation record
@@ -68,7 +85,6 @@ function reservation_get_reservations_by_course($courseid, $location='') {
 function reservation_get_parentable($reservationid) {
     global $DB, $CFG, $COURSE;
 
-
     $searchfields = array();
     $additionalquery = '';
 
@@ -90,7 +106,7 @@ function reservation_get_parentable($reservationid) {
                      {course} c
                WHERE res.course = c.id
                      AND (res.parent = 0)' . $additionalquery . ' ORDER BY category, coursename, name', $searchfields);
-} 
+}
 
 /**
  * Return a list of connected reservations
@@ -187,18 +203,7 @@ function reservation_get_requests($reservation, $full=false, $fields=null, $grou
     if (!$full) {
         $clear = ' AND r.timecancelled=0';
     }
-/*
-    $extraselect = '';
-    if (!empty($fields)) {
-        foreach ($fields as $fieldid => $field) {
-            if (($field->custom === false) && ($fieldid != 'email')) {
-                $extraselect .= ', u.'.$fieldid;
-            }
-        }
-    }
-*/
 
-    //$requests = $DB->get_records_sql('SELECT r.*, u.firstname, u.lastname, u.picture, u.email, u.imagealt'.$extraselect.
     $requests = $DB->get_records_sql('SELECT u.*, r.*'.
                                      ' FROM {reservation_request} r, {user} u'.
                                      ' WHERE u.deleted = 0 AND r.reservation = :reservationid'.$clear.
@@ -211,44 +216,44 @@ function reservation_get_requests($reservation, $full=false, $fields=null, $grou
 
         $number = 1;
         foreach ($requests as $requestid => $request) {
-            // Add request order numbers
+            // Add request order numbers.
             $requests[$requestid]->number = $number;
             if ($request->timecancelled == 0) {
                 $number++;
             }
 
-            // Set current user information
+            // Set current user information.
             if (($request->userid == $USER->id) && ($request->timecancelled == '0')) {
                 $requests[0] = $request;
             }
 
-            // Fill extra fields
+            // Fill extra fields.
             if (!empty($fields)) {
                 $userdata = new stdClass();
                 $userdata->id = $request->userid;
                 $userdata = profile_user_record($request->userid);
-                foreach ($fields as $fieldid => $field) { 
+                foreach ($fields as $fieldid => $field) {
                     if (($field->custom !== false) && ($field->custom !== 'groups')) {
                         $requests[$requestid]->$fieldid = format_string($userdata->$fieldid);
-                    }  
+                    }
                 }
             }
 
-            // Add user note
+            // Add user note.
             if ($reservation->note == 1) {
                 $requests[$requestid]->note = $DB->get_field('reservation_note', 'note', array('request' => $requestid));
             }
 
-            // Set user groups
+            // Set user groups.
             if ($groupmode != NOGROUPS) {
                 if (($groupid == 0) || groups_is_member($groupid, $request->userid)) {
                     $groups = groups_get_user_groups($reservation->course, $request->userid);
                     if (!empty($groups['0'])) {
                         $usergroups = array();
-                        foreach($groups['0'] as $group) {
+                        foreach ($groups['0'] as $group) {
                             $usergroups[] = format_string(groups_get_group_name($group));
                         }
-                        $requests[$requestid]->groups = implode(', ',$usergroups);
+                        $requests[$requestid]->groups = implode(', ', $usergroups);
                     } else {
                         $requests[$requestid]->groups = '';
                     }
@@ -268,10 +273,9 @@ function reservation_get_requests($reservation, $full=false, $fields=null, $grou
 // least important criterion first.
 // The default sort order is ascending, and the default sort
 // type is strnatcmp.
-function reservation_multisort($array, $sortorders)
-{
+function reservation_multisort($array, $sortorders) {
     if (!empty($sortorders)) {
-        $orders = array_reverse($sortorders,true);
+        $orders = array_reverse($sortorders, true);
         foreach ($orders as $key => $order) {
             $t = 'strnatcasecmp($a->'.$key.', $b->'.$key.')';
             if (!empty($array)) {
@@ -280,14 +284,14 @@ function reservation_multisort($array, $sortorders)
                     $t = '$a->'.$key.' - $b->'.$key;
                 }
             }
-            uasort($array, create_function('$a, $b', 'return ' . ($order==SORT_ASC ? '' : '-') . '(' . $t . ');'));
+            uasort($array, create_function('$a, $b', 'return ' . ($order == SORT_ASC ? '' : '-') . '(' . $t . ');'));
         }
     }
 
     return $array;
 }
 
-function reservation_set_grades($reservation,$teacherid,$grades) {
+function reservation_set_grades($reservation, $teacherid, $grades) {
     global $DB;
 
     if (!empty($grades)) {
@@ -345,7 +349,7 @@ function reservation_get_profilefields() {
 
     $infofields = $DB->get_records('user_info_field');
     $customfields = array();
-    foreach($infofields as $infofield) {
+    foreach ($infofields as $infofield) {
         $customfields[$infofield->shortname] = new stdClass();
         $customfields[$infofield->shortname]->name = $infofield->name;
         $customfields[$infofield->shortname]->id = $infofield->id;
@@ -360,8 +364,8 @@ function reservation_get_userdata($userid) {
         require_once($CFG->dirroot.'/user/profile/lib.php');
         $profiledata = profile_user_record($userid);
         if (!empty($profiledata)) {
-            foreach($profiledata as $fieldname => $value) {
-               $userdata->{$fieldname} = $value;
+            foreach ($profiledata as $fieldname => $value) {
+                $userdata->{$fieldname} = $value;
             }
         }
     }
@@ -375,17 +379,17 @@ function reservation_setup_counters($reservation, $customfields) {
     $counters[0] = new stdClass();
     $counters[0]->count = 0;
     $counters[0]->deletedrequests = 0;
-    if ($reservation_limits = $DB->get_records('reservation_limit', array('reservationid' => $reservation->id))) {
+    if ($reservationlimits = $DB->get_records('reservation_limit', array('reservationid' => $reservation->id))) {
         $i = 1;
-        foreach($reservation_limits as $reservation_limit) {
-            $counters[$i] = $reservation_limit;
+        foreach ($reservationlimits as $reservationlimit) {
+            $counters[$i] = $reservationlimit;
             $counters[$i]->count = 0;
-            if (isset($customfields[$reservation_limit->field])) {
-                $counters[$i]->field = $reservation_limit->field;
-                $counters[$i]->fieldname = format_string($customfields[$reservation_limit->field]->name);
+            if (isset($customfields[$reservationlimit->field])) {
+                $counters[$i]->field = $reservationlimit->field;
+                $counters[$i]->fieldname = format_string($customfields[$reservationlimit->field]->name);
             } else {
-                $counters[$i]->field = $reservation_limit->field;
-                $counters[$i]->fieldname = get_string($reservation_limit->field);
+                $counters[$i]->field = $reservationlimit->field;
+                $counters[$i]->fieldname = get_string($reservationlimit->field);
             }
             $i++;
         }
@@ -401,19 +405,19 @@ function reservation_update_counters($counters, $request) {
         $counters[0]->deletedrequests++;
     } else {
         $counters[0]->count++;
-        for ($i=1;$i<count($counters);$i++) {
+        for ($i = 1; $i < count($counters); $i++) {
             $fieldname = $counters[$i]->field;
             if (($request->$fieldname == $counters[$i]->matchvalue) && !$counters[$i]->operator) {
                 $counters[$i]->count++;
                 $counters[0]->matchlimit++;
                 if ($counters[$i]->count > $counters[$i]->requestlimit) {
-                   $counters[0]->overbooked++;
+                    $counters[0]->overbooked++;
                 }
-            } elseif (($request->$fieldname != $counters[$i]->matchvalue) && $counters[$i]->operator) {
+            } else if (($request->$fieldname != $counters[$i]->matchvalue) && $counters[$i]->operator) {
                 $counters[$i]->count++;
                 $counters[0]->matchlimit++;
                 if ($counters[$i]->count > $counters[$i]->requestlimit) {
-                   $counters[0]->overbooked++;
+                    $counters[0]->overbooked++;
                 }
             }
         }
@@ -421,7 +425,7 @@ function reservation_update_counters($counters, $request) {
     return $counters;
 }
 
-function reservation_setup_sublimit_fields($counters,$customfields,$fields=array()) {
+function reservation_setup_sublimit_fields($counters, $customfields, $fields = array()) {
     foreach ($counters as $counter) {
         if (isset($counter->field)) {
             if (isset($customfields[$counter->field])) {
@@ -440,8 +444,8 @@ function reservation_setup_sublimit_fields($counters,$customfields,$fields=array
     return $fields;
 }
 
-// calculate available seat for USER
-function reservation_get_availability($reservation,$counters,$available) {
+// Calculate available seat for USER.
+function reservation_get_availability($reservation, $counters, $available) {
     global $USER;
 
     $availablesublimit = 0;
@@ -450,13 +454,13 @@ function reservation_get_availability($reservation,$counters,$available) {
     $userdata = reservation_get_userdata($USER->id);
 
     if (count($counters) - 1 > 0) {
-        for ($i=1;$i<count($counters);$i++) {
+        for ($i = 1; $i < count($counters); $i++) {
             $fieldname = $counters[$i]->field;
             if ((($userdata->{$counters[$i]->field} == $counters[$i]->matchvalue) && !$counters[$i]->operator) ||
                (($userdata->{$counters[$i]->field} != $counters[$i]->matchvalue) && $counters[$i]->operator)) {
-                if ($availablesublimit <= ($counters[$i]->requestlimit-$counters[$i]->count)) {
-                   $availablesublimit = $counters[$i]->requestlimit-$counters[$i]->count;
-                   $limitoverbook = round($counters[$i]->requestlimit * $reservation->overbook / 100);
+                if ($availablesublimit <= ($counters[$i]->requestlimit - $counters[$i]->count)) {
+                    $availablesublimit = $counters[$i]->requestlimit - $counters[$i]->count;
+                    $limitoverbook = round($counters[$i]->requestlimit * $reservation->overbook / 100);
                 }
                 $nolimit = false;
             }
@@ -479,7 +483,7 @@ function reservation_get_availability($reservation,$counters,$available) {
  * @param moodle_url $returnurl return url in case of any error
  * @return array list of fields
  */
-function reservation_validate_upload_columns(csv_import_reader $cir, $fields, $required_fields, moodle_url $returnurl) {
+function reservation_validate_upload_columns(csv_import_reader $cir, $fields, $requiredfields, moodle_url $returnurl) {
     $columns = $cir->get_columns();
 
     if (empty($columns)) {
@@ -487,23 +491,23 @@ function reservation_validate_upload_columns(csv_import_reader $cir, $fields, $r
         $cir->cleanup();
         print_error('cannotreadtmpfile', 'error', $returnurl);
     }
-    if (count($columns) < count($required_fields)) {
+    if (count($columns) < count($requiredfields)) {
         $cir->close();
         $cir->cleanup();
         print_error('csvfewcolumns', 'error', $returnurl);
     }
 
-    // test columns
+    // Test columns.
     $processed = array();
     $required = 0;
-    foreach ($columns as $key=>$unused) {
+    foreach ($columns as $key => $unused) {
         $field = $columns[$key];
         $lcfield = core_text::strtolower($field);
         if (in_array($field, $fields) or in_array($lcfield, $fields)) {
-            // standard fields are only lowercase
+            // Standard fields are only lowercase.
             $newfield = $lcfield;
         } else if (preg_match('/^(field|operator|matchvalue|sublimit)\d+$/', $lcfield)) {
-            // sublimit fields - not used
+            // Sublimit fields - not used.
             $newfield = $lcfield;
 
         } else {
@@ -516,18 +520,40 @@ function reservation_validate_upload_columns(csv_import_reader $cir, $fields, $r
             $cir->cleanup();
             print_error('duplicatefieldname', 'error', $returnurl, $newfield);
         }
-        if (in_array($newfield, $required_fields)) {
+        if (in_array($newfield, $requiredfields)) {
             $required++;
         }
         $processed[$key] = $newfield;
     }
-    if ($required < count($required_fields)) {
+
+    if ($required < count($requiredfields)) {
         $cir->close();
         $cir->cleanup();
         print_error('missingrequiredfield', 'error', $returnurl);
     }
 
     return $processed;
+}
+
+function reservation_print_tabs($reservation, $mode) {
+    $tabs = array();
+    $row = array();
+
+    $baseurl = 'view.php';
+    $queries = array('r' => $reservation->id);
+
+    $queries['mode'] = 'overview';
+    $url = new moodle_url($baseurl, $queries);
+    $row[] = new tabobject('overview', $url, get_string('overview', 'reservation'));
+
+    $queries['mode'] = 'manage';
+    $url = new moodle_url($baseurl, $queries);
+    $row[] = new tabobject('manage', $url, get_string('manage', 'reservation'));
+
+    $tabs[] = $row;
+
+    // Print out the tabs and continue!
+    print_tabs($tabs, $mode, null, null);
 }
 
 /**
@@ -551,7 +577,8 @@ class ur_progress_tracker {
      */
     public function start() {
         $ci = 0;
-        echo '<table id="urresults" class="generaltable boxaligncenter flexible-wrap" summary="'.get_string('uploadreservationsresult', 'reservation').'">';
+        echo '<table id="urresults" class="generaltable boxaligncenter flexible-wrap" summary="'.
+                get_string('uploadreservationsresult', 'reservation').'">';
         echo '<tr class="heading r0">';
         echo '<th class="header c'.$ci++.'" scope="col">'.get_string('status').'</th>';
         echo '<th class="header c'.$ci++.'" scope="col">'.get_string('linenumber', 'reservation').'</th>';
@@ -570,18 +597,18 @@ class ur_progress_tracker {
      */
     public function flush() {
         if (empty($this->_row) or empty($this->_row['line']['normal'])) {
-            // Nothing to print - each line has to have at least number
+            // Nothing to print - each line has to have at least number.
             $this->_row = array();
             foreach ($this->columns as $col) {
-                $this->_row[$col] = array('normal'=>'', 'info'=>'', 'warning'=>'', 'error'=>'');
+                $this->_row[$col] = array('normal' => '', 'info' => '', 'warning' => '', 'error' => '');
             }
             return;
         }
         $ci = 0;
         $ri = 1;
         echo '<tr class="r'.$ri.'">';
-        foreach ($this->_row as $key=>$field) {
-            foreach ($field as $type=>$content) {
+        foreach ($this->_row as $key => $field) {
+            foreach ($field as $type => $content) {
                 if ($field[$type] !== '') {
                     $field[$type] = '<span class="ur'.$type.'">'.$field[$type].'</span>';
                 } else {
@@ -598,7 +625,7 @@ class ur_progress_tracker {
         }
         echo '</tr>';
         foreach ($this->columns as $col) {
-            $this->_row[$col] = array('normal'=>'', 'info'=>'', 'warning'=>'', 'error'=>'');
+            $this->_row[$col] = array('normal' => '', 'info' => '', 'warning' => '', 'error' => '');
         }
     }
 
@@ -612,7 +639,7 @@ class ur_progress_tracker {
      */
     public function track($col, $msg, $level = 'normal', $merge = true) {
         if (empty($this->_row)) {
-            $this->flush(); //init arrays
+            $this->flush(); // Init arrays.
         }
         if (!in_array($col, $this->columns)) {
             debugging('Incorrect column:'.$col);
@@ -620,7 +647,7 @@ class ur_progress_tracker {
         }
         if ($merge) {
             if ($this->_row[$col][$level] != '') {
-                $this->_row[$col][$level] .='<br />';
+                $this->_row[$col][$level] .= '<br />';
             }
             $this->_row[$col][$level] .= $msg;
         } else {
@@ -637,25 +664,3 @@ class ur_progress_tracker {
         echo '</table>';
     }
 }
-
-    function reservation_print_tabs($reservation, $mode) {
-        $tabs = array();
-        $row = array();
-   
-        $baseurl = 'view.php';
-        $queries = array('r' => $reservation->id);
-   
-        $queries['mode'] = 'overview';
-        $url = new moodle_url($baseurl, $queries);
-        $row[] = new tabobject('overview', $url, get_string('overview','reservation'));
-   
-        $queries['mode'] = 'manage';
-        $url = new moodle_url($baseurl, $queries);
-        $row[] = new tabobject('manage', $url, get_string('manage', 'reservation'));
-   
-        $tabs[] = $row;
-   
-        // Print out the tabs and continue!
-        print_tabs($tabs, $mode, NULL, NULL);
-    }
-?>
