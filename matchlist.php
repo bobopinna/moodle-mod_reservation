@@ -74,19 +74,21 @@ if (isset($customfields[$fieldname])) {
                 $fieldname.' ASC', 'DISTINCT '.$fieldname);
     }
 }
-   $style = 'position: relative; float:right; text-align: right;';
    $onclick = 'document.getElementById(\'matchvalue_list\').style.display=\'none\';';
    $strclose = get_string('close', 'reservation');
-   echo '<div style="'.$style.'"><a href="javascript:void(0)" onclick="'.$onclick.'">'.$strclose.'&#9746;</a></div>'."\n";
+   echo '<div class="matchlistcloser"><a href="javascript:void(0)" onclick="'.$onclick.'">'.$strclose.'&#9746;</a></div>'."\n";
 // Generate inner div code.
 if (!empty($values)) {
     echo '<strong>'.get_string('selectvalue', 'reservation').'</strong><br />'."\n";
     echo '<div class="matchlistvalues"><ul>'."\n";
     foreach ($values as $value) {
         if (!empty($value->$fieldname)) {
-            $onclick = 'document.getElementById(\''.$matchvalue.'\').value=\''.addslashes(htmlentities($value->$fieldname)).
+            $slashedvalue = addslashes_js(htmlspecialchars($value->$fieldname, ENT_COMPAT, 'UTF-8'));
+            $onclick = 'document.getElementById(\''.$matchvalue.'\').value=\''.$slashedvalue.
                     '\'; document.getElementById(\'matchvalue_list\').style.display=\'none\';';
-            echo '<li class="matchlistvalue"><a href="javascript:void(0)" onclick="'.$onclick.'">'.$value->$fieldname.'</a></li>'."\n";
+            echo '<li class="matchlistvalue"><a href="javascript:void(0)" onclick="'.$onclick.'">';
+            p($value->$fieldname);
+            echo '</a></li>'."\n";
         }
     }
     echo '</ul></div>'."\n";

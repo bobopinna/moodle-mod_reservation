@@ -150,3 +150,8 @@
     overflow-y: auto;
 }
 
+.path-mod-reservation .matchlistcloser {
+    position: relative;
+    float: right;
+    text-align: right;
+}
