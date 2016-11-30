@@ -450,6 +450,9 @@ function reservation_get_availability($reservation, $counters, $available) {
 
     $availablesublimit = 0;
     $limitoverbook = 0;
+    $nolimit = true;
+    $totalrequestlimit = 0;
+    $totalrequestcount = 0;
 
     $userdata = reservation_get_userdata($USER->id);
 
@@ -464,7 +467,14 @@ function reservation_get_availability($reservation, $counters, $available) {
                 }
                 $nolimit = false;
             }
+            $totalrequestlimit += $counters[$i]->requestlimit;
+            $totalrequestcount += $counters[$i]->count;
         }
+
+        if ($nolimit) {
+            $availablesublimit = $available - $totalrequestlimit + $totalrequestcount;
+        }
+
         if ($available > $availablesublimit) {
             $result = new stdClass();
             $result->available = $availablesublimit;
