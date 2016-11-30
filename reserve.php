@@ -94,6 +94,10 @@ if ($reservationid == $reservation->id) {
                 $fields = reservation_setup_sublimit_fields($counters, $customfields);
 
                 $requests = reservation_get_requests($reservation, false, $fields);
+                if (isset($requests[0])) {
+                    // Remove current user reservation infos.
+                    unset($requests[0]);
+                }
                 if (!$requests || (count($requests) < ($reservation->maxrequest + $overbook)) || ($reservation->maxrequest == 0)) {
                     if (count($counters) - 1 > 0) {
                         if ($requests) {
