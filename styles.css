@@ -135,13 +135,18 @@
 }
 
 .path-mod-reservation .matchlist {
-    position:absolute;
-    padding:5px;
-    display:none;
-    width:50%;
-    height:200px;
-    float:left;
+    position: absolute;
+    padding: 5px;
+    display: none;
+    width: 50%;
+    float: left;
     z-index: 99999;
-    background-color:white;
+    background-color: white;
     border: thin solid black;
 }
+
+.path-mod-reservation .matchlistvalues {
+    height: 19em;
+    overflow-y: auto;
+}
+

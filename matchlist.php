@@ -81,13 +81,15 @@ if (isset($customfields[$fieldname])) {
 // Generate inner div code.
 if (!empty($values)) {
     echo '<strong>'.get_string('selectvalue', 'reservation').'</strong><br />'."\n";
+    echo '<div class="matchlistvalues"><ul>'."\n";
     foreach ($values as $value) {
         if (!empty($value->$fieldname)) {
             $onclick = 'document.getElementById(\''.$matchvalue.'\').value=\''.addslashes(htmlentities($value->$fieldname)).
                     '\'; document.getElementById(\'matchvalue_list\').style.display=\'none\';';
-            echo '<a href="javascript:void(0)" onclick="'.$onclick.'">'.$value->$fieldname.'</a><br />'."\n";
+            echo '<li class="matchlistvalue"><a href="javascript:void(0)" onclick="'.$onclick.'">'.$value->$fieldname.'</a></li>'."\n";
         }
     }
+    echo '</ul></div>'."\n";
 } else {
     echo '<br /><strong>'.get_string('novalues', 'reservation').'</strong><br />'."\n";
 }
