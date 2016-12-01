@@ -447,7 +447,7 @@ if (!empty($requests)) {
 
         $table->is_downloading($download,
                                clean_filename("$course->shortname ".format_string($reservation->name, true)),
-                               format_string($reservation->name, true));
+                               $strreservations);
     }
 
     // Define Table headers.
