@@ -244,7 +244,12 @@ function checkClashes() {
         }
         $mform->addElement('select', 'maxrequest', get_string('maxrequest', 'reservation'), $values);
 
-        $mform->addElement('selectyesno', 'showrequest', get_string('showrequest', 'reservation'));
+        $choices = array();
+        $choices[0] = get_string('numberafterclose', 'reservation');
+        $choices[1] = get_string('listafterclose', 'reservation');
+        $choices[2] = get_string('listalways', 'reservation');
+        $choices[3] = get_string('numberalways', 'reservation');
+        $mform->addElement('select', 'showrequest', get_string('showuserrequest', 'reservation'), $choices);
 
         if (empty($CFG->reservation_max_overbook)) {
             $CFG->reservation_max_overbook = 100;

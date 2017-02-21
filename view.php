@@ -444,8 +444,10 @@ if (!empty($requests)) {
     $table = new flexible_table('mod-reservation-requests');
 
     if ($mode == 'overview') {
-        $table->is_downloadable(true);
-        $table->show_download_buttons_at(array(TABLE_P_TOP, TABLE_P_BOTTOM));
+        if (has_capability('mod/reservation:downloadrequests', $context)) {
+            $table->is_downloadable(true);
+            $table->show_download_buttons_at(array(TABLE_P_TOP, TABLE_P_BOTTOM));
+        }
 
         $table->is_downloading($download,
                                clean_filename("$course->shortname ".format_string($reservation->name, true)),
@@ -880,8 +882,11 @@ if (empty($download)) {
         }
 
         if (isset($currentuser) && ($currentuser->number > 0)) {
-            if ($now > $reservation->timeclose) {
-                $strjustbooked = get_string('justbooked', 'reservation', $currentuser->number);
+            $canviewnumbernow = ($reservation->showrequest == 0) && ($now > $reservation->timeclose);
+            $canviewnumberalways = ($reservation->showrequest == 3);
+            if ($canviewnumbernow || $canviewnumberalways) {
+                $numberspan = html_writer::tag('span', $currentuser->number, array('class' => 'justbookednumber'));
+                $strjustbooked = get_string('justbooked', 'reservation', html_writer::tag('span', $numberspan));
                 echo $OUTPUT->box($strjustbooked.$currentuser->note, 'center justbooked');
                 if (!empty($currentuser->grade)) {
                     echo $OUTPUT->box($currentuser->grade, 'center graded');
@@ -894,8 +899,9 @@ if (empty($download)) {
     }
 
     // Display requests table.
-    if (has_capability('mod/reservation:viewrequest', $context) || (($reservation->showrequest == 1) &&
-       ($now > $reservation->timeclose) && (is_enrolled($coursecontext)))) {
+    $canviewlistnow = ($reservation->showrequest == 1) && ($now > $reservation->timeclose) && (is_enrolled($coursecontext));
+    $canviewlistalways = ($reservation->showrequest == 2) && (is_enrolled($coursecontext));
+    if (has_capability('mod/reservation:viewrequest', $context) || $canviewlistnow || $canviewlistalways) {
         echo $OUTPUT->box_start('center');
 
         if (has_capability('mod/reservation:viewrequest', $context)) {
