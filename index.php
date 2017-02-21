@@ -23,10 +23,10 @@
 
 // This page lists all the instances of reservation in a particular course.
 
-require_once('../../config.php');
-require_once($CFG->dirroot.'/course/lib.php');
-require_once($CFG->libdir.'/tablelib.php');
-require_once('locallib.php');
+require_once(__DIR__ . '/../../config.php');
+require_once($CFG->dirroot . '/course/lib.php');
+require_once($CFG->libdir . '/tablelib.php');
+require_once(__DIR__ . 'locallib.php');
 
 $id = required_param('id', PARAM_INT);
 $download = optional_param('download', null, PARAM_ALPHA);
