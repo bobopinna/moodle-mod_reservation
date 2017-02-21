@@ -161,6 +161,7 @@ unset($choices);
 $choices = array();
 $choices['reservation'] = get_string('reservationevent', 'reservation');
 $choices['event'] = get_string('eventevent', 'reservation');
+$choices['userevent'] = get_string('userevent', 'reservation');
 $defaultevents = 'reservation,event';
 $settings->add(new admin_setting_configmulticheckbox('reservation_events', get_string('events', 'reservation'),
         get_string('configevents', 'reservation'), $defaultevents, $choices));

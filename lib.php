@@ -88,10 +88,9 @@ function reservation_update_instance($reservation) {
 
     if ($returnid = $DB->update_record('reservation', $reservation)) {
 
-        $DB->delete_records('event', array('modulename' => 'reservation', 'instance' => $reservation->id));
-
         reservation_set_sublimits($reservation);
 
+        $DB->delete_records('event', array('modulename' => 'reservation', 'instance' => $reservation->id));
         reservation_set_events($reservation);
 
         if (!empty($reservation->maxgrade)) {
@@ -131,9 +130,16 @@ function reservation_delete_instance($id) {
     if (! $DB->delete_records_select('reservation_note', 'request IN ('.$allrequestsql.')', array($reservation->id))) {
         $result = false;
     }
-    if (! $DB->delete_records('reservation_request', array('reservation' => $reservation->id))) {
-        $result = false;
+
+    if ($requests = $DB->get_records('reservation_request', array('reservation' => $reservation->id))) {
+        foreach ($requests as $request) {
+            if (isset($request->eventid) && !empty($request->eventid)) {
+                reservation_remove_user_event($reservation, $request);
+            }
+        }
+        $DB->delete_records('reservation_request', array('reservation' => $reservation->id));
     }
+
     if (! $DB->delete_records('event', array('modulename' => 'reservation', 'instance' => $reservation->id))) {
         $result = false;
     }
@@ -636,6 +642,21 @@ function reservation_refresh_events($courseid = 0) {
 
         $reservation->coursemodule = get_coursemodule_from_instance('reservation', $reservation->id)->id;
         reservation_set_events($reservation);
+
+        if (! $requests = $DB->get_records('reservation_request', array('reservation' => $reservation->id))) {
+            $usereventsenabled = false;
+            if (isset($CFG->reservation_events) && !empty($CFG->reservation_events)) {
+                $usereventsenabled = in_array('userevent', $CFG->reservation_events);
+            }
+            foreach ($requests as $request) {
+                if (isset($request->eventid) && !empty($request->eventid)) {
+                    reservation_remove_user_event($reservation, $request);
+                    if ($usereventsenabled) {
+                        reservation_set_user_event($reservation, $request);
+                    }
+                }
+            }
+        }
     }
     return true;
 }
@@ -660,8 +681,22 @@ function reservation_reset_userdata($data) {
 
     if (!empty($data->reset_reservation_request)) {
         $queryparameters = array('courseid' => $data->courseid);
-        $DB->delete_records_select('reservation_request', 'reservation IN ('.$allreservationsql.')', $queryparameters);
-        $DB->delete_records_select('reservation_note', 'request IN ('.$allrequestsql.')', array('courseid' => $data->courseid));
+        if ($requests = $DB->get_records_select('reservation_request', 'reservation IN ('.$allreservationsql.')', $queryparameters)) {
+            $DB->delete_records_select('reservation_request', 'reservation IN ('.$allreservationsql.')', $queryparameters);
+            $DB->delete_records_select('reservation_note', 'request IN ('.$allrequestsql.')', $queryparameters);
+          
+            $reservations[] = array(); 
+            foreach ($requests as $request) {
+                if (isset($request->eventid) && !empty($request->eventid)) {
+                    if (!isset($reservations[$request->reservation])) {
+                        $reservations[$request->reservation] = $DB->get_record('reservation', array('id' => $request->reservation));
+                    }
+                    if (isset($reservations[$request->reservation])) {
+                        reservation_remove_user_event($reservations[$request->reservation], $request);
+                    }
+                }
+            } 
+        }       
 
         $status[] = array(
                'component' => get_string('modulenameplural', 'reservation'),

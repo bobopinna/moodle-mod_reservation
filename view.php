@@ -117,6 +117,8 @@ if (isset($action) && confirm_sesskey()) {
                             $userid = $DB->get_field('reservation_request', 'userid', array('id' => $requestid));
                             reservation_update_grades($reservation, $userid);
 
+                            reservation_remove_user_event($reservation, $request);
+
                             $DB->delete_records('reservation_request', array('id' => $requestid));
                             $DB->delete_records('reservation_note', array('request' => $requestid));
 

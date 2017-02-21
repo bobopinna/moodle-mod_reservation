@@ -566,6 +566,66 @@ function reservation_print_tabs($reservation, $mode) {
     print_tabs($tabs, $mode, null, null);
 }
 
+function reservation_set_user_event($reservation, $request) {
+    global $CFG, $DB;
+
+    if (!isset($CFG->reservation_events)) {
+        $CFG->reservation_events = 'reservation,event';
+    }
+
+    if ($DB->get_record('user', array('id' => $request->userid)) && !empty($CFG->reservation_events)) {
+        $enabledevents = explode(',', $CFG->reservation_events);
+        if (in_array('userevent', $enabledevents)) {
+            require_once($CFG->dirroot.'/calendar/lib.php');
+
+
+            $event = new stdClass();
+            $event->name        = get_string('eventreminder', 'reservation', $reservation->name);
+            $coursemodule = get_coursemodule_from_instance('reservation', $reservation->id)->id;
+            $event->description = format_module_intro('reservation', $reservation, $coursemodule);
+            $event->userid      = $request->userid;
+            $event->modulename  = '';
+            $event->instance    = 0;
+            //$event->modulename  = 'reservation';
+            //$event->instance    = $reservation->id;
+            $event->eventtype   = 'user';
+            $event->timestart   = $reservation->timestart;
+            $event->visible     = instance_is_visible('reservation', $reservation);
+            $event->timeduration = max($reservation->timeend - $reservation->timestart, 0);
+
+            $newevent = calendar_event::create($event);
+
+            $DB->set_field('reservation_request', 'eventid', $newevent->id, array('id' => $request->id));
+        }
+    }
+} 
+
+function reservation_remove_user_event($reservation, $request) {
+    global $CFG, $DB;
+
+    if (!isset($CFG->reservation_events)) {
+        $CFG->reservation_events = 'reservation,event';
+    }
+
+    if ($DB->get_record('user', array('id' => $request->userid)) && !empty($CFG->reservation_events)) {
+        $enabledevents = explode(',', $CFG->reservation_events);
+        if (in_array('userevent', $enabledevents)) {
+            require_once($CFG->dirroot.'/calendar/lib.php');
+
+            if (!empty($events = calendar_events_by_id(array($request->eventid)))) {
+                $deleted = false;
+                foreach ($events as $event) {
+                    if (!$deleted) {
+                        calendar_event::load($event)->delete();
+                    } else {
+                        print_error('Found more than one user event for reservation '. $reservation->id);
+                    }
+                }
+            }
+        }
+    }
+} 
+
 /**
  * Tracking of processed users.
  *

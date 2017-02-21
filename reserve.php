@@ -141,6 +141,8 @@ if ($reservationid == $reservation->id) {
                                 \mod_reservation\event\request_added::create_from_request($reservation, $context,
                                         $request, $usernote)->trigger();
 
+                                reservation_set_user_event($reservation, $request);
+
                                 // Update completion state.
                                 $completion = new completion_info($course);
                                 if ($completion->is_enabled($cm) && $reservation->completionreserved) {
@@ -168,6 +170,8 @@ if ($reservationid == $reservation->id) {
             $DB->set_field('reservation_request', 'timecancelled', time(), array('id' => $request->id));
 
             \mod_reservation\event\request_cancelled::create_from_request($reservation, $context, $request)->trigger();
+
+            reservation_remove_user_event($reservation, $request);
 
             // Update completion state.
             $completion = new completion_info($course);
