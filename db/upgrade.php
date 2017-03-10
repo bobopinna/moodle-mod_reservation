@@ -22,7 +22,7 @@
  */
 
 // This file keeps track of upgrades to
-// the scorm module
+// the Reservation plugin
 //
 // Sometimes, changes between versions involve
 // alterations to database structures and other
