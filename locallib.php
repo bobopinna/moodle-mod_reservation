@@ -612,11 +612,12 @@ function reservation_remove_user_event($reservation, $request) {
         if (in_array('userevent', $enabledevents)) {
             require_once($CFG->dirroot.'/calendar/lib.php');
 
-            if (!empty($events = calendar_events_by_id(array($request->eventid)))) {
+            if (!empty($events = calendar_get_events_by_id(array($request->eventid)))) {
                 $deleted = false;
                 foreach ($events as $event) {
                     if (!$deleted) {
                         calendar_event::load($event)->delete();
+                        $deleted = true;
                     } else {
                         print_error('Found more than one user event for reservation '. $reservation->id);
                     }
