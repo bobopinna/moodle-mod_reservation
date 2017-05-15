@@ -701,6 +701,7 @@ if (!empty($requests)) {
                 if (($mode == 'manage') && !empty($actions) && !empty($row)) {
                     $row[] = html_writer::empty_tag('input', array('type' => 'checkbox',
                                                                    'name' => 'requestid[]',
+                                                                   'class' => 'request',
                                                                    'value' => $request->id));
                 }
             }
@@ -980,17 +981,23 @@ if (empty($download)) {
                                          (($view == 'full') && ($counters[0]->deletedrequests > 0)))) {
                     $html = '';
                     $html .= html_writer::empty_tag('input', array('type' => 'button',
-                                                    'onclick' => 'checkall()',
+                                                    'id' => 'checkall',
+                                                    'class' => 'btn btn-secondary m-r-1',
                                                     'value' => get_string('selectall')));
                     $html .= html_writer::empty_tag('input', array('type' => 'button',
-                                                                   'onclick' => 'checknone()',
+                                                                   'id' => 'checknone',
+                                                                   'class' => 'btn btn-secondary m-r-1',
                                                                    'value' => get_string('deselectall')));
                     $html .= html_writer::select($actions, 'action', '0',
                                                  array('0' => get_string('withselected', 'reservation')));
                     $html .= html_writer::empty_tag('input', array('type' => 'submit',
                                                                    'name' => 'selectedaction',
+                                                                   'class' => 'btn btn-secondary m-r-1',
                                                                    'value' => get_string('ok')));
                     echo html_writer::tag('div', $html, array('class' => 'form-buttons'));
+
+                    $module = array('name' => 'mod_reservation', 'fullpath' => '/mod/reservation/module.js');
+                    $PAGE->requires->js_init_call('M.mod_reservation.init_view', null, false, $module);
                 }
 
                 echo html_writer::end_tag('form');
