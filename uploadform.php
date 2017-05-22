@@ -74,9 +74,6 @@ class reservation_upload_confirm_form extends moodleform {
 
         $columns = $this->_customdata['columns'];
         $data    = $this->_customdata['data'];
-        if (!isset($data['maxsection'])) {
-            $data['maxsection'] = 0;
-        }
 
         $mform->addElement('header', 'settingsheader', get_string('general'));
         if (!in_array('course', $columns)) {
@@ -86,20 +83,22 @@ class reservation_upload_confirm_form extends moodleform {
             if ($courses) {
                 $choices = array();
                 foreach ($courses as $course) {
-                    // Compartibility with course formats using field 'numsections'.
-                    $courseformatoptions = course_get_format($course)->get_format_options();
+                    // Compatibility with course formats using field 'numsections'.
+                    $coursenumsections = course_get_format($course)->get_last_section_number();
 
-                    $hassections = array_key_exists('numsections', $courseformatoptions);
-                    if ($hassections && ($data['maxsection'] <= $courseformatoptions['numsections']) && ($data['maxsection'] > 0)) {
                         if ($course->category != 0) {
                             $choices[$course->shortname] = $displaylist[$course->category].' / '.
                                     $course->fullname.' ('.$course->shortname.')';
                         } else {
                             $choices[$course->shortname] = $course->fullname.' ('.$course->shortname.')';
                         }
-                    }
                 }
-                $mform->addElement('select', 'course', get_string('course'), $choices);
+                if (!empty($choices)) {
+                    $mform->addElement('select', 'course', get_string('course'), $choices);
+                } else {
+                    $noerror = false;
+                }
+
             } else {
                 $noerror = false;
             }
@@ -117,6 +116,8 @@ class reservation_upload_confirm_form extends moodleform {
             $mform->setdefault('iid', $data['iid']);
 
             $this->add_action_buttons(true, get_string('importreservations', 'reservation'));
+
+            $this->set_data($data);
         } else {
             $mform->addElement('static', 'alert', '', get_string('nocourseswithnsections', 'reservation', $data['maxsection']));
             $mform->addElement('cancel', 'cancel');

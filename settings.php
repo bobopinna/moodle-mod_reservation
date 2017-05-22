@@ -23,18 +23,16 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$strsesskey = '';
-if (!empty($USER->id)) {
-    $batchurl = new moodle_url('/mod/reservation/batch.php', array('sesskey' => $USER->sesskey));
-    $linkshtml = html_writer::start_tag('div', array('style' => 'text-align: center;'));
-    $linkshtml .= html_writer::link(new moodle_url('/mod/reservation/locations.php', array('sesskey' => $USER->sesskey)),
-            get_string('locations', 'reservation'));
-    $linkshtml .= '&nbsp;-&nbsp;';
-    $linkshtml .= html_writer::link(new moodle_url('/mod/reservation/upload.php'), get_string('upload', 'reservation'));
-    $linkshtml .= html_writer::end_tag('div');
+$settings->add(new admin_setting_heading('reservation_tools', get_string('tools', 'reservation'), ''));
+if (!empty($USER->sesskey)) {
+    $url = new moodle_url('/mod/reservation/locations.php', array('sesskey' => $USER->sesskey));
+    $settings->add(new \mod_reservation\admin_setting_link('reservationlocations',
+            get_string('locations', 'reservation'), get_string('configlocations', 'reservation'),
+            get_string('locations', 'reservation'), $url, ''));
 }
-$settings->add(new admin_setting_heading('reservation_heading', get_string('config', 'reservation'),
-        get_string('explainconfig', 'reservation').$linkshtml));
+$settings->add(new \mod_reservation\admin_setting_link('reservationupload',
+        get_string('upload', 'reservation'), get_string('configupload', 'reservation'),
+        get_string('upload', 'reservation'), new moodle_url('/mod/reservation/upload.php'), ''));
 
 $settings->add(new admin_setting_heading('reservation_settings', get_string('reservation_settings', 'reservation'), ''));
 
@@ -165,3 +163,4 @@ $choices['userevent'] = get_string('userevent', 'reservation');
 $defaultevents = 'reservation,event';
 $settings->add(new admin_setting_configmulticheckbox('reservation_events', get_string('events', 'reservation'),
         get_string('configevents', 'reservation'), $defaultevents, $choices));
+

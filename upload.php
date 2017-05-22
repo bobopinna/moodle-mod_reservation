@@ -60,12 +60,12 @@ $requiredfields = array('section', 'name', 'timestart');
 $errorstr = get_string('error');
 
 if (empty($iid)) {
-    $mform = new reservation_upload_form();
+    $mformupload = new reservation_upload_form();
 
-    if ($formdata = $mform->get_data()) {
+    if ($formdata = $mformupload->get_data()) {
         $iid = csv_import_reader::get_new_iid('uploadreservation');
         $cir = new csv_import_reader($iid, 'uploadreservation');
-        $content = $mform->get_file_content('reservationsfile');
+        $content = $mformupload->get_file_content('reservationsfile');
 
         $readcount = $cir->load_csv_content($content, $formdata->encoding, $formdata->delimiter_name);
         unset($content);
@@ -82,7 +82,7 @@ if (empty($iid)) {
 
         echo $OUTPUT->heading_with_help(get_string('upload', 'reservation'), 'upload', 'reservation');
 
-        $mform->display();
+        $mformupload->display();
         echo $OUTPUT->footer();
         die;
     }
@@ -93,13 +93,13 @@ if (!empty($iid)) {
     $filecolumns = reservation_validate_upload_columns($cir, $fields, $requiredfields, $returnurl);
 
     $formdata = array('iid' => $iid, 'previewrows' => $previewrows);
-    $mform = new reservation_upload_confirm_form(null, array('columns' => $filecolumns, 'data' => $formdata));
+    $mformconfirm = new reservation_upload_confirm_form(null, array('columns' => $filecolumns, 'data' => $formdata));
     // If a file has been uploaded, then process it.
-    if ($formdata = $mform->is_cancelled()) {
+    if ($formdata = $mformconfirm->is_cancelled()) {
         $cir->cleanup(true);
         redirect($returnurl);
 
-    } else if ($formdata = $mform->get_data()) {
+    } else if ($formdata = $mformconfirm->get_submitted_data()) {
         // Print the header.
         echo $OUTPUT->header();
         echo $OUTPUT->heading(get_string('uploadreservationsresult', 'reservation'));
@@ -144,7 +144,7 @@ if (!empty($iid)) {
             }
             if (!isset($data->course)) {
                 $courseshortname = optional_param('course', '', PARAM_RAW);
-                if (!empty($courseshortname)) {
+                if (!empty($courseshortname) && ($DB->get_record('course', array('shortname' => $courseshortname)))) {
                     $data->course = $courseshortname;
                     $upt->track('course', s($courseshortname), 'normal');
                 } else {
@@ -162,9 +162,8 @@ if (!empty($iid)) {
                     $upt->track('course', $errorstr, 'error');
                 } else {
                     // Compartibility with course formats using field 'numsections'.
-                    $courseformatoptions = course_get_format($course)->get_format_options();
-                    if (array_key_exists('numsections', $courseformatoptions) &&
-                        $data->section > $courseformatoptions['numsections'] || $data->section < 0) {
+                    $coursenumsections = course_get_format($course)->get_last_section_number();
+                    if ($data->section > $coursenumsections || $data->section < 0) {
                         $upt->track('section', $errorstr, 'error');
                     } else {
                         $cw = get_fast_modinfo($course->id)->get_section_info($data->section);
@@ -172,7 +171,7 @@ if (!empty($iid)) {
                         $reservation = new stdClass();
                         // Create the course module.
                         $reservation->cmidnumber = null;
-                        $reservation->section = $data->section;
+                        $reservation->section = clean_param($data->section, PARAM_INT);
 
                         // Create the reservation database entry.
                         $reservation->course = $course->id;
@@ -261,6 +260,9 @@ if (!empty($iid)) {
                         }
 
                         $reservation->visible = $cw->visible;
+                        if ($CFG->branch >= 32) {
+                            $reservation->visibleoncoursepage = $cw->visible;
+                        }
                         $reservation->instance = 0;
                         $reservation->field_1 = '-';
 
@@ -409,7 +411,7 @@ if (!empty($iid)) {
             }
 
             if (isset($rowcols['section'])) {
-                $rowcols['section'] = trim($rowcols['section']);
+                $rowcols['section'] = clean_param(trim($rowcols['section']), PARAM_INT);
                 if (empty($rowcols['section']) && (!isset($rowcols['course']) || empty($rowcols['course']))) {
                     $rowcols['status'][] = get_string('fieldrequired', 'error', 'section');
                     $noerror = false;
@@ -444,9 +446,7 @@ if (!empty($iid)) {
 
         // Print the form if valid values are available.
         if ($noerror) {
-            $formdata = array('iid' => $iid, 'previewrows' => $previewrows, 'maxsection' => $maxsection);
-            $mform = new reservation_upload_confirm_form(null, array('columns' => $filecolumns, 'data' => $formdata));
-            $mform->display();
+            $mformconfirm->display();
         } else {
             echo $OUTPUT->continue_button($returnurl);
         }
