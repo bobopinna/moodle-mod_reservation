@@ -54,11 +54,7 @@ class mod_reservation_mod_form extends moodleform_mod {
         $mform->addRule('name', null, 'required', null, 'client');
 
         // Description.
-        if ($CFG->branch < 29) {
-            $this->add_intro_editor(true, get_string('description', 'reservation'));
-        } else {
-            $this->standard_intro_elements(get_string('description', 'reservation'));
-        }
+        $this->standard_intro_elements(get_string('description', 'reservation'));
 
         // Event Settings.
         $mform->addElement('header', 'eventsettings', get_string('eventsettings', 'reservation'));
@@ -423,21 +419,30 @@ function checkClashes() {
         }
     }
 
-    public function get_data() {
-        $data = parent::get_data();
-        if ($data) {
-            if (!empty($data->completionunlocked)) {
-                // Turn off completion settings if the checkboxes aren't ticked.
-                $autocompletion = !empty($data->completion) && $data->completion == COMPLETION_TRACKING_AUTOMATIC;
-                if (!$autocompletion || empty($data->completionreserved)) {
-                    $data->completionreserved = 0;
-                }
+    /**
+     * Allows module to modify the data returned by form get_data().
+     * This method is also called in the bulk activity completion form.
+     *
+     * Only available on moodleform_mod.
+     *
+     * @param stdClass $data the form data to be modified.
+     */
+    public function data_postprocessing($data) {
+        parent::data_postprocessing($data);
+        if (!empty($data->completionunlocked)) {
+            // Turn off completion settings if the checkboxes aren't ticked.
+            $autocompletion = !empty($data->completion) && $data->completion == COMPLETION_TRACKING_AUTOMATIC;
+            if (!$autocompletion || empty($data->completionreserved)) {
+                $data->completionreserved = 0;
             }
         }
-
-        return $data;
     }
 
+    /**
+     * Perform minimal validation on the settings form
+     * @param array $data
+     * @param array $files
+     */
     public function validation($data, $files) {
         global $CFG;
 

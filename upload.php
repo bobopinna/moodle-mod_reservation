@@ -268,9 +268,7 @@ if (!empty($iid)) {
                         }
 
                         $reservation->visible = $cw->visible;
-                        if ($CFG->branch >= 32) {
-                            $reservation->visibleoncoursepage = $cw->visible;
-                        }
+                        $reservation->visibleoncoursepage = $cw->visible;
                         $reservation->instance = 0;
                         $reservation->field_1 = '-';
 
