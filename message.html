@@ -26,8 +26,8 @@
     <td align="right"><b>
      <?php print_string("messagebody"); ?>:
      </b></td>
-    <td align="left" rowspan="2">
-    <?php print_textarea($usehtmleditor, 25, 65, 630, 400, "messagebody", $messagebody); ?>
+    <td align="left">
+    <?php print_textarea(true, 15, 65, 1, 1, "messagebody", $messagebody); ?>
     </td>
 </tr>
 
@@ -35,17 +35,16 @@
     <td align="right"><label for="menuformat"><b><?php print_string("formattexttype"); ?>:</b></label></td>
     <td>
     <?php
-        if ($usehtmleditor) {   /// Trying this out for a while
-            print_string('formathtml');
-            echo '<input type="hidden" name="format" value="'.FORMAT_HTML.'" />';
-        } else {
-            choose_from_menu(format_text_menu(), "format", $format, "");
-        }
+        print_string('formathtml');
+        echo '<input type="hidden" name="format" value="'.FORMAT_HTML.'" />';
      ?>
     </td>
 </tr>
 
-<tr><td align="center" colspan="2"><input type="submit" name="preview" value="<?php print_string('preview'); ?>" /></td></tr>
+<tr><td align="center" colspan="2">
+        <input type="submit" name="send" value="<?php print_string('sendmessage', 'message'); ?>" />
+        <input type="submit" name="preview" value="<?php print_string('preview'); ?>" />
+</td></tr>
 </table>
 <?php echo $OUTPUT->box_end(); ?>
 <table align="center"><tr><th colspan="4" scope="row"><?php print_string('currentlyselectedusers'); ?></th></tr>
@@ -63,7 +62,7 @@
                 $error = get_string('emailempty');
             }
             if (!empty($error)) {
-                echo '<img src="'.$OUTPUT->pix_url('t/emailno') . '" alt="'.$error.'" class="iconsmall" title="'.$error.'"/>';
+                echo $OUTPUT->pix_icon('t/emailno', $error);
                 unset($error);
             }
             echo '</td><td><input type="submit" onClick="this.form.deluser.value='.$user->id.';" value="' . 

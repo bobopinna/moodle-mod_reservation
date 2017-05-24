@@ -147,22 +147,30 @@ if (!empty($messagebody) && !$edit && !$deluser && ($preview || $send)) {
 <input type="hidden" name="format" value="'.$format.'" />
 <input type="hidden" name="sesskey" value="' . sesskey() . '" />
 ';
-            echo "<h3>".get_string('previewhtml')."</h3><div class=\"messagepreview\">\n".
-                    format_text($messagebody, $format)."\n</div>\n";
+            echo "<h3>".get_string('previewhtml')."</h3>";
+            echo "<div class=\"messagepreview\">\n".format_text($messagebody, $format)."\n</div>\n";
             echo '<p align="center"><input type="submit" name="send" value="'.get_string('sendmessage', 'message').'" />'."\n";
             echo '<input type="submit" name="edit" value="'.get_string('update').'" /></p>';
             echo "\n</form>";
         } else if (!empty($send)) {
-            $good = 1;
+            $fails = array();
             foreach ($SESSION->reservation_messageto[$id] as $user) {
-                $good = $good && message_post_message($USER, $user, $messagebody, $format);
+                if (!message_post_message($USER, $user, $messagebody, $format)) {
+                    $user->fullname = fullname($user);
+                    $fails[] = get_string('messagedselecteduserfailed', 'moodle', $user);
+                };
             }
-            if (!empty($good)) {
+            if (empty($fails)) {
                 echo $OUTPUT->heading(get_string('messagedselectedusers'));
                 unset($SESSION->reservation_messageto[$id]);
                 unset($SESSION->reservation_messageselect[$id]);
             } else {
-                echo $OUTPUT->heading(get_string('messagedselectedusersfailed'));
+                echo $OUTPUT->heading(get_string('messagedselectedcountusersfailed', 'moodle', count($fails)));
+                echo '<ul>';
+                foreach ($fails as $f) {
+                        echo '<li>', $f, '</li>';
+                }
+                echo '</ul>';
             }
             echo '<p align="center"><a href="view.php?id='.$id.'">'.get_string('backtoparticipants').'</a></p>';
         }
@@ -182,8 +190,15 @@ if ((!empty($send) || !empty($preview) || !empty($edit)) && (empty($messagebody)
 
 if (count($SESSION->reservation_messageto[$id])) {
     require_sesskey();
-    $usehtmleditor = true;
     require("message.html");
 }
+
+$PAGE->requires->yui_module('moodle-core-formchangechecker',
+        'M.core_formchangechecker.init',
+        array(array(
+            'formid' => 'theform'
+        ))
+);
+$PAGE->requires->string_for_js('changesmadereallygoaway', 'moodle');
 
 echo $OUTPUT->footer();
