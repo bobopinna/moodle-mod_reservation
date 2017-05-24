@@ -15,11 +15,12 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This file is part of the User section Moodle
+ * Send a private message to several selected users
  *
+ * @package mod_reservation
  * @copyright 1999 Martin Dougiamas  http://dougiamas.com
+ * @copyright 2013 onwards Roberto Pinna
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @package user
  */
 
 require_once('../../config.php');

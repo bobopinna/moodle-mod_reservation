@@ -15,13 +15,12 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package mod
- * @subpackage reservation
- * @author Roberto Pinna (bobo@di.unipmn.it)
+ * This page lists all the instances of reservation in a particular course.
+ *
+ * @package mod_reservation
+ * @copyright 2006 onwards Roberto Pinna
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-// This page lists all the instances of reservation in a particular course.
 
 require_once(__DIR__ . '/../../config.php');
 require_once($CFG->dirroot . '/course/lib.php');

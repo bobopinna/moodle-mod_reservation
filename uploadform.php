@@ -17,9 +17,8 @@
 /**
  * Bulk reservation upload forms
  *
- * @package    reservation
- * @subpackage upload
- * @copyright  2012 Roberto Pinna
+ * @package    mod_reservation
+ * @copyright  2012 onwards Roberto Pinna
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -29,13 +28,16 @@ require_once($CFG->libdir.'/formslib.php');
 
 
 /**
- * Upload a file CVS file with user information.
+ * Upload a file CVS file with reservation list.
  *
  * @copyright  2007 Petr Skoda  {@link http://skodak.org}
- * @copyright  2012 Roberto Pinna {@mail roberto.pinna@unipmn.it}
+ * @copyright  2012 onwards Roberto Pinna
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class reservation_upload_form extends moodleform {
+    /**
+     * Define the reservation upload form
+     */
     public function definition () {
         $mform = $this->_form;
 
@@ -66,7 +68,17 @@ class reservation_upload_form extends moodleform {
     }
 }
 
+/**
+ * Confirm CSV file data and add missing values
+ *
+ * @copyright  2007 Petr Skoda  {@link http://skodak.org}
+ * @copyright  2012 onwards Roberto Pinna
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class reservation_upload_confirm_form extends moodleform {
+    /**
+     * Define the confirmation form
+     */
     public function definition () {
         global $DB;
         $mform = $this->_form;
@@ -86,12 +98,12 @@ class reservation_upload_confirm_form extends moodleform {
                     // Compatibility with course formats using field 'numsections'.
                     $coursenumsections = course_get_format($course)->get_last_section_number();
 
-                        if ($course->category != 0) {
-                            $choices[$course->shortname] = $displaylist[$course->category].' / '.
-                                    $course->fullname.' ('.$course->shortname.')';
-                        } else {
-                            $choices[$course->shortname] = $course->fullname.' ('.$course->shortname.')';
-                        }
+                    if ($course->category != 0) {
+                        $choices[$course->shortname] = $displaylist[$course->category].' / '.
+                                $course->fullname.' ('.$course->shortname.')';
+                    } else {
+                        $choices[$course->shortname] = $course->fullname.' ('.$course->shortname.')';
+                    }
                 }
                 if (!empty($choices)) {
                     $mform->addElement('select', 'course', get_string('course'), $choices);

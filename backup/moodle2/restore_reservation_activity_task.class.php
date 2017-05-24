@@ -15,10 +15,11 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package mod
- * @subpackage reservation
- * @author Roberto Pinna (bobo@di.unipmn.it)
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * Define all the backup steps that will be used by the backup_assign_activity_task
+ *
+ * @package   mod_reservation
+ * @copyright 2012 onwards Roberto Pinna
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
@@ -26,8 +27,11 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->dirroot . '/mod/reservation/backup/moodle2/restore_reservation_stepslib.php');
 
 /**
- * reservation restore task that provides all the settings and steps to perform one
- * complete restore of the activity
+ * Reservation restore task that provides all the settings and steps to perform one complete restore of the activity.
+ *
+ * @package   mod_reservation
+ * @copyright 2012 onwards Roberto Pinna
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class restore_reservation_activity_task extends restore_activity_task {
 
@@ -49,6 +53,8 @@ class restore_reservation_activity_task extends restore_activity_task {
     /**
      * Define the contents in the activity that must be
      * processed by the link decoder
+     *
+     * @return array
      */
     static public function define_decode_contents() {
         $contents = array();
@@ -61,6 +67,8 @@ class restore_reservation_activity_task extends restore_activity_task {
     /**
      * Define the decoding rules for links belonging
      * to the activity to be executed by the link decoder
+     *
+     * @return array of restore_decode_rule
      */
     static public function define_decode_rules() {
         $rules = array();
@@ -77,6 +85,8 @@ class restore_reservation_activity_task extends restore_activity_task {
      * by the {@link restore_logs_processor} when restoring
      * reservation logs. It must return one array
      * of {@link restore_log_rule} objects
+     *
+     * @return array of restore_log_rule
      */
     static public function define_restore_log_rules() {
         $rules = array();
@@ -100,6 +110,8 @@ class restore_reservation_activity_task extends restore_activity_task {
      * Note this rules are applied when restoring course logs
      * by the restore final task, but are defined here at
      * activity level. All them are rules not linked to any module instance (cmid = 0)
+     *
+     * @return array
      */
     static public function define_restore_log_rules_for_course() {
         $rules = array();

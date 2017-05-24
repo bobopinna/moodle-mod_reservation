@@ -15,10 +15,11 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package mod
- * @subpackage reservation
- * @author Roberto Pinna (bobo@di.unipmn.it)
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * This file contains the backup activity for the reservation plugin
+ *
+ * @package   mod_reservation
+ * @copyright 2012 onwards Roberto Pinna
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
@@ -26,8 +27,11 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->dirroot . '/mod/reservation/backup/moodle2/backup_reservation_stepslib.php');
 
 /**
- * reservation backup task that provides all the settings and steps to perform one
- * complete backup of the activity
+ * Rreservation backup task that provides all the settings and steps to perform one complete backup of the activity.
+ *
+ * @package   mod_reservation
+ * @copyright 2012 onwards Roberto Pinna
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class backup_reservation_activity_task extends backup_activity_task {
 
@@ -49,6 +53,8 @@ class backup_reservation_activity_task extends backup_activity_task {
     /**
      * Code the transformations to perform in the activity in
      * order to get transportable (encoded) links
+     * @param string $content
+     * @return string
      */
     static public function encode_content_links($content) {
         global $CFG;

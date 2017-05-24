@@ -42,7 +42,6 @@ class request_cancelled extends \core\event\base {
      * @param \stdClass $reservation
      * @param \context_module $context
      * @param \stdClass $request
-     * @param \stdClass $requestnote
      * @return request_cancelled
      */
     public static function create_from_request(\stdClass $reservation, \context_module $context, \stdClass $request) {

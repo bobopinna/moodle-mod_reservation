@@ -15,14 +15,11 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package mod
- * @subpackage reservation
- * @author Roberto Pinna (bobo@di.unipmn.it)
+ * Reservation module log events definition
+ *
+ * @package mod_reservation
+ * @copyright 2012 onwards Roberto Pinna
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
-/**
- * Definition of log events
  */
 
 defined('MOODLE_INTERNAL') || die();

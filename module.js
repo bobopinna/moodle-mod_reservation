@@ -1,6 +1,6 @@
-M.mod_reservation = {};
+M.modReservation = {};
 
-M.mod_reservation.init_view = function(Y) {
+M.modReservation.initView = function(Y) {
     Y.on('click', function(e) {
         Y.all('input.request').each(function() {
             this.set('checked', 'checked');

@@ -15,23 +15,29 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package mod
- * @subpackage reservation
- * @author Roberto Pinna (bobo@di.unipmn.it)
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * Define all the restore steps that will be used by the restore_reservation_activity_task
+ *
+ * @package   mod_reservation
+ * @copyright 2012 onwards Roberto Pinna
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Define all the restore steps that will be used by the restore_reservation_activity_task
- */
-
-/**
  * Structure step to restore one reservation activity
+ *
+ * @package   mod_reservation
+ * @copyright 2012 onwards Roberto Pinna
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class restore_reservation_activity_structure_step extends restore_activity_structure_step {
 
+    /**
+     * Define the structure of the restore workflow.
+     *
+     * @return restore_path_element $structure
+     */
     protected function define_structure() {
 
         $paths = array();
@@ -48,6 +54,12 @@ class restore_reservation_activity_structure_step extends restore_activity_struc
         return $this->prepare_activity_structure($paths);
     }
 
+    /**
+     * Process an assign restore.
+     *
+     * @param object $data The data in object form
+     * @return void
+     */
     protected function process_reservation($data) {
         global $DB;
 
@@ -85,6 +97,11 @@ class restore_reservation_activity_structure_step extends restore_activity_struc
         $this->set_mapping('reservation', $oldid, $newitemid);
     }
 
+    /**
+     * Process a sublimit restore
+     * @param object $data The data in object form
+     * @return void
+     */
     protected function process_reservation_limit($data) {
         global $DB;
 
@@ -96,6 +113,11 @@ class restore_reservation_activity_structure_step extends restore_activity_struc
         $newitemid = $DB->insert_record('reservation_limit', $data);
     }
 
+    /**
+     * Process a reservation request restore
+     * @param object $data The data in object form
+     * @return void
+     */
     protected function process_reservation_request($data) {
         global $DB;
 
@@ -113,6 +135,11 @@ class restore_reservation_activity_structure_step extends restore_activity_struc
         $this->set_mapping('reservation_request', $oldid, $newitemid);
     }
 
+    /**
+     * Process a reservation note restore
+     * @param object $data The data in object form
+     * @return void
+     */
     protected function process_reservation_note($data) {
         global $DB;
 
@@ -126,17 +153,25 @@ class restore_reservation_activity_structure_step extends restore_activity_struc
         // (child paths, file areas nor links decoder).
     }
 
+    /**
+     * Once the database tables have been fully restored, restore the files
+     * @return void
+     */
     protected function after_execute() {
 
         // Add reservation related files, no need to match by itemname (just internally handled context).
         $this->add_related_files('mod_reservation', 'intro', null);
     }
 
+    /**
+     * Once the database tables have been restored, restore the reservations connections
+     * @return void
+     */
     protected function after_restore() {
         global $DB;
 
-        // Now that all the questions have been restored,
-        // let's process the created question_multianswer sequences (list of question ids).
+        // Now that all the reservation have been restored,
+        // let's process the reservation connections.
         $rs = $DB->get_recordset_sql("
                 SELECT r.id, r.parent
                   FROM {reservation} r

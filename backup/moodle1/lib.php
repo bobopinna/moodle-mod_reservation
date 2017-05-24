@@ -17,9 +17,8 @@
 /**
  * Provides support for the conversion of moodle1 backup to the moodle2 format
  *
- * @package    mod
- * @subpackage reservation
- * @author     Roberto Pinna (bobo@di.unipmn.it)
+ * @package    mod_reservation
+ * @copyright  2012 onwards Roberto Pinna
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -27,6 +26,10 @@ defined('MOODLE_INTERNAL') || die();
 
 /**
  * Choice conversion handler
+ *
+ * @package    mod_reservation
+ * @copyright  2012 onwards Roberto Pinna
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class moodle1_mod_reservation_handler extends moodle1_mod_handler {
 
@@ -75,6 +78,7 @@ class moodle1_mod_reservation_handler extends moodle1_mod_handler {
     /**
      * This is executed every time we have one /MOODLE_BACKUP/COURSE/MODULES/MOD/RESERVATION
      * data available
+     * @param array $data
      */
     public function process_reservation($data) {
 
@@ -117,6 +121,7 @@ class moodle1_mod_reservation_handler extends moodle1_mod_handler {
     /**
      * This is executed every time we have one /MOODLE_BACKUP/COURSE/MODULES/MOD/RESERVATION/LIMITS/LIMIT
      * data available
+     * @param array $data
      */
     public function process_reservation_limit($data) {
         $this->write_xml('limit', $data, array('/limit/id'));

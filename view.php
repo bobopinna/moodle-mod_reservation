@@ -15,9 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package mod
- * @subpackage reservation
- * @author Roberto Pinna (bobo@di.unipmn.it)
+ * Reservation plugin view page
+ *
+ * @package mod_reservation
+ * @copyright 2006 onwards Roberto Pinna
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -996,8 +997,8 @@ if (empty($download)) {
                                                                    'value' => get_string('ok')));
                     echo html_writer::tag('div', $html, array('class' => 'form-buttons'));
 
-                    $module = array('name' => 'mod_reservation', 'fullpath' => '/mod/reservation/module.js');
-                    $PAGE->requires->js_init_call('M.mod_reservation.init_view', null, false, $module);
+                    $module = array('name' => 'modReservation', 'fullpath' => '/mod/reservation/module.js');
+                    $PAGE->requires->js_init_call('M.modReservation.initView', null, false, $module);
                 }
 
                 echo html_writer::end_tag('form');
