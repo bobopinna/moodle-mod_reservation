@@ -248,7 +248,7 @@ if (empty($download)) {
             echo html_writer::tag('span',
                                   userdate($reservation->timeopen, $strftimedaydatetime),
                                   array('class' => 'notopened'));
-            echo html_writer::tag('span', ' '.get_string('reservationnotopened', 'reservation'), array('class' => 'bold'));
+            echo html_writer::tag('span', ' '.get_string('reservationnotopened', 'reservation'), array('class' => 'alert bg-warning'));
         } else {
             echo html_writer::tag('span', userdate($reservation->timeopen, $strftimedaydatetime));
         }
@@ -258,7 +258,7 @@ if (empty($download)) {
     echo html_writer::tag('label', get_string('timeclose', 'reservation').': ', array('class' => 'bold'));
     if ($now > $reservation->timeclose) {
         echo html_writer::tag('span', userdate($reservation->timeclose, $strftimedaydatetime), array('class' => 'notopened'));
-        echo html_writer::tag('span', ' '.get_string('reservationclosed', 'reservation'), array('class' => 'bold'));
+        echo html_writer::tag('span', ' '.get_string('reservationclosed', 'reservation'), array('class' => 'alert bg-warning'));
     } else {
         echo html_writer::tag('span', userdate($reservation->timeclose, $strftimedaydatetime));
     }

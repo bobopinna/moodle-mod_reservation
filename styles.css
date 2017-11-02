@@ -27,9 +27,6 @@
 }
 
 .path-mod-reservation .notopened {
-    background-color: #bf2f32;
-    color: white;
-    padding: 2px;
 }
 
 .path-mod-reservation .cancelled {
