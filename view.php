@@ -296,7 +296,7 @@ if (empty($download)) {
 // Check to see if groups are being used in this reservation.
 $groupmode = groups_get_activity_groupmode($cm);
 
-if (($mode == 'manage') && ($now < $reservation->timestart)) {
+if ($mode == 'manage') {
     // Get list of users available for manual reserve.
     $addableusers = array();
 
@@ -769,8 +769,7 @@ if (empty($download) && has_capability('mod/reservation:viewrequest', $context))
 if (empty($download)) {
     // Show reservation form.
     if (($mode == 'manage') && has_capability('mod/reservation:manualreserve', $context)) {
-        if ((($reservation->maxrequest == 0) || ($available > 0) || ($available + $overbook > 0)) &&
-            ($now < $reservation->timestart)) {
+        if (($reservation->maxrequest == 0) || ($available > 0) || ($available + $overbook > 0)) {
             if (isset($addableusers) && !empty($addableusers)) {
                 $html = '';
                 $reserveurl = new moodle_url('/mod/reservation/reserve.php', array('id' => $cm->id));
@@ -797,6 +796,7 @@ if (empty($download)) {
                 }
                 $html .= html_writer::empty_tag('input', array('type' => 'submit',
                                                                'name' => 'reserve',
+                                                               'class' => 'btn btn-primary',
                                                                'value' => get_string('reserve', 'reservation')));
                 $html .= html_writer::end_tag('form');
 
@@ -852,6 +852,7 @@ if (empty($download)) {
             if (isset($currentuser) && ($currentuser->number > 0)) {
                 $html .= html_writer::empty_tag('input', array('type' => 'submit',
                                                                'name' => 'cancel',
+                                                               'class' => 'btn btn-primary',
                                                                'value' => get_string('reservecancel', 'reservation')));
             } else if ((($reservation->maxrequest == 0) && ($available > 0)) || ($available > 0) || ($available + $overbook > 0)) {
                 if ($reservation->note == 1) {
@@ -864,6 +865,7 @@ if (empty($download)) {
                 }
                 $html .= html_writer::empty_tag('input', array('type' => 'submit',
                                                                'name' => 'reserve',
+                                                               'class' => 'btn btn-primary',
                                                                'value' => get_string('reserve', 'reservation')));
             }
             $html .= html_writer::end_tag('form');
@@ -922,11 +924,13 @@ if (empty($download)) {
                     $html .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'view', 'value' => 'clean'));
                     $html .= html_writer::empty_tag('input', array('type' => 'submit',
                                                                    'name' => 'save',
+                                                                   'class' => 'btn btn-secondary',
                                                                    'value' => get_string('cleanview', 'reservation')));
                 } else if ($counters[0]->deletedrequests > 0) {
                     $html .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'view', 'value' => 'full'));
                     $html .= html_writer::empty_tag('input', array('type' => 'submit',
                                                                    'name' => 'save',
+                                                                   'class' => 'btn btn-secondary',
                                                                    'value' => get_string('fullview', 'reservation')));
                 }
                 $html .= html_writer::end_tag('fieldset');
@@ -974,6 +978,7 @@ if (empty($download)) {
                 if (($reservation->maxgrade != 0) && ($now > $reservation->timestart) && ($counters[0]->count > 0)) {
                     $html = html_writer::empty_tag('input', array('type' => 'submit',
                                                                   'name' => 'savegrades',
+                                                                  'class' => 'btn btn-primary',
                                                                   'value' => get_string('save', 'reservation')));
                     echo html_writer::tag('div', $html, array('class' => 'savegrades'));
                 }
@@ -981,14 +986,16 @@ if (empty($download)) {
                 if (!empty($actions) && (($counters[0]->count > 0) ||
                                          (($view == 'full') && ($counters[0]->deletedrequests > 0)))) {
                     $html = '';
+                    $html .= html_writer::start_tag('div', array('class' => 'btn-group'));
                     $html .= html_writer::empty_tag('input', array('type' => 'button',
                                                     'id' => 'checkall',
-                                                    'class' => 'btn btn-secondary m-r-1',
+                                                    'class' => 'btn btn-secondary',
                                                     'value' => get_string('selectall')));
                     $html .= html_writer::empty_tag('input', array('type' => 'button',
                                                                    'id' => 'checknone',
-                                                                   'class' => 'btn btn-secondary m-r-1',
+                                                                   'class' => 'btn btn-secondary',
                                                                    'value' => get_string('deselectall')));
+                    $html .= html_writer::end_tag('div');
                     $html .= html_writer::select($actions, 'action', '0',
                                                  array('0' => get_string('withselected', 'reservation')));
                     $html .= html_writer::empty_tag('input', array('type' => 'submit',

@@ -66,11 +66,7 @@ if ($reservationid == $reservation->id) {
 
         $canreserve = has_capability('mod/reservation:reserve', $context);
         if (has_capability('mod/reservation:manualreserve', $context) && !empty($newparticipant)) {
-            if ($now < $reservation->timestart) {
-                $request->userid = $newparticipant;
-            } else {
-                $notice = 'reservationdenied';
-            }
+            $request->userid = $newparticipant;
         } else if ($canreserve && ($now >= $reservation->timeopen) && ($now <= $reservation->timeclose)) {
             $request->userid = $USER->id;
         } else {
