@@ -248,7 +248,8 @@ if (empty($download)) {
             echo html_writer::tag('span',
                                   userdate($reservation->timeopen, $strftimedaydatetime),
                                   array('class' => 'notopened'));
-            echo html_writer::tag('span', ' '.get_string('reservationnotopened', 'reservation'), array('class' => 'alert bg-warning'));
+            echo html_writer::tag('span', ' '.get_string('reservationnotopened', 'reservation'),
+                                  array('class' => 'alert bg-warning'));
         } else {
             echo html_writer::tag('span', userdate($reservation->timeopen, $strftimedaydatetime));
         }
@@ -898,10 +899,12 @@ if (empty($download)) {
                     echo $OUTPUT->box($strjustbooked.$currentuser->note, 'center justbooked');
                 }
             } else {
+                $classes = 'center alreadybooked';
                 if (($reservation->maxrequest > 0) && ($currentuser->number > $reservation->maxrequest)) {
-                    echo $OUTPUT->box(get_string('alreadyoverbooked', 'reservation').$currentuser->note, 'center alreadybooked overbooked');
+                    $classes .= ' overbooked';
+                    echo $OUTPUT->box(get_string('alreadyoverbooked', 'reservation').$currentuser->note, $classes);
                 } else {
-                    echo $OUTPUT->box(get_string('alreadybooked', 'reservation').$currentuser->note, 'center alreadybooked');
+                    echo $OUTPUT->box(get_string('alreadybooked', 'reservation').$currentuser->note, $classes);
                 }
             }
             if (!empty($currentuser->grade)) {

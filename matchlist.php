@@ -77,7 +77,8 @@ if (isset($customfields[$fieldname])) {
 }
    $onclick = 'document.getElementById(\'matchvalue_list\').style.display=\'none\';';
    $strclose = get_string('close', 'reservation');
-   echo '<div class="matchlistcloser"><a href="javascript:void(0)" onclick="'.$onclick.'" class="btn btn-danger btn-sm">'.$strclose.'</a></div>'."\n";
+   $btn = 'class="btn btn-danger btn-sm"';
+   echo '<div class="matchlistcloser"><a href="javascript:void(0)" onclick="'.$onclick.'" '.$btn.'>'.$strclose.'</a></div>'."\n";
 // Generate inner div code.
 if (!empty($values)) {
     echo '<strong>'.get_string('selectvalue', 'reservation').'</strong><br />'."\n";

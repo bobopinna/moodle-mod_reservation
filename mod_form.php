@@ -202,7 +202,7 @@ function checkClashes() {
 
             $mform->addElement('static', 'collision', '',
                     '<input type="button" id="checkclashes" onclick="checkClashes()" value="'.
-                           get_string('checkclashes', 'reservation').'" class="btn btn-primary" />'.$reportdiv.$collisiondiv.$script);
+                    get_string('checkclashes', 'reservation').'" class="btn btn-primary" />'.$reportdiv.$collisiondiv.$script);
         }
 
         $mform->addElement('modgrade', 'maxgrade', get_string('grade'));
