@@ -97,8 +97,8 @@ echo $OUTPUT->box_start('locationform');
      </fieldset>
      <fieldset class="locationedit">
          <input type="hidden" name="sesskey" value="<?php p($sesskey) ?>" />
-         <input type="submit" name="add" value="&lt;-- <?php print_string('add') ?>" /><br />
-         <input type="submit" name="delete" value="<?php print_string('deleteselected') ?> --X" />
+         <input type="submit" name="add" value="<?php print_string('add') ?>" class="btn btn-primary addlocation" />
+         <input type="submit" name="delete" value="<?php print_string('deleteselected') ?>" class="btn btn-danger deletelocation" />
      </fieldset>
      <fieldset class="locationedit">
          <label for='newlocation'><?php print_string('newlocation', 'reservation'); ?></label><br />

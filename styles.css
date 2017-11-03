@@ -100,6 +100,13 @@
     min-width: 20%;
 }
 
+.path-admin-mod-reservation .locationform .addlocation,
+.path-admin-mod-reservation .locationform .deletelocation {
+    margin-top: 2em;
+    display: block;
+    width: 100%;
+}
+
 /**
  * Editing page
  */
