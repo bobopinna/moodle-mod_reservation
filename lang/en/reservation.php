@@ -65,8 +65,10 @@ $string['timeopen'] = 'Reservation start on';
 $string['timestart'] = 'Start date';
 $string['timeend'] = 'End date';
 $string['save'] = 'Save grade';
-$string['justbooked'] = 'You are booked as: <span class="justbookednumber">{$a}</span>';
+$string['justbooked'] = 'You are booked as: {$a}';
+$string['justoverbooked'] = 'You are overbooked as: {$a}';
 $string['alreadybooked'] = 'You are already booked';
+$string['alreadyoverbooked'] = 'You are already in the waiting list';
 $string['yourgrade'] = 'Your grade about this reservation is: {$a->grade}/{$a->maxgrade}';
 $string['yourscale'] = 'Your grade about this reservation is: {$a}';
 $string['by'] = 'by';
@@ -242,5 +244,6 @@ $string['numberafterclose'] = 'their reservation request number after reservatio
 $string['listafterclose'] = 'reservation requests list after reservation was closed';
 $string['listalways'] = 'reservation requests list anytime';
 $string['numberalways'] = 'their reservation request number anytime';
+$string['none'] = 'no informations about reservation order';
 $string['tools'] = 'Reservation tools';
 

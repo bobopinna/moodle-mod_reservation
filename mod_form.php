@@ -258,6 +258,7 @@ function checkClashes() {
         $choices[1] = get_string('listafterclose', 'reservation');
         $choices[2] = get_string('listalways', 'reservation');
         $choices[3] = get_string('numberalways', 'reservation');
+        $choices[4] = get_string('none', 'reservation');
         $mform->addElement('select', 'showrequest', get_string('showuserrequest', 'reservation'), $choices);
 
         if (empty($CFG->reservation_max_overbook)) {

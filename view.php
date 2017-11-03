@@ -890,13 +890,22 @@ if (empty($download)) {
             $canviewnumberalways = ($reservation->showrequest == 3);
             if ($canviewnumbernow || $canviewnumberalways) {
                 $numberspan = html_writer::tag('span', $currentuser->number, array('class' => 'justbookednumber'));
-                $strjustbooked = get_string('justbooked', 'reservation', html_writer::tag('span', $numberspan));
-                echo $OUTPUT->box($strjustbooked.$currentuser->note, 'center justbooked');
-                if (!empty($currentuser->grade)) {
-                    echo $OUTPUT->box($currentuser->grade, 'center graded');
+                if (($reservation->maxrequest > 0) && ($currentuser->number > $reservation->maxrequest)) {
+                    $strjustbooked = get_string('justoverbooked', 'reservation', html_writer::tag('span', $numberspan));
+                    echo $OUTPUT->box($strjustbooked.$currentuser->note, 'center justbooked overbooked');
+                } else {
+                    $strjustbooked = get_string('justbooked', 'reservation', html_writer::tag('span', $numberspan));
+                    echo $OUTPUT->box($strjustbooked.$currentuser->note, 'center justbooked');
                 }
             } else {
-                echo $OUTPUT->box(get_string('alreadybooked', 'reservation').$currentuser->note, 'center alreadybooked');
+                if (($reservation->maxrequest > 0) && ($currentuser->number > $reservation->maxrequest)) {
+                    echo $OUTPUT->box(get_string('alreadyoverbooked', 'reservation').$currentuser->note, 'center alreadybooked overbooked');
+                } else {
+                    echo $OUTPUT->box(get_string('alreadybooked', 'reservation').$currentuser->note, 'center alreadybooked');
+                }
+            }
+            if (!empty($currentuser->grade)) {
+                echo $OUTPUT->box($currentuser->grade, 'center graded');
             }
         }
         echo html_writer::end_tag('div');
