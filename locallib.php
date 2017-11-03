@@ -640,7 +640,7 @@ function reservation_print_tabs($reservation, $mode) {
 function reservation_set_user_event($reservation, $request) {
     global $CFG, $DB;
 
-    if (!isset($CFG->reservation_vents)) {
+    if (!isset($CFG->reservation_events)) {
         $CFG->reservation_events = 'reservation,event';
     }
 
