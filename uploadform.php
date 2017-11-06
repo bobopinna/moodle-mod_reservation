@@ -95,17 +95,25 @@ class reservation_upload_confirm_form extends moodleform {
             if ($courses) {
                 $choices = array();
                 foreach ($courses as $course) {
-                    // Compatibility with course formats using field 'numsections'.
-                    $coursenumsections = course_get_format($course)->get_last_section_number();
+                    $coursenumsections = 0;
+                    if (course_get_format($course)->uses_sections()) {
+                        $sections = get_fast_modinfo($course->id)->get_section_info_all();
+                        if (!empty($sections)) {
+                            $coursenumsections = (int)max(array_keys($sections));
+                        }
+                    }
 
-                    if ($course->category != 0) {
-                        $choices[$course->shortname] = $displaylist[$course->category].' / '.
-                                $course->fullname.' ('.$course->shortname.')';
-                    } else {
-                        $choices[$course->shortname] = $course->fullname.' ('.$course->shortname.')';
+                    if ($coursenumsections > 0 ) {
+                        if ($course->category != 0) {
+                            $choices[$course->shortname] = $displaylist[$course->category].' / '.
+                                    $course->fullname.' ('.$course->shortname.')';
+                        } else {
+                            $choices[$course->shortname] = $course->fullname.' ('.$course->shortname.')';
+                        }
                     }
                 }
                 if (!empty($choices)) {
+                    asort($choices, SORT_NATURAL);
                     $mform->addElement('select', 'course', get_string('course'), $choices);
                 } else {
                     $noerror = false;

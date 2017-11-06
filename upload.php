@@ -169,9 +169,13 @@ if (!empty($iid)) {
                 if (!$course = $DB->get_record('course', array('shortname' => $data->course))) {
                     $upt->track('course', $errorstr, 'error');
                 } else {
-                    // Compartibility with course formats using field 'numsections'.
-                    $coursenumsections = course_get_format($course)->get_last_section_number();
-                    if ($data->section > $coursenumsections || $data->section < 0) {
+                    $coursenumsections = 0;
+                    $sections = get_fast_modinfo($course->id)->get_section_info_all();
+                    if (!empty($sections)) {
+                        $coursenumsections = (int)max(array_keys($sections));
+                    }
+
+                    if (($coursenumsections > 0) && ($data->section > $coursenumsections) || ($data->section < 0)) {
                         $upt->track('section', $errorstr, 'error');
                     } else {
                         $cw = get_fast_modinfo($course->id)->get_section_info($data->section);
