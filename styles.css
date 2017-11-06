@@ -26,9 +26,6 @@
     background-color: orange;
 }
 
-.path-mod-reservation .notopened {
-}
-
 .path-mod-reservation .cancelled {
     text-decoration: line-through;
 }
