@@ -276,6 +276,7 @@ function checkClashes() {
              $values[$i] = "$i%";
         }
         $mform->addElement('select', 'overbook', get_string('overbook', 'reservation'), $values);
+        $mform->disabledIf('overbook', 'maxrequest', 'eq', '0');
         $mform->setAdvanced('overbook');
 
         if (isset($CFG->reservation_sublimits) && !empty($CFG->reservation_sublimits)) {
