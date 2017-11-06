@@ -15,9 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package mod
- * @subpackage reservation
- * @author Roberto Pinna (bobo@di.unipmn.it)
+ * This file contains the forms to create and edit an instance of this module
+ *
+ * @package mod_reservation
+ * @copyright 2011 onwards Roberto Pinna
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -26,8 +27,20 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->dirroot.'/course/moodleform_mod.php');
 require_once($CFG->dirroot.'/mod/reservation/locallib.php');
 
+/**
+ * Reservation settings form
+ *
+ * @package mod_reservation
+ * @copyright 2011 onwards Roberto Pinna
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class mod_reservation_mod_form extends moodleform_mod {
 
+    /**
+     * Called to define this moodle form
+     *
+     * @return void
+     */
     public function definition() {
 
         global $CFG, $COURSE, $DB, $PAGE;
@@ -193,7 +206,7 @@ function checkClashes() {
 
             $mform->addElement('static', 'collision', '',
                     '<input type="button" id="checkclashes" onclick="checkClashes()" value="'.
-                           get_string('checkclashes', 'reservation').'" />'.$reportdiv.$collisiondiv.$script);
+                    get_string('checkclashes', 'reservation').'" class="btn btn-primary" />'.$reportdiv.$collisiondiv.$script);
         }
 
         $mform->addElement('modgrade', 'maxgrade', get_string('grade'));
@@ -244,7 +257,13 @@ function checkClashes() {
         }
         $mform->addElement('select', 'maxrequest', get_string('maxrequest', 'reservation'), $values);
 
-        $mform->addElement('selectyesno', 'showrequest', get_string('showrequest', 'reservation'));
+        $choices = array();
+        $choices[0] = get_string('numberafterclose', 'reservation');
+        $choices[1] = get_string('listafterclose', 'reservation');
+        $choices[2] = get_string('listalways', 'reservation');
+        $choices[3] = get_string('numberalways', 'reservation');
+        $choices[4] = get_string('none', 'reservation');
+        $mform->addElement('select', 'showrequest', get_string('showuserrequest', 'reservation'), $choices);
 
         if (empty($CFG->reservation_max_overbook)) {
             $CFG->reservation_max_overbook = 100;
@@ -261,6 +280,7 @@ function checkClashes() {
              $values[$i] = "$i%";
         }
         $mform->addElement('select', 'overbook', get_string('overbook', 'reservation'), $values);
+        $mform->disabledIf('overbook', 'maxrequest', 'eq', '0');
         $mform->setAdvanced('overbook');
 
         if (isset($CFG->reservation_sublimits) && !empty($CFG->reservation_sublimits)) {
@@ -366,6 +386,11 @@ function checkClashes() {
         $this->add_action_buttons();
     }
 
+    /**
+     * Any data processing needed before the form is displayed
+     * (needed to set up draft areas for editor and filemanager elements)
+     * @param array $defaultvalues
+     */
     public function data_preprocessing(&$defaultvalues) {
         global $CFG, $DB;
 
@@ -400,6 +425,14 @@ function checkClashes() {
         }
     }
 
+    /**
+     * Allows module to modify the data returned by form get_data().
+     * This method is also called in the bulk activity completion form.
+     *
+     * Only available on moodleform_mod.
+     *
+     * @return stdClass $data the form data modified.
+     */
     public function get_data() {
         $data = parent::get_data();
         if ($data) {
@@ -415,6 +448,11 @@ function checkClashes() {
         return $data;
     }
 
+    /**
+     * Perform minimal validation on the settings form
+     * @param array $data
+     * @param array $files
+     */
     public function validation($data, $files) {
         global $CFG;
 
@@ -438,6 +476,11 @@ function checkClashes() {
         return $errors;
     }
 
+    /**
+     * Add any custom completion rules to the form.
+     *
+     * @return array Contains the names of the added form elements
+     */
     public function add_completion_rules() {
         $mform =& $this->_form;
 
@@ -448,6 +491,12 @@ function checkClashes() {
         return array('completionreserved');
     }
 
+    /**
+     * Determines if completion is enabled for this module.
+     *
+     * @param array $data
+     * @return bool
+     */
     public function completion_rule_enabled($data) {
         return !empty($data['completionreserved']);
     }

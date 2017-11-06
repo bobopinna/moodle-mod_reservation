@@ -17,9 +17,8 @@
 /**
  * Bulk reservation upload forms
  *
- * @package    reservation
- * @subpackage upload
- * @copyright  2012 Roberto Pinna
+ * @package    mod_reservation
+ * @copyright  2012 onwards Roberto Pinna
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -29,13 +28,16 @@ require_once($CFG->libdir.'/formslib.php');
 
 
 /**
- * Upload a file CVS file with user information.
+ * Upload a file CVS file with reservation list.
  *
  * @copyright  2007 Petr Skoda  {@link http://skodak.org}
- * @copyright  2012 Roberto Pinna {@mail roberto.pinna@unipmn.it}
+ * @copyright  2012 onwards Roberto Pinna
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class reservation_upload_form extends moodleform {
+    /**
+     * Define the reservation upload form
+     */
     public function definition () {
         $mform = $this->_form;
 
@@ -66,7 +68,17 @@ class reservation_upload_form extends moodleform {
     }
 }
 
+/**
+ * Confirm CSV file data and add missing values
+ *
+ * @copyright  2007 Petr Skoda  {@link http://skodak.org}
+ * @copyright  2012 onwards Roberto Pinna
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class reservation_upload_confirm_form extends moodleform {
+    /**
+     * Define the confirmation form
+     */
     public function definition () {
         global $DB;
         $mform = $this->_form;
@@ -74,9 +86,6 @@ class reservation_upload_confirm_form extends moodleform {
 
         $columns = $this->_customdata['columns'];
         $data    = $this->_customdata['data'];
-        if (!isset($data['maxsection'])) {
-            $data['maxsection'] = 0;
-        }
 
         $mform->addElement('header', 'settingsheader', get_string('general'));
         if (!in_array('course', $columns)) {
@@ -86,11 +95,15 @@ class reservation_upload_confirm_form extends moodleform {
             if ($courses) {
                 $choices = array();
                 foreach ($courses as $course) {
-                    // Compartibility with course formats using field 'numsections'.
-                    $courseformatoptions = course_get_format($course)->get_format_options();
+                    $coursenumsections = 0;
+                    if (course_get_format($course)->uses_sections()) {
+                        $sections = get_fast_modinfo($course->id)->get_section_info_all();
+                        if (!empty($sections)) {
+                            $coursenumsections = (int)max(array_keys($sections));
+                        }
+                    }
 
-                    $hassections = array_key_exists('numsections', $courseformatoptions);
-                    if ($hassections && ($data['maxsection'] <= $courseformatoptions['numsections']) && ($data['maxsection'] > 0)) {
+                    if ($coursenumsections > 0 ) {
                         if ($course->category != 0) {
                             $choices[$course->shortname] = $displaylist[$course->category].' / '.
                                     $course->fullname.' ('.$course->shortname.')';
@@ -99,7 +112,13 @@ class reservation_upload_confirm_form extends moodleform {
                         }
                     }
                 }
-                $mform->addElement('select', 'course', get_string('course'), $choices);
+                if (!empty($choices)) {
+                    asort($choices, SORT_NATURAL);
+                    $mform->addElement('select', 'course', get_string('course'), $choices);
+                } else {
+                    $noerror = false;
+                }
+
             } else {
                 $noerror = false;
             }

@@ -15,31 +15,21 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package mod
- * @subpackage reservation
- * @author Roberto Pinna (bobo@di.unipmn.it)
+ * This file keeps track of upgrades to the Reservation plugin
+ *
+ * @package mod_reservation
+ * @copyright 2007 onwards Roberto Pinna
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-// This file keeps track of upgrades to
-// the scorm module
-//
-// Sometimes, changes between versions involve
-// alterations to database structures and other
-// major things that may break installations.
-//
-// The upgrade function in this file will attempt
-// to perform all the necessary actions to upgrade
-// your older installtion to the current version.
-//
-// If there's something it cannot do itself, it
-// will tell you what you need to do.
-//
-// The commands in here will all be database-neutral,
-// using the functions defined in lib/ddllib.php.
-
 defined('MOODLE_INTERNAL') || die();
 
+/**
+ * Reservation module upgrade task
+ *
+ * @param int $oldversion the version we are upgrading from
+ * @return bool always true
+ */
 function xmldb_reservation_upgrade($oldversion=0) {
 
     global $CFG, $THEME, $DB;

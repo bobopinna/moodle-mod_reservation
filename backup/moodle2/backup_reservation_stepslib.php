@@ -15,23 +15,28 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package mod
- * @subpackage reservation
- * @author Roberto Pinna (bobo@di.unipmn.it)
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * Define all the backup steps that will be used by the backup_reservation_activity_task
+ *
+ * @package   mod_reservation
+ * @copyright 2012 onwards Roberto Pinna
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Define all the backup steps that will be used by the backup_reservation_activity_task
- */
-
-/**
  * Define the complete reservation structure for backup, with file and id annotations
+ *
+ * @package   mod_reservation
+ * @copyright 2012 onwards Roberto Pinna
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class backup_reservation_activity_structure_step extends backup_activity_structure_step {
 
+    /**
+     * Define the structure for the reservation activity
+     * @return void
+     */
     protected function define_structure() {
 
         // To know if we are including userinfo.

@@ -15,9 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package mod
- * @subpackage reservation
- * @author Roberto Pinna (bobo@di.unipmn.it)
+ * Check and return a list of clashes with given reservation time and location
+ *
+ * @package mod_reservation
+ * @copyright 2012 onwards Roberto Pinna
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 

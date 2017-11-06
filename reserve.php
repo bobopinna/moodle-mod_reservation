@@ -15,9 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package mod
- * @subpackage reservation
- * @author Roberto Pinna (bobo@di.unipmn.it)
+ * Reserve or cancel a reservation request
+ *
+ * @package mod_reservation
+ * @copyright 2006 onwards Roberto Pinna
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -65,11 +66,7 @@ if ($reservationid == $reservation->id) {
 
         $canreserve = has_capability('mod/reservation:reserve', $context);
         if (has_capability('mod/reservation:manualreserve', $context) && !empty($newparticipant)) {
-            if ($now < $reservation->timestart) {
-                $request->userid = $newparticipant;
-            } else {
-                $notice = 'reservationdenied';
-            }
+            $request->userid = $newparticipant;
         } else if ($canreserve && ($now >= $reservation->timeopen) && ($now <= $reservation->timeclose)) {
             $request->userid = $USER->id;
         } else {

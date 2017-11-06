@@ -15,9 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package mod
- * @subpackage reservation
- * @author Roberto Pinna (bobo@di.unipmn.it)
+ * Display a DIV with the list of existing values for a given user fieldname and fill the match value field.
+ *
+ * @package mod_reservation
+ * @copyright 2011 onwards Roberto Pinna
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -76,7 +77,8 @@ if (isset($customfields[$fieldname])) {
 }
    $onclick = 'document.getElementById(\'matchvalue_list\').style.display=\'none\';';
    $strclose = get_string('close', 'reservation');
-   echo '<div class="matchlistcloser"><a href="javascript:void(0)" onclick="'.$onclick.'">'.$strclose.'&#9746;</a></div>'."\n";
+   $btn = 'class="btn btn-danger btn-sm"';
+   echo '<div class="matchlistcloser"><a href="javascript:void(0)" onclick="'.$onclick.'" '.$btn.'>'.$strclose.'</a></div>'."\n";
 // Generate inner div code.
 if (!empty($values)) {
     echo '<strong>'.get_string('selectvalue', 'reservation').'</strong><br />'."\n";

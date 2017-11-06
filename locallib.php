@@ -15,9 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package mod
- * @subpackage reservation
- * @author Roberto Pinna (bobo@di.unipmn.it)
+ * Reservation plugin local lib functions
+ *
+ * @package mod_reservation
+ * @copyright 2011 onwards Roberto Pinna
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -26,8 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 /**
  * Gets a full reservation record
  *
- * @global object
- * @param int $reservationid
+ * @param integer $reservationid reservation id
  * @return object|bool The reservation or false
  */
 function reservation_get_reservation($reservationid) {
@@ -50,12 +50,11 @@ function reservation_get_reservation($reservationid) {
 }
 
 /**
- *  Return list of reservations in specified course or with specified location
+ * Return a list of reservations in specified course or with specified location
  *
- * @uses $DB
- * @param courseid integer course id
- * @param location string  location name
- * @return array|bool the reservations list or false
+ * @param integer $courseid A course id
+ * @param string  $location The location name
+ * @return array|bool The reservations list or false
  */
 function reservation_get_reservations_by_course($courseid, $location='') {
     global  $DB;
@@ -79,8 +78,8 @@ function reservation_get_reservations_by_course($courseid, $location='') {
 /**
  * Return a menu list of parentable reservation
  *
- * @uses $DB, $CFG, $COURSE
- * @return array the reservations menu list or false
+ * @param integer $reservationid A reservation id
+ * @return array  The reservations menu list or false
  */
 function reservation_get_parentable($reservationid) {
     global $DB, $CFG, $COURSE;
@@ -109,10 +108,9 @@ function reservation_get_parentable($reservationid) {
 }
 
 /**
- * Return a list of connected reservations
+ * Returns a list of reservations connected to the passed one
  *
- * @uses $DB
- * @param $reservation reservation object
+ * @param stdClass $reservation A reservation object
  * @return array the reservations list
  */
 function reservation_get_connected($reservation) {
@@ -141,8 +139,8 @@ function reservation_get_connected($reservation) {
 /**
  * Return a connected reservation where the user is already reserved, if exists
  *
- * @uses $DB
- * @param $reservation reservation object
+ * @param stdClass $reservation reservation object
+ * @param integer $userid
  * @return object with course name, reservation name, reservation id
  */
 function reservation_reserved_on_connected($reservation, $userid) {
@@ -188,12 +186,12 @@ function reservation_reserved_on_connected($reservation, $userid) {
 /**
  * Return all requests user data
  *
- * @uses $CFG
- * @reservation object   reservation record object
- * @full        boolean  define if return a full list or active only requests
- * @fields      array    which data field but returned
- * @groupid     integer  define if return all users or only members of specified group (NOT USED)
- * @groupmode   integer  how groups are showed
+ * @param stdClass $reservation reservation object
+ * @param boolean  $full        define if return a full list or active only requests
+ * @param array    $fields      which data field but returned
+ * @param integer  $groupid     define if return all users or only members of specified group (NOT USED)
+ * @param integer  $groupmode   how groups are showed
+ * @return array|bool list of request for that reservation
  */
 function reservation_get_requests($reservation, $full=false, $fields=null, $groupid=0, $groupmode=NOGROUPS) {
 
@@ -267,12 +265,18 @@ function reservation_get_requests($reservation, $full=false, $fields=null, $grou
     return $requests;
 }
 
-// Sorts an array (you know the kind) by key
-// and by the comparison operator you prefer.
-// Note that instead of most important criteron first, it's
-// least important criterion first.
-// The default sort order is ascending, and the default sort
-// type is strnatcmp.
+/**
+ * Sorts an array (you know the kind) by key
+ * and by the comparison operator you prefer.
+ * Note that instead of most important criteron first, it's
+ * least important criterion first.
+ * The default sort order is ascending, and the default sort
+ * type is strnatcmp.
+ *
+ * @param array $array
+ * @param array $sortorders Associative array with attribute names as keys and ASC or DESC as values
+ * @return array sorted array
+ */
 function reservation_multisort($array, $sortorders) {
     if (!empty($sortorders)) {
         $orders = array_reverse($sortorders, true);
@@ -291,6 +295,13 @@ function reservation_multisort($array, $sortorders) {
     return $array;
 }
 
+/**
+ * Set grades for a give reservation
+ *
+ * @param stdClass $reservation
+ * @param integer $teacherid
+ * @param array $grades Associative array with requestids as keys and grades as value
+ */
 function reservation_set_grades($reservation, $teacherid, $grades) {
     global $DB;
 
@@ -312,7 +323,13 @@ function reservation_set_grades($reservation, $teacherid, $grades) {
     }
 }
 
-
+/**
+ * Get list of teachers for this reservation
+ *
+ * @param stdClass $reservation
+ * @param integer $cmid
+ * @return array list of fullnames of teachers
+ */
 function reservation_get_teacher_names($reservation, $cmid=null) {
     global $DB;
 
@@ -344,6 +361,11 @@ function reservation_get_teacher_names($reservation, $cmid=null) {
     return $teachername;
 }
 
+/**
+ * Get list of users custom profile fields
+ *
+ * @return array list of custom profile fields
+ */
 function reservation_get_profilefields() {
     global $DB;
 
@@ -357,6 +379,12 @@ function reservation_get_profilefields() {
     return $customfields;
 }
 
+/**
+ * Get complete user profile fields (standard + custom fields)
+ *
+ * @param integer $userid
+ * @return stdClass User data
+ */
 function reservation_get_userdata($userid) {
     global $DB, $CFG;
 
@@ -372,6 +400,13 @@ function reservation_get_userdata($userid) {
     return $userdata;
 }
 
+/**
+ * Setup array of required counters for sublimit check
+ *
+ * @param stdClass $reservation
+ * @param array $customfields
+ * @return array Counters
+ */
 function reservation_setup_counters($reservation, $customfields) {
     global $DB;
 
@@ -397,6 +432,13 @@ function reservation_setup_counters($reservation, $customfields) {
     return $counters;
 }
 
+/**
+ * Update counters for the given reservation request
+ *
+ * @param array $counters
+ * @param stdClass $request
+ * @return array Updated counters
+ */
 function reservation_update_counters($counters, $request) {
 
     $counters[0]->overbooked = 0;
@@ -425,6 +467,14 @@ function reservation_update_counters($counters, $request) {
     return $counters;
 }
 
+/**
+ * Get list of sublimit fields
+ *
+ * @param array $counters
+ * @param array $customfields
+ * @param array $fields
+ * @return array Sublimits fields
+ */
 function reservation_setup_sublimit_fields($counters, $customfields, $fields = array()) {
     foreach ($counters as $counter) {
         if (isset($counter->field)) {
@@ -444,7 +494,14 @@ function reservation_setup_sublimit_fields($counters, $customfields, $fields = a
     return $fields;
 }
 
-// Calculate available seat for USER.
+/**
+ * Calculate available seat for USER.
+ *
+ * @param stdClass $reservation
+ * @param array $counters
+ * @param integer $available
+ * @return bool seat availability
+ */
 function reservation_get_availability($reservation, $counters, $available) {
     global $USER;
 
@@ -488,8 +545,10 @@ function reservation_get_availability($reservation, $counters, $available) {
 /**
  * Validation callback function - verified the column line of csv file.
  * Converts standard column names to lowercase.
+ *
  * @param csv_import_reader $cir
  * @param array $fields standard user fields
+ * @param array $requiredfields mandatory user fields
  * @param moodle_url $returnurl return url in case of any error
  * @return array list of fields
  */
@@ -545,6 +604,12 @@ function reservation_validate_upload_columns(csv_import_reader $cir, $fields, $r
     return $processed;
 }
 
+/**
+ * Print view page tabs
+ *
+ * @param stdClass $reservation
+ * @param string $mode the current selected tab (overview or manage)
+ */
 function reservation_print_tabs($reservation, $mode) {
     $tabs = array();
     $row = array();
@@ -566,6 +631,12 @@ function reservation_print_tabs($reservation, $mode) {
     print_tabs($tabs, $mode, null, null);
 }
 
+/**
+ * Creates an user event for given reservation
+ *
+ * @param stdClass $reservation
+ * @param stdClass $request
+ */
 function reservation_set_user_event($reservation, $request) {
     global $CFG, $DB;
 
@@ -578,7 +649,6 @@ function reservation_set_user_event($reservation, $request) {
         if (in_array('userevent', $enabledevents)) {
             require_once($CFG->dirroot.'/calendar/lib.php');
 
-
             $event = new stdClass();
             $event->name        = get_string('eventreminder', 'reservation', $reservation->name);
             $coursemodule = get_coursemodule_from_instance('reservation', $reservation->id)->id;
@@ -586,8 +656,6 @@ function reservation_set_user_event($reservation, $request) {
             $event->userid      = $request->userid;
             $event->modulename  = '';
             $event->instance    = 0;
-            //$event->modulename  = 'reservation';
-            //$event->instance    = $reservation->id;
             $event->eventtype   = 'user';
             $event->timestart   = $reservation->timestart;
             $event->visible     = instance_is_visible('reservation', $reservation);
@@ -598,8 +666,14 @@ function reservation_set_user_event($reservation, $request) {
             $DB->set_field('reservation_request', 'eventid', $newevent->id, array('id' => $request->id));
         }
     }
-} 
+}
 
+/**
+ * Remove the user event for given reservation
+ *
+ * @param stdClass $reservation
+ * @param stdClass $request
+ */
 function reservation_remove_user_event($reservation, $request) {
     global $CFG, $DB;
 
@@ -612,12 +686,13 @@ function reservation_remove_user_event($reservation, $request) {
         if (in_array('userevent', $enabledevents)) {
             require_once($CFG->dirroot.'/calendar/lib.php');
 
-            $events = calendar_events_by_id(array($request->eventid));
+            $events = calendar_get_events_by_id(array($request->eventid));
             if (!empty($events)) {
                 $deleted = false;
                 foreach ($events as $event) {
                     if (!$deleted) {
                         calendar_event::load($event)->delete();
+                        $deleted = true;
                     } else {
                         print_error('Found more than one user event for reservation '. $reservation->id);
                     }
@@ -625,25 +700,28 @@ function reservation_remove_user_event($reservation, $request) {
             }
         }
     }
-} 
+}
 
 /**
- * Tracking of processed users.
+ * Tracking of processed reservation.
  *
- * This class prints user information into a html table.
+ * This class prints reservation information into a html table.
  *
- * @package    core
- * @subpackage admin
- * @copyright  2007 Petr Skoda  {@link http://skodak.org}
- * @copyright  2012 Roberto Pinna  {@mail roberto.pinna@unipmn.it}
+ * @package    mod_reservation
+ * @copyright  2007 Petr Skoda {@link http://skodak.org}
+ * @copyright  2012 onwards Roberto Pinna
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class ur_progress_tracker {
+    /** @var array The row */
     private $_row;
+
+    /** @var array $columns List of columns */
     public $columns = array('status', 'line', 'course', 'section', 'name', 'timestart', 'timeclose');
 
     /**
      * Print table header.
+     *
      * @return void
      */
     public function start() {
@@ -664,6 +742,7 @@ class ur_progress_tracker {
 
     /**
      * Flush previous line and start a new one.
+     *
      * @return void
      */
     public function flush() {
@@ -702,6 +781,7 @@ class ur_progress_tracker {
 
     /**
      * Add tracking info
+     *
      * @param string $col name of column
      * @param string $msg message
      * @param string $level 'normal', 'warning' or 'error'
@@ -728,6 +808,7 @@ class ur_progress_tracker {
 
     /**
      * Print the table end
+     *
      * @return void
      */
     public function close() {

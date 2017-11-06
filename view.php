@@ -15,9 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package mod
- * @subpackage reservation
- * @author Roberto Pinna (bobo@di.unipmn.it)
+ * Reservation plugin view page
+ *
+ * @package mod_reservation
+ * @copyright 2006 onwards Roberto Pinna
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -247,7 +248,8 @@ if (empty($download)) {
             echo html_writer::tag('span',
                                   userdate($reservation->timeopen, $strftimedaydatetime),
                                   array('class' => 'notopened'));
-            echo html_writer::tag('span', ' '.get_string('reservationnotopened', 'reservation'), array('class' => 'bold'));
+            echo html_writer::tag('span', ' '.get_string('reservationnotopened', 'reservation'),
+                                  array('class' => 'alert bg-warning'));
         } else {
             echo html_writer::tag('span', userdate($reservation->timeopen, $strftimedaydatetime));
         }
@@ -257,7 +259,7 @@ if (empty($download)) {
     echo html_writer::tag('label', get_string('timeclose', 'reservation').': ', array('class' => 'bold'));
     if ($now > $reservation->timeclose) {
         echo html_writer::tag('span', userdate($reservation->timeclose, $strftimedaydatetime), array('class' => 'notopened'));
-        echo html_writer::tag('span', ' '.get_string('reservationclosed', 'reservation'), array('class' => 'bold'));
+        echo html_writer::tag('span', ' '.get_string('reservationclosed', 'reservation'), array('class' => 'alert bg-warning'));
     } else {
         echo html_writer::tag('span', userdate($reservation->timeclose, $strftimedaydatetime));
     }
@@ -295,7 +297,7 @@ if (empty($download)) {
 // Check to see if groups are being used in this reservation.
 $groupmode = groups_get_activity_groupmode($cm);
 
-if (($mode == 'manage') && ($now < $reservation->timestart)) {
+if ($mode == 'manage') {
     // Get list of users available for manual reserve.
     $addableusers = array();
 
@@ -444,8 +446,10 @@ if (!empty($requests)) {
     $table = new flexible_table('mod-reservation-requests');
 
     if ($mode == 'overview') {
-        $table->is_downloadable(true);
-        $table->show_download_buttons_at(array(TABLE_P_TOP, TABLE_P_BOTTOM));
+        if (has_capability('mod/reservation:downloadrequests', $context)) {
+            $table->is_downloadable(true);
+            $table->show_download_buttons_at(array(TABLE_P_TOP, TABLE_P_BOTTOM));
+        }
 
         $table->is_downloading($download,
                                clean_filename("$course->shortname ".format_string($reservation->name, true)),
@@ -699,6 +703,7 @@ if (!empty($requests)) {
                 if (($mode == 'manage') && !empty($actions) && !empty($row)) {
                     $row[] = html_writer::empty_tag('input', array('type' => 'checkbox',
                                                                    'name' => 'requestid[]',
+                                                                   'class' => 'request',
                                                                    'value' => $request->id));
                 }
             }
@@ -765,8 +770,7 @@ if (empty($download) && has_capability('mod/reservation:viewrequest', $context))
 if (empty($download)) {
     // Show reservation form.
     if (($mode == 'manage') && has_capability('mod/reservation:manualreserve', $context)) {
-        if ((($reservation->maxrequest == 0) || ($available > 0) || ($available + $overbook > 0)) &&
-            ($now < $reservation->timestart)) {
+        if (($reservation->maxrequest == 0) || ($available > 0) || ($available + $overbook > 0)) {
             if (isset($addableusers) && !empty($addableusers)) {
                 $html = '';
                 $reserveurl = new moodle_url('/mod/reservation/reserve.php', array('id' => $cm->id));
@@ -793,6 +797,7 @@ if (empty($download)) {
                 }
                 $html .= html_writer::empty_tag('input', array('type' => 'submit',
                                                                'name' => 'reserve',
+                                                               'class' => 'btn btn-primary',
                                                                'value' => get_string('reserve', 'reservation')));
                 $html .= html_writer::end_tag('form');
 
@@ -848,6 +853,7 @@ if (empty($download)) {
             if (isset($currentuser) && ($currentuser->number > 0)) {
                 $html .= html_writer::empty_tag('input', array('type' => 'submit',
                                                                'name' => 'cancel',
+                                                               'class' => 'btn btn-primary',
                                                                'value' => get_string('reservecancel', 'reservation')));
             } else if ((($reservation->maxrequest == 0) && ($available > 0)) || ($available > 0) || ($available + $overbook > 0)) {
                 if ($reservation->note == 1) {
@@ -860,6 +866,7 @@ if (empty($download)) {
                 }
                 $html .= html_writer::empty_tag('input', array('type' => 'submit',
                                                                'name' => 'reserve',
+                                                               'class' => 'btn btn-primary',
                                                                'value' => get_string('reserve', 'reservation')));
             }
             $html .= html_writer::end_tag('form');
@@ -880,22 +887,37 @@ if (empty($download)) {
         }
 
         if (isset($currentuser) && ($currentuser->number > 0)) {
-            if ($now > $reservation->timeclose) {
-                $strjustbooked = get_string('justbooked', 'reservation', $currentuser->number);
-                echo $OUTPUT->box($strjustbooked.$currentuser->note, 'center justbooked');
-                if (!empty($currentuser->grade)) {
-                    echo $OUTPUT->box($currentuser->grade, 'center graded');
+            $canviewnumbernow = ($reservation->showrequest == 0) && ($now > $reservation->timeclose);
+            $canviewnumberalways = ($reservation->showrequest == 3);
+            if ($canviewnumbernow || $canviewnumberalways) {
+                $numberspan = html_writer::tag('span', $currentuser->number, array('class' => 'justbookednumber'));
+                if (($reservation->maxrequest > 0) && ($currentuser->number > $reservation->maxrequest)) {
+                    $strjustbooked = get_string('justoverbooked', 'reservation', html_writer::tag('span', $numberspan));
+                    echo $OUTPUT->box($strjustbooked.$currentuser->note, 'center justbooked overbooked');
+                } else {
+                    $strjustbooked = get_string('justbooked', 'reservation', html_writer::tag('span', $numberspan));
+                    echo $OUTPUT->box($strjustbooked.$currentuser->note, 'center justbooked');
                 }
             } else {
-                echo $OUTPUT->box(get_string('alreadybooked', 'reservation').$currentuser->note, 'center alreadybooked');
+                $classes = 'center alreadybooked';
+                if (($reservation->maxrequest > 0) && ($currentuser->number > $reservation->maxrequest)) {
+                    $classes .= ' overbooked';
+                    echo $OUTPUT->box(get_string('alreadyoverbooked', 'reservation').$currentuser->note, $classes);
+                } else {
+                    echo $OUTPUT->box(get_string('alreadybooked', 'reservation').$currentuser->note, $classes);
+                }
+            }
+            if (!empty($currentuser->grade)) {
+                echo $OUTPUT->box($currentuser->grade, 'center graded');
             }
         }
         echo html_writer::end_tag('div');
     }
 
     // Display requests table.
-    if (has_capability('mod/reservation:viewrequest', $context) || (($reservation->showrequest == 1) &&
-       ($now > $reservation->timeclose) && (is_enrolled($coursecontext)))) {
+    $canviewlistnow = ($reservation->showrequest == 1) && ($now > $reservation->timeclose) && (is_enrolled($coursecontext));
+    $canviewlistalways = ($reservation->showrequest == 2) && (is_enrolled($coursecontext));
+    if (has_capability('mod/reservation:viewrequest', $context) || $canviewlistnow || $canviewlistalways) {
         echo $OUTPUT->box_start('center');
 
         if (has_capability('mod/reservation:viewrequest', $context)) {
@@ -914,11 +936,13 @@ if (empty($download)) {
                     $html .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'view', 'value' => 'clean'));
                     $html .= html_writer::empty_tag('input', array('type' => 'submit',
                                                                    'name' => 'save',
+                                                                   'class' => 'btn btn-secondary',
                                                                    'value' => get_string('cleanview', 'reservation')));
                 } else if ($counters[0]->deletedrequests > 0) {
                     $html .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'view', 'value' => 'full'));
                     $html .= html_writer::empty_tag('input', array('type' => 'submit',
                                                                    'name' => 'save',
+                                                                   'class' => 'btn btn-secondary',
                                                                    'value' => get_string('fullview', 'reservation')));
                 }
                 $html .= html_writer::end_tag('fieldset');
@@ -966,6 +990,7 @@ if (empty($download)) {
                 if (($reservation->maxgrade != 0) && ($now > $reservation->timestart) && ($counters[0]->count > 0)) {
                     $html = html_writer::empty_tag('input', array('type' => 'submit',
                                                                   'name' => 'savegrades',
+                                                                  'class' => 'btn btn-primary',
                                                                   'value' => get_string('save', 'reservation')));
                     echo html_writer::tag('div', $html, array('class' => 'savegrades'));
                 }
@@ -973,18 +998,26 @@ if (empty($download)) {
                 if (!empty($actions) && (($counters[0]->count > 0) ||
                                          (($view == 'full') && ($counters[0]->deletedrequests > 0)))) {
                     $html = '';
+                    $html .= html_writer::start_tag('div', array('class' => 'btn-group'));
                     $html .= html_writer::empty_tag('input', array('type' => 'button',
-                                                    'onclick' => 'checkall()',
+                                                    'id' => 'checkall',
+                                                    'class' => 'btn btn-secondary',
                                                     'value' => get_string('selectall')));
                     $html .= html_writer::empty_tag('input', array('type' => 'button',
-                                                                   'onclick' => 'checknone()',
+                                                                   'id' => 'checknone',
+                                                                   'class' => 'btn btn-secondary',
                                                                    'value' => get_string('deselectall')));
+                    $html .= html_writer::end_tag('div');
                     $html .= html_writer::select($actions, 'action', '0',
                                                  array('0' => get_string('withselected', 'reservation')));
                     $html .= html_writer::empty_tag('input', array('type' => 'submit',
                                                                    'name' => 'selectedaction',
+                                                                   'class' => 'btn btn-secondary m-r-1',
                                                                    'value' => get_string('ok')));
                     echo html_writer::tag('div', $html, array('class' => 'form-buttons'));
+
+                    $module = array('name' => 'modReservation', 'fullpath' => '/mod/reservation/module.js');
+                    $PAGE->requires->js_init_call('M.modReservation.initView', null, false, $module);
                 }
 
                 echo html_writer::end_tag('form');

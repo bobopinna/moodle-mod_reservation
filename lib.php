@@ -14,15 +14,22 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
- * @package mod
- * @subpackage reservation
- * @author Roberto Pinna (bobo@di.unipmn.it)
+ * This file contains the moodle hooks for the reservation plugin
+ *
+ * @package mod_reservation
+ * @copyright 2006 onwards Roberto Pinna
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+defined('MOODLE_INTERNAL') || die();
+
+/**
+ * Supported features
+ *
+ * @param string $feature FEATURE_xx constant for requested feature
+ * @return mixed True if module supports feature, false if not, null if doesn't know
+ */
 function reservation_supports($feature) {
     switch($feature) {
         case FEATURE_GROUPS:
@@ -43,18 +50,21 @@ function reservation_supports($feature) {
             return false;
         case FEATURE_BACKUP_MOODLE2:
             return true;
+        case FEATURE_SHOW_DESCRIPTION:
+            return true;
 
         default:
             return null;
     }
 }
 
+/**
+ * Adds reservation instance.
+ *
+ * @param stdClass $reservation
+ * @return int The instance id of the new reservation
+ */
 function reservation_add_instance($reservation) {
-    // Given an object containing all the necessary data,
-    // (defined by the form in mod.html) this function
-    // will create a new instance and return the id number
-    // of the new instance.
-
     global $DB;
 
     $reservation = reservation_postprocess($reservation);
@@ -74,12 +84,13 @@ function reservation_add_instance($reservation) {
     return $returnid;
 }
 
-
+/**
+ * Updates reservation instance.
+ *
+ * @param stdClass $reservation
+ * @return int The instance id of the updated reservation
+ */
 function reservation_update_instance($reservation) {
-    // Given an object containing all the necessary data,
-    // (defined by the form in mod.html) this function
-    // will update an existing instance with new data.
-
     global $DB;
 
     $reservation->id = $reservation->instance;
@@ -105,11 +116,13 @@ function reservation_update_instance($reservation) {
     return $returnid;
 }
 
+/**
+ * Delete reservartion instance by activity id
+ *
+ * @param int $id
+ * @return bool success
+ */
 function reservation_delete_instance($id) {
-    // Given an ID of an instance of this module,
-    // this function will permanently delete the instance
-    // and any data that depends on it.
-
     global $CFG, $DB;
 
     if (! $reservation = $DB->get_record('reservation', array('id' => $id))) {
@@ -175,13 +188,16 @@ function reservation_get_completion_state($course, $cm, $userid, $type) {
     }
 }
 
+/**
+ * Used for user activity reports.
+ *
+ * @param object $course Course
+ * @param object $user User
+ * @param object $mod TODO this is not used in this function, refactor
+ * @param object $reservation
+ * @return object A standard object with 2 variables: info (reserved or not or grade) and time (last graded or time created)
+ */
 function reservation_user_outline($course, $user, $mod, $reservation) {
-    // Return a small object with summary information about what a
-    // user has done with a given particular instance of this module
-    // Used for user activity reports.
-    // $return->time = the time they did it.
-    // $return->info = a short text description.
-
     global $DB;
 
     $return = null;
@@ -200,10 +216,15 @@ function reservation_user_outline($course, $user, $mod, $reservation) {
     return $return;
 }
 
+/**
+ * Print a detailed representation of what a user has done with a reservation.
+ *
+ * @param object $course
+ * @param object $user
+ * @param object $mod
+ * @param object $reservation
+ */
 function reservation_user_complete($course, $user, $mod, $reservation) {
-    // Print a detailed representation of what a  user has done with
-    // a given particular instance of this module, for user activity reports.
-
     global $DB;
 
     $queryparameters = array('reservation' => $reservation->id, 'userid' => $user->id, 'timecancelled' => '0');
@@ -226,22 +247,28 @@ function reservation_user_complete($course, $user, $mod, $reservation) {
     return true;
 }
 
-function reservation_print_recent_activity($course, $isteacher, $timestart) {
-    // Given a course and a time, this module should find recent activity
-    // that has occurred in reservation activities and print it out.
-    // Return true if there was output, or false is there was none.
-
+/**
+ * Given a course and a date, prints a summary of activity with
+ * reservations activities in the course since that date
+ *
+ * @param object $course
+ * @param bool $viewfullnames capability
+ * @param int $timestart
+ * @return bool success
+ */
+function reservation_print_recent_activity($course, $viewfullnames, $timestart) {
     global $CFG;
 
     return false;
-    // True if anything was printed, otherwise false.
 }
 
+/**
+ * Function to be run periodically according to the scheduled task.
+ *
+ * Finds all notifications that have yet to be mailed out, and mails them
+ * out to all teachers or students based on requirements.
+ */
 function reservation_cron () {
-    // Function to be run periodically according to the moodle cron
-    // This function searches for things that need to be done, such
-    // as sending out mail, toggling flags etc ...
-
     global $CFG, $USER, $DB;
 
     // Notices older than 1 day will not be mailed.  This is to avoid the problem where
@@ -521,6 +548,7 @@ function reservation_get_user_grades($reservation, $userid=0) {
  *
  * @param object $reservation null means all reservations
  * @param int $userid specific user only, 0 mean all
+ * @param bool $nullifnone
  */
 function reservation_update_grades($reservation=null, $userid=0, $nullifnone=true) {
     global $CFG, $DB;
@@ -561,8 +589,8 @@ function reservation_update_grades($reservation=null, $userid=0, $nullifnone=tru
 /**
  * Create grade item for given reservation
  *
- * @param object $reservation object with extra cmidnumber
- * @param mixed optional array/object of grade(s); 'reset' means reset grades in gradebook
+ * @param stdClass $reservation object with extra cmidnumber
+ * @param mixed $grades optional array/object of grade(s); 'reset' means reset grades in gradebook
  * @return int 0 if ok, error code otherwise
  */
 function reservation_grade_item_update($reservation, $grades=null) {
@@ -618,13 +646,16 @@ function reservation_grade_item_delete($reservation) {
             $reservation->id, 0, null, array('deleted' => 1));
 }
 
+/**
+ * This standard function will check all instances of this module
+ * and make sure there are up-to-date events created for each of them.
+ * If courseid = 0, then every assignment event in the site is checked, else
+ * only assignment events belonging to the course specified are checked.
+ *
+ * @param int $courseid
+ * @return bool
+ */
 function reservation_refresh_events($courseid = 0) {
-    // This standard function will check all instances of this module
-    // and make sure there are up-to-date events created for each of them.
-    // If courseid = 0, then every reservation event in the site is checked, else
-    // only reservation events belonging to the course specified are checked.
-    // This function is used, in its new format, by restore_refresh_events().
-
     global $DB;
 
     if ($courseid) {
@@ -664,7 +695,8 @@ function reservation_refresh_events($courseid = 0) {
 /**
  * This function is used by the reset_course_userdata function in moodlelib.
  * This function will remove all requests from the specified reservation
- * @param $data the data submitted from the reset course.
+ *
+ * @param stdClass $data the data submitted from the reset course.
  * @return array status array
  */
 function reservation_reset_userdata($data) {
@@ -680,12 +712,13 @@ function reservation_reset_userdata($data) {
                       WHERE reservation IN ('.$allreservationsql.')';
 
     if (!empty($data->reset_reservation_request)) {
+        $query = 'reservation IN ('.$allreservationsql.')';
         $queryparameters = array('courseid' => $data->courseid);
-        if ($requests = $DB->get_records_select('reservation_request', 'reservation IN ('.$allreservationsql.')', $queryparameters)) {
+        if ($requests = $DB->get_records_select('reservation_request', $query, $queryparameters)) {
             $DB->delete_records_select('reservation_request', 'reservation IN ('.$allreservationsql.')', $queryparameters);
             $DB->delete_records_select('reservation_note', 'request IN ('.$allrequestsql.')', $queryparameters);
-          
-            $reservations[] = array(); 
+
+            $reservations[] = array();
             foreach ($requests as $request) {
                 if (isset($request->eventid) && !empty($request->eventid)) {
                     if (!isset($reservations[$request->reservation])) {
@@ -695,8 +728,8 @@ function reservation_reset_userdata($data) {
                         reservation_remove_user_event($reservations[$request->reservation], $request);
                     }
                 }
-            } 
-        }       
+            }
+        }
 
         $status[] = array(
                'component' => get_string('modulenameplural', 'reservation'),
@@ -708,8 +741,10 @@ function reservation_reset_userdata($data) {
     return $status;
 }
 
-/* Called by course/reset.php
- * @param $mform form passed by reference
+/**
+ * Called by course/reset.php
+ *
+ * @param moodleform $mform form passed by reference
  */
 function reservation_reset_course_form_definition(&$mform) {
     $mform->addElement('header', 'reservationheader', get_string('modulenameplural', 'reservation'));
@@ -719,13 +754,23 @@ function reservation_reset_course_form_definition(&$mform) {
 
 /**
  * Course reset form defaults.
+ *
+ * @param  object $course
+ * @return array
  */
 function reservation_reset_course_form_defaults($course) {
     return array('reset_reservation_request' => 1);
 }
 
+/**
+ * Return list of closed reservation that have not been mailed out to assigned teachers.
+ * Used by reservation_cron function
+ *
+ * @param int $starttime The date and time to search from
+ * @param int $endtime The date and time to search to
+ * @return array list of closed reservation
+ */
 function reservation_get_unmailed_reservations($starttime, $endtime) {
-    // Return list of closed reservation that have not been mailed out to assigned teachers.
     global $CFG, $DB;
     return $DB->get_records_sql('SELECT res.*
                                    FROM {reservation} res
@@ -735,8 +780,15 @@ function reservation_get_unmailed_reservations($starttime, $endtime) {
                                 array('endtime' => $endtime, 'starttime' => $starttime));
 }
 
+/**
+ * Return list of graded requests that have not been mailed out.
+ * Used by reservation_cron function
+ *
+ * @param int $starttime The date and time to search from
+ * @param int $endtime The date and time to search to
+ * @return array list of graded request
+ */
 function reservation_get_unmailed_requests($starttime, $endtime) {
-    // Return list of graded requests that have not been mailed out.
     global $CFG, $DB;
     return $DB->get_records_sql('SELECT req.*, res.course, res.name
                                    FROM {reservation_request} req,
@@ -751,6 +803,13 @@ function reservation_get_unmailed_requests($starttime, $endtime) {
                                 array('endtime' => $endtime, 'starttime' => $starttime));
 }
 
+/**
+ * Make some postprocessing settings on reservation to set defaults.
+ * Used by reservation_add_instance and reservation_update_instance functions
+ *
+ * @param stdClass $reservation
+ * @return object modified reservartion
+ */
 function reservation_postprocess($reservation) {
     global $CFG;
 
@@ -778,6 +837,13 @@ function reservation_postprocess($reservation) {
     return $reservation;
 }
 
+/**
+ * Set or update reservation sublimits.
+ * Used by reservation_add_instance and reservation_update_instance functions
+ *
+ * @param stdClass $reservation
+ * @return void
+ */
 function reservation_set_sublimits($reservation) {
     global $CFG, $DB;
 
@@ -811,6 +877,13 @@ function reservation_set_sublimits($reservation) {
     return $reservation;
 }
 
+/**
+ * Set or update reservation events.
+ * Used by reservation_add_instance, reservation_update_instance and reservation_refresh_events functions
+ *
+ * @param stdClass $reservation
+ * @return void
+ */
 function reservation_set_events($reservation) {
     global $CFG;
 
@@ -859,10 +932,30 @@ function reservation_set_events($reservation) {
     }
 }
 
+/**
+ * List the actions that correspond to a view of this module.
+ * This is used by the participation report.
+ *
+ * Note: This is not used by new logging system. Event with
+ *       crud = 'r' and edulevel = LEVEL_PARTICIPATING will
+ *       be considered as view action.
+ *
+ * @return array
+ */
 function reservation_get_view_actions() {
     return array('view', 'view all');
 }
 
-function reservation_get_port_actions() {
+/**
+ * List the actions that correspond to a post of this module.
+ * This is used by the participation report.
+ *
+ * Note: This is not used by new logging system. Event with
+ *       crud = ('c' || 'u' || 'd') and edulevel = LEVEL_PARTICIPATING
+ *       will be considered as post action.
+ *
+ * @return array
+ */
+function reservation_get_post_actions() {
     return array('reserve', 'cancel'. 'grade');
 }

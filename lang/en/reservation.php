@@ -15,9 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package mod
- * @subpackage reservation
- * @author Roberto Pinna (bobo@di.unipmn.it)
+ * Reservation module language strings
+ *
+ * @package mod_reservation
+ * @copyright 2006 onwards Roberto Pinna
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -64,16 +65,19 @@ $string['timeopen'] = 'Reservation start on';
 $string['timestart'] = 'Start date';
 $string['timeend'] = 'End date';
 $string['save'] = 'Save grade';
-$string['justbooked'] = 'You are booked as: <span class="justbookednumber">{$a}</span>';
+$string['justbooked'] = 'You are booked as: {$a}';
+$string['justoverbooked'] = 'You are overbooked as: {$a}';
 $string['alreadybooked'] = 'You are already booked';
+$string['alreadyoverbooked'] = 'You are already in the waiting list';
 $string['yourgrade'] = 'Your grade about this reservation is: {$a->grade}/{$a->maxgrade}';
 $string['yourscale'] = 'Your grade about this reservation is: {$a}';
 $string['by'] = 'by';
 $string['showrequest'] = 'Users can view requests list';
-$string['configlocations'] = 'In this page you can manage standard locations for reservations in this Moodle site';
+$string['showuserrequest'] = 'Users can view';
+$string['configlocations'] = 'Manage standard locations for reservations in this Moodle site';
 $string['locations'] = 'Manage Locations';
 $string['locationslist'] = 'Locations List';
-$string['newlocation'] = 'New Locations';
+$string['newlocation'] = 'New Location';
 $string['resetreservation'] = 'Remove all reservations';
 $string['withselected'] = 'With selected...';
 $string['note'] = 'Note';
@@ -82,7 +86,7 @@ $string['notopened'] = 'Not opened';
 $string['closed'] = 'Closed';
 $string['fields'] = 'Shown fields';
 $string['configfields'] = 'This setting define which fields will shown in reservations table';
-$string['config'] = 'Reservation module global settings';
+$string['config'] = 'Reservation settings';
 $string['explainconfig'] = 'Administrators can define here global settings for the Resevation Module';
 $string['addparticipant'] = 'Add request';
 $string['noteachers'] = 'No available teachers';
@@ -189,6 +193,7 @@ $string['duration11h'] = '11 hours';
 $string['duration12h'] = '12 hours';
 
 $string['upload'] = 'Reservations upload';
+$string['configupload'] = 'Create several reservations uploading them via text file';
 $string['upload_help'] = '<p>Reservations may be uploaded via text file. The format of the file should be as follows:</p><ul><li>Each line of the file contains one record</li><li>Each record is a series of data separated by commas (or other delimiters)</li><li>The first record contains a list of fieldnames defining the format of the rest of the file</li><li>Required fieldsname are section, name and timestart</li><li>Optional fieldsname are course, intro, teachers, timeend, maxgrade, timeopen, timeclose, maxrequest</li><li>If course is not specified it must be choosen after preview</li></ul>';
 $string['uploadreservations'] = 'Upload Reservations';
 $string['uploadreservationsresult'] = 'Upload Reservations Result';
@@ -235,3 +240,10 @@ $string['eventrequestdeleted'] = 'Reservation request deleted';
 $string['modulename_help'] = '<p>The main aim of this activity is schedule laboratory sessions and exams but you can schedule everything you want.</p><p>Teacher can define the number of seats available for the event, event date, reservation opening and closing date.<br />A reservation may have a grade or a scale.<br />Students can book and unbook a seat and add a note about this reservation.</p><p>After the event starts the teacher can grade the event. Students will notified by mail.</p><p>Reservation list may be downloaded in various formats.</p>';
 $string['completionreserved'] = 'Student must reserve to complete this activity';
 $string['badparent'] = 'This reservation was connected to another reservation not restored now. The connection has been removed. If needed reconnect them manually';
+$string['numberafterclose'] = 'their reservation request number after reservation was closed';
+$string['listafterclose'] = 'reservation requests list after reservation was closed';
+$string['listalways'] = 'reservation requests list anytime';
+$string['numberalways'] = 'their reservation request number anytime';
+$string['none'] = 'no informations about reservation order';
+$string['tools'] = 'Reservation tools';
+
