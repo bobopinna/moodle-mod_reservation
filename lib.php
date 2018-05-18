@@ -819,7 +819,7 @@ function reservation_postprocess($reservation) {
         $reservation->location = '';
     }
 
-    if ((trim($reservation->locationtext) != '') && empty($reservation->location)) {
+    if (isset($reservation->locationtext) && empty($reservation->location) && (trim($reservation->locationtext) != '')) {
         $reservation->location = trim($reservation->locationtext);
     }
 
