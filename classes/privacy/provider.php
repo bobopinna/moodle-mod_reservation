@@ -89,7 +89,7 @@ class provider implements
             INNER JOIN {course_modules} cm ON cm.id = c.instanceid AND c.contextlevel = :contextlevel
             INNER JOIN {modules} m ON m.id = cm.module AND m.name = :modname
             INNER JOIN {reservation} r ON r.id = cm.instance
-            INNER JOIN {reservation_requests} rr ON rr.reservation = r.id AND
+            INNER JOIN {reservation_request} rr ON rr.reservation = r.id AND
                         (rr.userid = :userid OR rr.teacher = :graderid)";
 
         $params = [
@@ -121,19 +121,18 @@ class provider implements
         list($contextsql, $contextparams) = $DB->get_in_or_equal($contextlist->get_contextids(), SQL_PARAMS_NAMED);
 
         $sql = "SELECT cm.id AS cmid,
-                       r.id as reservationid,
                        rr.userid as userid,
                        rr.timecreated as timecreated,
                        n.note as note,
                        rr.timecancelled as timecancelled,
                        rr.teacher as grader,
                        rr.grade as grade,
-                       rr.timegraded as timegraded,
+                       rr.timegraded as timegraded
                   FROM {context} c
             INNER JOIN {course_modules} cm ON cm.id = c.instanceid AND c.contextlevel = :contextlevel
             INNER JOIN {modules} m ON m.id = cm.module AND m.name = :modname
             INNER JOIN {reservation} r ON r.id = cm.instance
-            INNER JOIN {reservation_requests} rr ON rr.reservation = cm.instance
+            INNER JOIN {reservation_request} rr ON rr.reservation = cm.instance
             INNER JOIN {reservation_note} n ON n.request = rr.id
                  WHERE c.id {$contextsql}
                        AND (rr.userid = :userid OR rr.teacher = :graderid)
@@ -158,15 +157,14 @@ class provider implements
                     'requests' => []
                 ];
             }
-            $requestdata =  new stdClass();
-            $requestdata->reservationid = $reservationrequest->reservationid;
+            $requestdata = new \stdClass();
             $requestdata->userid = $reservationrequest->userid;
-            $requestdata->timecreated = $reservationrequest->timecreated;
+            $requestdata->timecreated = \core_privacy\local\request\transform::datetime($reservationrequest->timecreated);
             $requestdata->note = $reservationrequest->note;
-            $requestdata->timecancelled = $reservationrequest->timecancelled;
+            $requestdata->timecancelled = \core_privacy\local\request\transform::datetime($reservationrequest->timecancelled);
             $requestdata->grader = $reservationrequest->grader;
             $requestdata->grade = $reservationrequest->grade;
-            $requestdata->timegraded = $reservationrequest->timegraded;
+            $requestdata->timegraded = \core_privacy\local\request\transform::datetime($reservationrequest->timegraded);
             $reservationdata['requests'][] = $requestdata;
             $lastcmid = $reservationrequest->cmid;
         }
@@ -211,12 +209,12 @@ class provider implements
         }
 
         if ($cm = get_coursemodule_from_id('reservation', $context->instanceid)) {
-            $requests = $DB->get_records('reservation_request', ['reservationid' => $instanceid]);
+            $requests = $DB->get_records('reservation_request', ['reservation' => $instanceid]);
             if (!empty($requests)) {
                 foreach ($requests as $request){
-                    $DB->delete_records('reservation_note', ['requestid' => $request->id]);
+                    $DB->delete_records('reservation_note', ['request' => $request->id]);
                 }
-                $DB->delete_records('reservation_request', ['reservationid' => $instanceid]);
+                $DB->delete_records('reservation_request', ['reservation' => $instanceid]);
             }
         }
     }
@@ -240,12 +238,12 @@ class provider implements
                 continue;
             }
             $instanceid = $DB->get_field('course_modules', 'instance', ['id' => $context->instanceid], MUST_EXIST);
-            $requests = $DB->get_records('reservation_request', ['reservationid' => $instanceid, 'userid' => $userid]);
+            $requests = $DB->get_records('reservation_request', ['reservation' => $instanceid, 'userid' => $userid]);
             if (!empty($requests)) {
                 foreach ($requests as $request){
-                    $DB->delete_records('reservation_note', ['requestid' => $request->id]);
+                    $DB->delete_records('reservation_note', ['request' => $request->id]);
                 }
-                $DB->delete_records('reservation_request', ['reservationid' => $instanceid, 'userid' => $userid]);
+                $DB->delete_records('reservation_request', ['reservation' => $instanceid, 'userid' => $userid]);
             }
         }
     }
