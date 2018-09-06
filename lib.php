@@ -233,7 +233,7 @@ function reservation_user_complete($course, $user, $mod, $reservation) {
                 userdate($userrequest->timecreated, get_string('strftimedatetime')) . '<br />';
         if ($userrequest->timegraded != 0) {
             if (! $teacher = $DB->get_record('user', array('id' => $userrequest->teacher))) {
-                echo 'Could not find teacher '.$request->teacher."\n";
+                echo 'Could not find teacher '.$userrequest->teacher."\n";
             } else {
                 echo get_string('grade').': '.$userrequest->grade . ' (' .
                         userdate($userrequest->timegraded, get_string('strftimedatetime')) . ' ' .
@@ -471,7 +471,7 @@ function reservation_cron () {
                     foreach ($requests as $request) {
                         mtrace('Processing reservation user '.$request->userid);
                         if (! $user = $DB->get_record('user', array('id' => $request->userid))) {
-                            mtrace('Could not find user '.$userid);
+                            mtrace('Could not find user '.$user->id);
                             continue;
                         }
 
@@ -522,7 +522,7 @@ function reservation_cron () {
  * @return array array of grades, false if none
  */
 function reservation_get_user_grades($reservation, $userid=0) {
-    global $CFG, $DB;
+    global $DB;
 
     $param = array();
     $user = '';
@@ -563,6 +563,11 @@ function reservation_update_grades($reservation=null, $userid=0, $nullifnone=tru
                 }
             }
             reservation_grade_item_update($reservation, $grades);
+        } else if ($userid and $nullifnone) {
+            $grade = new stdClass();
+            $grade->userid   = $userid;
+            $grade->rawgrade = NULL;
+            reservation_grade_item_update($data, $grade);
         } else {
             reservation_grade_item_update($reservation);
         }
@@ -698,7 +703,7 @@ function reservation_refresh_events($courseid = 0) {
  * @return array status array
  */
 function reservation_reset_userdata($data) {
-    global $CFG, $DB;
+    global $DB;
 
     $status = array();
 
@@ -863,7 +868,7 @@ function reservation_set_sublimits($reservation) {
                 $reservationlimit->matchvalue = $reservation->$matchvalue;
                 $reservationlimit->requestlimit = $reservation->$requestlimit;
 
-                if (!$limitid = $DB->insert_record('reservation_limit', $reservationlimit)) {
+                if (!$DB->insert_record('reservation_limit', $reservationlimit)) {
                     error('Could not insert sublimit rule '.$i);
                 }
             } else {

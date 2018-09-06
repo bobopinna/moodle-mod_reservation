@@ -756,7 +756,8 @@ class ur_progress_tracker {
         $ri = 1;
         echo '<tr class="r'.$ri.'">';
         foreach ($this->_row as $field) {
-            foreach ($field as $type => $content) {
+            $types = array_keys((array) $fields);
+            foreach ($types as $type) {
                 if ($field[$type] !== '') {
                     $field[$type] = '<span class="ur'.$type.'">'.$field[$type].'</span>';
                 } else {
