@@ -333,7 +333,7 @@ function reservation_set_grades($reservation, $teacherid, $grades) {
 function reservation_get_teacher_names($reservation, $cmid=null) {
     global $DB;
 
-    $teachername = '';
+    $teachernames = array();
     if (strlen($reservation->teachers) > 0) {
         $context = context_course::instance($reservation->course);
         $capability = 'moodle/course:viewhiddenactivities';
@@ -349,16 +349,13 @@ function reservation_get_teacher_names($reservation, $cmid=null) {
             if (!empty($teacherid)) {
                 if ($teacher = $DB->get_record('user', array('id' => $teacherid))) {
                     if (has_capability($capability, $context, $teacherid)) {
-                        if (strlen($teachername) > 0) {
-                            $teachername .= ', ';
-                        }
-                        $teachername .= fullname($teacher);
+                        $teachernames[] = fullname($teacher);
                     }
                 }
             }
         }
     }
-    return $teachername;
+    return implode(', ', $teachernames);
 }
 
 /**
@@ -756,7 +753,7 @@ class ur_progress_tracker {
         $ri = 1;
         echo '<tr class="r'.$ri.'">';
         foreach ($this->_row as $field) {
-            $types = array_keys((array) $fields);
+            $types = array_keys((array) $field);
             foreach ($types as $type) {
                 if ($field[$type] !== '') {
                     $field[$type] = '<span class="ur'.$type.'">'.$field[$type].'</span>';
