@@ -42,6 +42,12 @@ function xmldb_reservation_upgrade($oldversion=0) {
 
         upgrade_mod_savepoint(true, 2016051800, 'reservation');
     }
+    if ($oldversion < 2016071100) {	
+        upgrade_mod_savepoint(true, 2016071100, 'reservation');	
+    }	
+    if ($oldversion < 2017022100) {	
+        upgrade_mod_savepoint(true, 2017022100, 'reservation');	
+    }
     if ($oldversion < 2017022101) {
         // Define field eventid to be added to reservation_request.
         $table = new xmldb_table('reservation_request');
@@ -53,5 +59,14 @@ function xmldb_reservation_upgrade($oldversion=0) {
         }
 
         upgrade_mod_savepoint(true, 2017022101, 'reservation');
+    }
+    if ($oldversion < 2017051500) {	
+        upgrade_mod_savepoint(true, 2017051500, 'reservation');	
+    }	
+    if ($oldversion < 2017110300) {	
+        upgrade_mod_savepoint(true, 2017110300, 'reservation');	
+    }
+    if ($oldversion < 2018100600) {	
+        upgrade_mod_savepoint(true, 2018100600, 'reservation');	
     }
 }
