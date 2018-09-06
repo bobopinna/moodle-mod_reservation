@@ -566,7 +566,7 @@ function reservation_update_grades($reservation=null, $userid=0, $nullifnone=tru
         } else if ($userid and $nullifnone) {
             $grade = new stdClass();
             $grade->userid   = $userid;
-            $grade->rawgrade = NULL;
+            $grade->rawgrade = null;
             reservation_grade_item_update($reservation, $grade);
         } else {
             reservation_grade_item_update($reservation);
