@@ -83,7 +83,6 @@ class provider implements
      * @return contextlist the list of contexts containing user info for the user.
      */
     public static function get_contexts_for_userid(int $userid) : contextlist {
-        // Fetch all reservation requests.
         $sql = "SELECT c.id
                   FROM {context} c
             INNER JOIN {course_modules} cm ON cm.id = c.instanceid AND c.contextlevel = :contextlevel
@@ -138,16 +137,15 @@ class provider implements
                        AND (rr.userid = :userid OR rr.teacher = :graderid)
               ORDER BY cm.id";
 
-        $params = ['modname' => 'reservation', 'contextlevel' => CONTEXT_MODULE, 'userid' => $user->id, 'graderid' => $user->id] + $contextparams;
+        $params = ['modname' => 'reservation',
+                   'contextlevel' => CONTEXT_MODULE,
+                   'userid' => $user->id,
+                   'graderid' => $user->id] + $contextparams;
 
-        // Reference to the reservation activity seen in the last iteration of the loop. By comparing this with the current record, and
-        // because we know the results are ordered, we know when we've moved to the requests for a new reservation activity and therefore
-        // when we can export the complete data for the last activity.
         $lastcmid = null;
 
         $reservationrequests = $DB->get_recordset_sql($sql, $params);
         foreach ($reservationrequests as $reservationrequest) {
-            // If we've moved to a new reservation, then write the last reservation data and reinit the reservation data array.
             if ($lastcmid != $reservationrequest->cmid) {
                 if (!empty($reservationdata)) {
                     $context = \context_module::instance($lastcmid);
@@ -170,7 +168,6 @@ class provider implements
         }
         $reservationrequests->close();
 
-        // The data for the last activity won't have been written yet, so make sure to write it now!
         if (!empty($reservationdata)) {
             $context = \context_module::instance($lastcmid);
             self::export_reservation_data_for_user($reservationdata, $context, $user);
@@ -211,7 +208,7 @@ class provider implements
         if ($cm = get_coursemodule_from_id('reservation', $context->instanceid)) {
             $requests = $DB->get_records('reservation_request', ['reservation' => $instanceid]);
             if (!empty($requests)) {
-                foreach ($requests as $request){
+                foreach ($requests as $request) {
                     $DB->delete_records('reservation_note', ['request' => $request->id]);
                 }
                 $DB->delete_records('reservation_request', ['reservation' => $instanceid]);
@@ -240,7 +237,7 @@ class provider implements
             $instanceid = $DB->get_field('course_modules', 'instance', ['id' => $context->instanceid], MUST_EXIST);
             $requests = $DB->get_records('reservation_request', ['reservation' => $instanceid, 'userid' => $userid]);
             if (!empty($requests)) {
-                foreach ($requests as $request){
+                foreach ($requests as $request) {
                     $DB->delete_records('reservation_note', ['request' => $request->id]);
                 }
                 $DB->delete_records('reservation_request', ['reservation' => $instanceid, 'userid' => $userid]);

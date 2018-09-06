@@ -435,9 +435,9 @@ if (!empty($requests)) {
             }
         }
         if (($reservation->note) && !empty($requests[0]->note)) {
-            $currentuser->note =  html_writer::tag('div',
-                                                   get_string('note', 'reservation').': '.format_string($requests[0]->note),
-                                                   array('class' => 'note'));
+            $currentuser->note = html_writer::tag('div',
+                                                  get_string('note', 'reservation').': '.format_string($requests[0]->note),
+                                                  array('class' => 'note'));
         } else {
             $currentuser->note = '';
         }
