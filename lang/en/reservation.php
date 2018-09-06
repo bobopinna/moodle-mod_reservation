@@ -246,4 +246,14 @@ $string['listalways'] = 'reservation requests list anytime';
 $string['numberalways'] = 'their reservation request number anytime';
 $string['none'] = 'no informations about reservation order';
 $string['tools'] = 'Reservation tools';
-
+$string['privacy:metadata:reservation_request:reservationid'] = 'ID of the reservation';
+$string['privacy:metadata:reservation_request:userid'] = 'ID of the user';
+$string['privacy:metadata:reservation_request:timecreated'] = 'Date and time of request creation';
+$string['privacy:metadata:reservation_request:timecancelled'] = 'Date and time of request cancel';
+$string['privacy:metadata:reservation_request:grader'] = 'ID of the grader';
+$string['privacy:metadata:reservation_request:grade'] = 'User reservation request grade';
+$string['privacy:metadata:reservation_request:timegraded'] = 'Date and time of request grade';
+$string['privacy:metadata:reservation_request:mailed'] = 'The mailed notification status of the grading';
+$string['privacy:metadata:reservation_request'] = 'Store user data of a reservation request';
+$string['privacy:metadata:reservation_note:note'] = 'User note for the reservation request';
+$string['privacy:metadata:reservation_note'] = 'Store user note of a reservation request';
