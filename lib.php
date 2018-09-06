@@ -123,7 +123,7 @@ function reservation_update_instance($reservation) {
  * @return bool success
  */
 function reservation_delete_instance($id) {
-    global $CFG, $DB;
+    global $DB;
 
     if (! $reservation = $DB->get_record('reservation', array('id' => $id))) {
         return false;
@@ -173,7 +173,7 @@ function reservation_delete_instance($id) {
  * @return bool True if completed, false if not, $type if conditions not set.
  */
 function reservation_get_completion_state($course, $cm, $userid, $type) {
-    global $CFG, $DB;
+    global $DB;
 
     // Get reservation details.
     $reservation = $DB->get_record('reservation', array('id' => $cm->instance), '*', MUST_EXIST);
@@ -257,8 +257,6 @@ function reservation_user_complete($course, $user, $mod, $reservation) {
  * @return bool success
  */
 function reservation_print_recent_activity($course, $viewfullnames, $timestart) {
-    global $CFG;
-
     return false;
 }
 
@@ -771,7 +769,8 @@ function reservation_reset_course_form_defaults($course) {
  * @return array list of closed reservation
  */
 function reservation_get_unmailed_reservations($starttime, $endtime) {
-    global $CFG, $DB;
+    global $DB;
+
     return $DB->get_records_sql('SELECT res.*
                                    FROM {reservation} res
                                   WHERE res.mailed = 0
@@ -789,7 +788,8 @@ function reservation_get_unmailed_reservations($starttime, $endtime) {
  * @return array list of graded request
  */
 function reservation_get_unmailed_requests($starttime, $endtime) {
-    global $CFG, $DB;
+    global $DB;
+
     return $DB->get_records_sql('SELECT req.*, res.course, res.name
                                    FROM {reservation_request} req,
                                         {reservation} res,
@@ -811,8 +811,6 @@ function reservation_get_unmailed_requests($starttime, $endtime) {
  * @return object modified reservartion
  */
 function reservation_postprocess($reservation) {
-    global $CFG;
-
     $reservation->timemodified = time();
 
     if (!isset($reservation->location)) {

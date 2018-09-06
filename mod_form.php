@@ -43,7 +43,7 @@ class mod_reservation_mod_form extends moodleform_mod {
      */
     public function definition() {
 
-        global $CFG, $COURSE, $DB, $PAGE;
+        global $CFG, $COURSE, $DB;
         $mform    =& $this->_form;
 
         $mform->addElement('header', 'general', get_string('general', 'form'));

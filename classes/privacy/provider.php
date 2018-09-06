@@ -206,6 +206,7 @@ class provider implements
         }
 
         if ($cm = get_coursemodule_from_id('reservation', $context->instanceid)) {
+            $instanceid = $cm->instance;
             $requests = $DB->get_records('reservation_request', ['reservation' => $instanceid]);
             if (!empty($requests)) {
                 foreach ($requests as $request) {

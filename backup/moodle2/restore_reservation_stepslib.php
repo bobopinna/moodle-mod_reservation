@@ -106,11 +106,10 @@ class restore_reservation_activity_structure_step extends restore_activity_struc
         global $DB;
 
         $data = (object)$data;
-        $oldid = $data->id;
 
         $data->reservationid = $this->get_new_parentid('reservation');
 
-        $newitemid = $DB->insert_record('reservation_limit', $data);
+        $DB->insert_record('reservation_limit', $data);
     }
 
     /**
@@ -144,13 +143,10 @@ class restore_reservation_activity_structure_step extends restore_activity_struc
         global $DB;
 
         $data = (object)$data;
-        $oldid = $data->id;
 
         $data->request = $this->get_new_parentid('reservation_request');
 
-        $newitemid = $DB->insert_record('reservation_note', $data);
-        // No need to save this mapping as far as nothing depend on it
-        // (child paths, file areas nor links decoder).
+        $DB->insert_record('reservation_note', $data);
     }
 
     /**

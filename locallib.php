@@ -515,7 +515,6 @@ function reservation_get_availability($reservation, $counters, $available) {
 
     if (count($counters) - 1 > 0) {
         for ($i = 1; $i < count($counters); $i++) {
-            $fieldname = $counters[$i]->field;
             if ((($userdata->{$counters[$i]->field} == $counters[$i]->matchvalue) && !$counters[$i]->operator) ||
                (($userdata->{$counters[$i]->field} != $counters[$i]->matchvalue) && $counters[$i]->operator)) {
                 if ($availablesublimit <= ($counters[$i]->requestlimit - $counters[$i]->count)) {
@@ -569,8 +568,7 @@ function reservation_validate_upload_columns(csv_import_reader $cir, $fields, $r
     // Test columns.
     $processed = array();
     $required = 0;
-    foreach ($columns as $key => $unused) {
-        $field = $columns[$key];
+    foreach ($columns as $key => $field) {
         $lcfield = core_text::strtolower($field);
         if (in_array($field, $fields) or in_array($lcfield, $fields)) {
             // Standard fields are only lowercase.
@@ -757,7 +755,7 @@ class ur_progress_tracker {
         $ci = 0;
         $ri = 1;
         echo '<tr class="r'.$ri.'">';
-        foreach ($this->_row as $key => $field) {
+        foreach ($this->_row as $field) {
             foreach ($field as $type => $content) {
                 if ($field[$type] !== '') {
                     $field[$type] = '<span class="ur'.$type.'">'.$field[$type].'</span>';
