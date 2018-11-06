@@ -702,6 +702,425 @@ function reservation_remove_user_event($reservation, $request) {
 }
 
 /**
+ * Print html formatted reservation info
+ *
+ * @param stdClass $reservation
+ * @param stdClass $cmid
+ */
+function reservation_print_info($reservation, $cmid) {
+    $now = time();
+ 
+    $coursecontext = context_course::instance($reservation->course);
+
+    echo html_writer::tag('div', format_module_intro('reservation', $reservation, $cmid), array('class' => 'intro'));
+    // Retrive teachers list.
+    $teachername = reservation_get_teacher_names($reservation, $cmid);
+    if (!empty($teachername)) {
+        $teacherroles = get_archetype_roles('editingteacher');
+        $teacherrole = array_shift($teacherroles);
+        $teacherstr = role_get_name($teacherrole, $coursecontext);
+        echo html_writer::start_tag('div');
+        echo html_writer::tag('label', $teacherstr.': ', array('class' => 'bold'));
+        echo html_writer::tag('span', $teachername);
+        echo html_writer::end_tag('div');
+    }
+    if (!empty($reservation->location)) {
+        echo html_writer::start_tag('div');
+        echo html_writer::tag('label', get_string('location', 'reservation').': ', array('class' => 'bold'));
+        echo html_writer::tag('span', $reservation->location);
+        echo html_writer::end_tag('div');
+    }
+    $strftimedaydatetime = get_string('strftimedaydatetime');
+    echo html_writer::start_tag('div');
+    if (!empty($reservation->timeend)) {
+        echo html_writer::tag('label', get_string('timestart', 'reservation').': ', array('class' => 'bold'));
+    } else {
+        echo html_writer::tag('label', get_string('date').': ', array('class' => 'bold'));
+    }
+    echo html_writer::tag('span', userdate($reservation->timestart, $strftimedaydatetime));
+    echo html_writer::end_tag('div');
+    if (!empty($reservation->timeend)) {
+        echo html_writer::start_tag('div');
+        echo html_writer::tag('label', get_string('timeend', 'reservation').': ', array('class' => 'bold'));
+        echo html_writer::tag('span', userdate($reservation->timeend, $strftimedaydatetime));
+        echo html_writer::end_tag('div');
+    }
+
+    echo html_writer::empty_tag('hr', array('class' => 'clearfloat'));
+
+    if (!empty($reservation->timeopen)) {
+        echo html_writer::start_tag('div');
+        echo html_writer::tag('label', get_string('timeopen', 'reservation').': ', array('class' => 'bold'));
+        if ($now < $reservation->timeopen) {
+            echo html_writer::tag('span',
+                                  userdate($reservation->timeopen, $strftimedaydatetime),
+                                  array('class' => 'notopened'));
+            echo html_writer::tag('span', ' '.get_string('reservationnotopened', 'reservation'),
+                                  array('class' => 'alert bg-warning'));
+        } else {
+            echo html_writer::tag('span', userdate($reservation->timeopen, $strftimedaydatetime));
+        }
+        echo html_writer::end_tag('div');
+    }
+    echo html_writer::start_tag('div');
+    echo html_writer::tag('label', get_string('timeclose', 'reservation').': ', array('class' => 'bold'));
+    if ($now > $reservation->timeclose) {
+        echo html_writer::tag('span', userdate($reservation->timeclose, $strftimedaydatetime), array('class' => 'notopened'));
+        echo html_writer::tag('span', ' '.get_string('reservationclosed', 'reservation'), array('class' => 'alert bg-warning'));
+    } else {
+        echo html_writer::tag('span', userdate($reservation->timeclose, $strftimedaydatetime));
+    }
+    echo html_writer::end_tag('div');
+}
+
+/**
+ * Print connected reservations
+ *
+ * @param stdClass $reservation
+ */
+function reservation_print_connected($reservation) {
+    global $CFG;
+
+    if (isset($CFG->reservation_connect_to) && ($CFG->reservation_connect_to == 'site')) {
+        require_once($CFG->libdir.'/coursecatlib.php');
+        $displaylist = coursecat::make_categories_list();
+    }
+    // Show connected reservations.
+    if ($connectedreservations = reservation_get_connected($reservation)) {
+        $connectedlist = html_writer::tag('label',
+                                           get_string('connectedto', 'reservation').': ',
+                                           array('class' => 'bold'));
+        $connectedlist .= html_writer::start_tag('ul', array('class' => 'connectedreservations'));
+        foreach ($connectedreservations as $cr) {
+            $linktext = $cr->coursename . ': ' . $cr->name;
+            if (isset($CFG->reservation_connect_to) && ($CFG->reservation_connect_to == 'site')) {
+                $linktext = $displaylist[$cr->category] .'/'. $linktext;
+            }
+            $linkurl = new moodle_url('/mod/reservation/view.php', array('r' => $cr->id));
+            $link = html_writer::tag('a', $linktext, array('href' => $linkurl, 'class' => 'connectedlink'));
+            $connectedlist .= html_writer::tag('li', $link);
+        }
+        $connectedlist .= html_writer::end_tag('ul');
+
+        echo html_writer::tag('div', $connectedlist, array('class' => 'connected'));
+    }
+}
+
+/**
+ * Get array of defined table fields
+ *
+ * @param int $group
+ * @param int $groupmode
+ * @return array
+ */
+function reservation_get_fields($customfields, $status) {
+    global $CFG;
+
+    $fields = array();
+
+    // Get request table display fields.
+    if (!isset($CFG->reservation_fields)) {
+        $CFG->reservation_fields = '';
+    }
+
+    // Add fields to requests table.
+    $field = strtok($CFG->reservation_fields, ',');
+    while ($field !== false) {
+        if (isset($customfields[$field])) {
+            if (!isset($fields[$field])) {
+                $fields[$field] = new stdClass();
+                $fields[$field]->custom = $customfields[$field]->id;
+            }
+            $fields[$field]->name = format_string($customfields[$field]->name);
+        } else {
+            if (!isset($fields[$field])) {
+                $fields[$field] = new stdClass();
+                $fields[$field]->custom = false;
+            }
+            if ($field == 'phone1') {
+                $fields[$field]->name = get_string('phone');
+            } else {
+                $fields[$field]->name = get_string($field);
+            }
+        }
+        $field = strtok(',');
+    }
+
+    if (($status->groupmode == VISIBLEGROUPS) || (($status->groupmode == SEPARATEGROUPS) && ($status->group == 0))) {
+        $fields['groups'] = new stdClass();
+        $fields['groups']->name = get_string('group');
+        $fields['groups']->custom = 'groups';
+    }
+
+    return $fields;
+}
+
+/**
+ * Get list of addable users for manual reservation
+ *
+ *
+ * @param context $context
+ * @param context $coursecontext
+ * @param int $group
+ * @param int $groupmode
+ * @return array
+ */
+function reservation_get_addableusers($reservation, $status) {
+    global $CFG, $DB, $USER, $PAGE;
+
+    $context = $PAGE->context;
+
+    $coursecontext = context_course::instance($reservation->course);
+
+    // Get list of users available for manual reserve.
+    $addableusers = array();
+
+    if (has_capability('mod/reservation:manualreserve', $context)) {
+        $participants = array();
+        if (!isset($CFG->reservation_manual_users)) {
+            $CFG->reservation_manual_users = 'course';
+        }
+
+        if ($CFG->reservation_manual_users == 'site') {
+            $participants = $DB->get_records('user', array('deleted' => 0, 'suspended' => 0), 'lastname ASC', '*');
+        } else {
+            $participants = get_enrolled_users($coursecontext, null, 0, 'u.*', 'u.lastname ASC');
+        }
+        if (!empty($participants)) {
+            foreach ($participants as $participant) {
+                if (!in_array($participant->username, array('guest', 'admin'))) {
+                    if ($status->groupmode == SEPARATEGROUPS) {
+                        if (($status->group != 0) && (has_capability('mod/reservation:viewrequest', $context))) {
+                            $groups = groups_get_user_groups($reservation->course, $participant->id);
+                            if (!empty($groups) && (array_search($status->group, $groups['0']) === false)) {
+                                continue;
+                            }
+                        } else if (!has_capability('mod/reservation:viewrequest', $context)) {
+                            $mygroups = groups_get_user_groups($reservation->course, $USER->id);
+                            if (!empty($mygroups['0'])) {
+                                $notmember = true;
+                                $i = 0;
+                                while (($i < count($mygroups['0'])) && (!groups_is_member($mygroups['0'][$i], $participant->id))) {
+                                    $i++;
+                                }
+                                if ($i == count($mygroups['0'])) {
+                                    continue;
+                                }
+                            } else {
+                                continue;
+                            }
+                        }
+                    }
+                    $addableusers[$participant->id] = fullname($participant);
+                }
+            }
+        }
+    }
+    return $addableusers;
+}
+
+function reservation_get_table_data($reservation, $requests, &$addableusers, &$counters, $fields, $status) {
+    global $USER, $DB, $PAGE, $OUTPUT;
+
+    $context = $PAGE->context;
+
+    $now = time();
+
+    $rows = array();
+    if (!empty($requests)) {
+        foreach ($requests as $request) {
+            $row = array();
+            $rowclasses = array();
+
+            // Remove already reserved users from manual reservation list of users.
+            if (($status->mode == 'manage') && isset($addableusers) &&
+                    isset($addableusers[$request->userid]) && ($request->timecancelled == 0)) {
+                unset($addableusers[$request->userid]);
+            }
+
+            // Highlight current user request.
+            if (($USER->id == $request->userid) && ($request->timecancelled == '0')) {
+                $rowclasses[] = 'yourreservation';
+            }
+
+            $counters = reservation_update_counters($counters, $request);
+            // Set row data.
+            if (($counters[0]->matchlimit > 0) && ($counters[0]->matchlimit == $counters[0]->overbooked)
+                    && ($request->timecancelled == 0)) {
+                $rowclasses[] = 'overbooked';
+            }
+            if (($reservation->maxrequest < $request->number) && ($reservation->maxrequest > 0) && ($request->timecancelled == 0)) {
+                $rowclasses[] = 'overbooked';
+            }
+            if (has_capability('mod/reservation:viewrequest', $context)) {
+                if ($request->timecancelled != '0') {
+                    $rowclasses[] = 'cancelled';
+                }
+            }
+
+            // Check for group (TODO: check if it can be moved in get_all_requests).
+            if ($status->groupmode == SEPARATEGROUPS) {
+                if (($status->group != 0) && (has_capability('mod/reservation:viewrequest', $context))) {
+                    $groups = groups_get_user_groups($reservation->course, $request->userid);
+                    if (!empty($groups) && (array_search($status->group, $groups['0']) === false)) {
+                        continue;
+                    }
+                } else if (!has_capability('mod/reservation:viewrequest', $context)) {
+                    $mygroups = groups_get_user_groups($reservation->course, $USER->id);
+                    if (!empty($mygroups['0'])) {
+                        $notmember = true;
+                        $i = 0;
+                        while (($i < count($mygroups['0'])) && (!groups_is_member($mygroups['0'][$i], $request->userid))) {
+                            $i++;
+                        }
+                        if ($i == count($mygroups['0'])) {
+                            continue;
+                        }
+                    } else {
+                        continue;
+                    }
+                }
+            }
+
+            $rowclass = implode(' ', $rowclasses);
+
+            if (($request->timecancelled == '0') || (has_capability('mod/reservation:viewrequest', $context)
+                    && ($status->view == 'full'))) {
+                if ($request->timecancelled == '0') {
+                    $row[] = $request->number;
+                } else {
+                    $row[] = '';
+                }
+
+                if (empty($status->download)) {
+                    $userlink = new moodle_url('/user/view.php', array('id' => $request->userid, 'course' => $reservation->course));
+                    $user = $DB->get_record('user', array('id' => $request->userid));
+                    $row[] = $OUTPUT->user_picture($user, array('courseid' => $reservation->course));
+                    $attributes = array('href' => $userlink, 'class' => 'fullname '.$rowclass);
+                    $row[] = html_writer::tag('a', fullname($request), $attributes);
+                } else {
+                    $row[] = $request->firstname;
+                    $row[] = $request->lastname;
+                }
+
+                if (has_capability('mod/reservation:viewrequest', $context)) {
+                    if (!empty($fields)) {
+                        foreach ($fields as $fieldid => $field) {
+                            if (isset($field->name)) {
+                                switch ($fieldid) {
+                                    case 'email':
+                                        if (empty($status->download)) {
+                                            $fieldvalue = obfuscate_mailto($request->$fieldid);
+                                        } else {
+                                            $fieldvalue = $request->$fieldid;
+                                        }
+                                    break;
+                                    case 'country':
+                                        $fieldvalue = $countrynames[$request->$fieldid];
+                                    break;
+                                    default:
+                                        $fieldvalue = format_string($request->$fieldid);
+                                    break;
+                                }
+
+                                if (empty($status->download)) {
+                                    $row[] = html_writer::tag('div', $fieldvalue, array('class' => $fieldid.' '.$rowclass));
+                                } else {
+                                    $row[] = $fieldvalue;
+                                }
+                            }
+                        }
+                    }
+                    // Add reservation request time.
+                    if (empty($status->download)) {
+                        $row[] = html_writer::tag('div',
+                                                  trim(userdate($request->timecreated, get_string('strftimedatetime'))),
+                                                  array('class' => 'timecreated '.$rowclass));
+                    } else {
+                        $row[] = trim(userdate($request->timecreated, get_string('strftimedatetime')));
+                    }
+
+                    // If full view display also request revocation time.
+                    if ($status->view == 'full') {
+                        if ($request->timecancelled != '0') {
+                            if (empty($status->download)) {
+                                $row[] = html_writer::tag('div',
+                                                          trim(userdate($request->timecancelled, get_string('strftimedatetime'))),
+                                                          array('class' => 'timecancelled '.$rowclass));
+                            } else {
+                                $row[] = trim(userdate($request->timecancelled, get_string('strftimedatetime')));
+                            }
+                        } else {
+                            $row[] = '';
+                        }
+                    }
+                    // Add reservation request note.
+                    if ($reservation->note) {
+                        if (($status->view == 'full') || ($request->timecancelled == 0)) {
+                            if (isset($request->note) && !empty($request->note)) {
+                                if (empty($status->download)) {
+                                    $row[] = html_writer::tag('div', $request->note, array('class' => 'note '.$rowclass));
+                                } else {
+                                    $row[] = $request->note;
+                                }
+                            } else {
+                                if (empty($status->download)) {
+                                    $row[] = html_writer::tag('div', '', array('class' => 'note'));
+                                } else {
+                                    $row[] = '';
+                                }
+                            }
+                        }
+                    }
+                    // Display grade or grading dropdown menu.
+                    if (($reservation->maxgrade != 0) && ($now > $reservation->timestart)) {
+                        if (($status->mode == 'manage') && ($request->timecancelled == 0)) {
+                            $row[] = html_writer::select(make_grades_menu($reservation->maxgrade),
+                                                         'grades['.$request->id.']',
+                                                         $request->grade,
+                                                         array(-1 => get_string('nograde')));
+                        } else {
+                            if ($request->timegraded != 0) {
+                                $usergrade = $request->grade;
+                                if ($reservation->maxgrade < 0) {
+                                    if ($scale = $DB->get_record('scale', array('id' => -$reservation->maxgrade))) {
+                                        $values = explode(',', $scale->scale);
+                                        $usergrade = $values[$request->grade - 1];
+                                    }
+                                }
+                                if (empty($status->download)) {
+                                    $row[] = html_writer::tag('div', $usergrade, array('class' => 'grade '.$rowclass));
+                                } else {
+                                    $row[] = $usergrade;
+                                }
+                            } else {
+                                if (empty($status->download)) {
+                                    $row[] = html_writer::tag('div', '', array('class' => 'grade '.$rowclass));
+                                } else {
+                                    $row[] = '';
+                                }
+                            }
+                        }
+                    }
+                    // If some actions are available, display the selection checkbox.
+                    if (($status->mode == 'manage') && !empty($status->actions) && !empty($row)) {
+                        $row[] = html_writer::empty_tag('input', array('type' => 'checkbox',
+                                                                       'name' => 'requestid[]',
+                                                                       'class' => 'request',
+                                                                       'value' => $request->id));
+                    }
+                }
+            }
+            // Add row to the table.
+            if (!empty($row)) {
+                $rows[] = $row;
+            }
+        }
+    }
+    return $rows;
+}
+
+/**
  * Tracking of processed reservation.
  *
  * This class prints reservation information into a html table.
