@@ -17,10 +17,12 @@
 /**
  * Reservation module capability definition
  *
- * @package    mod_certificate
+ * @package    mod_reservation
  * @copyright  2018 Roberto Pinna
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+defined('MOODLE_INTERNAL') || die();
 
 $addons = array(
     "mod_reservation" => array()
