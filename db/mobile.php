@@ -23,6 +23,5 @@
  */
 
 $addons = array(
-    "mod_reservation" => array( // Plugin identifier
-    )
+    "mod_reservation" => array()
 );
