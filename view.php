@@ -27,7 +27,7 @@ require_once('locallib.php');
 require_once($CFG->libdir.'/tablelib.php');
 
 $id = optional_param('id', null, PARAM_INT);                    // Course Module ID, or.
-$r = optional_param('r', null, PARAM_INT);                      // reservation ID.
+$r = optional_param('r', null, PARAM_INT);                      // Reservation ID.
 
 if (!empty($id)) {
     if (! $cm = get_coursemodule_from_id('reservation', $id)) {
@@ -54,13 +54,13 @@ if (!empty($id)) {
 }
 
 $status = new stdClass();
-$status->view = optional_param('view', null, PARAM_ALPHA);              // 'full' or 'clean' view for teacher.
-$status->mode = optional_param('mode', 'overview', PARAM_ALPHA);        // define the viewed tab.
-$status->action = optional_param('action', null, PARAM_ALPHA);          // delete or message selected requests.
+$status->view = optional_param('view', null, PARAM_ALPHA);              // Full or clean view for teacher.
+$status->mode = optional_param('mode', 'overview', PARAM_ALPHA);        // Define the viewed tab.
+$status->action = optional_param('action', null, PARAM_ALPHA);          // Delete or message selected requests.
 if (empty($status->action) && !empty(optional_param('savegrades', null, PARAM_ALPHA))) {
-    $status->action = 'savegrades';                                     // save all modified grades.
+    $status->action = 'savegrades';                                     // Save all modified grades.
 }
-$status->download = optional_param('download', null, PARAM_ALPHA);      // null or one of available download formats.
+$status->download = optional_param('download', null, PARAM_ALPHA);      // Null or one of available download formats.
 
 // Check to see if groups are being used in this reservation.
 $status->groupmode = groups_get_activity_groupmode($cm);
@@ -449,16 +449,11 @@ if (empty($status->download)) {
                 $html .= html_writer::select($addableusers, 'newparticipant');
                 $html .= html_writer::end_tag('div');
                 if ($reservation->note == 1) {
-                    $html .= html_writer::start_tag('div');
-                    $html .= html_writer::tag('label',
-                                              get_string('note', 'reservation'),
-                                              array('for' => 'note', 'class' => 'note'));
-                    $html .= html_writer::tag('textarea', '', array('name' => 'note', 'rows' => '5', 'cols' => '30'));
-                    $html .= html_writer::end_tag('div');
+                    $html .= reservation_get_note_field($reservation);
                 }
                 $html .= html_writer::empty_tag('input', array('type' => 'submit',
                                                                'name' => 'reserve',
-                                                               'class' => 'btn btn-primary',
+                                                               'class' => 'btn btn-primary manualreservebtn',
                                                                'value' => get_string('reserve', 'reservation')));
                 $html .= html_writer::end_tag('form');
 
@@ -518,16 +513,11 @@ if (empty($status->download)) {
                                                                'value' => get_string('reservecancel', 'reservation')));
             } else if ((($reservation->maxrequest == 0) && ($available > 0)) || ($available > 0) || ($available + $overbook > 0)) {
                 if ($reservation->note == 1) {
-                    $html .= html_writer::start_tag('div');
-                    $html .= html_writer::tag('label',
-                                              get_string('note', 'reservation'),
-                                              array('for' => 'note', 'class' => 'note'));
-                    $html .= html_writer::tag('textarea', '', array('name' => 'note', 'rows' => '5', 'cols' => '30'));
-                    $html .= html_writer::end_tag('div');
+                    $html .= reservation_get_note_field($reservation);
                 }
                 $html .= html_writer::empty_tag('input', array('type' => 'submit',
                                                                'name' => 'reserve',
-                                                               'class' => 'btn btn-primary',
+                                                               'class' => 'btn btn-primary reservebtn',
                                                                'value' => get_string('reserve', 'reservation')));
             }
             $html .= html_writer::end_tag('form');

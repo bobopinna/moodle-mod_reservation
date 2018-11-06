@@ -282,15 +282,15 @@ function reservation_multisort($array, $sortorders) {
         $orders = array_reverse($sortorders, true);
         foreach ($orders as $key => $order) {
             $callback = function($a, $b) use ($order, $key) {
-                 $o = 1;
-                 if ($order == SORT_DESC) {
-                     $o = -1;
-                 }
-                 if (is_numeric($a->$key) && is_numeric($b->$key)) {
-                     return ($a->$key - $b->$key) * $o; 
-                 } else {
-                     return strnatcasecmp($a->$key, $b->$key) * $o;
-                 }
+                $o = 1;
+                if ($order == SORT_DESC) {
+                    $o = -1;
+                }
+                if (is_numeric($a->$key) && is_numeric($b->$key)) {
+                    return ($a->$key - $b->$key) * $o; 
+                } else {
+                    return strnatcasecmp($a->$key, $b->$key) * $o;
+                }
             };
             uasort($array, $callback);
         }
@@ -919,6 +919,18 @@ function reservation_get_addableusers($reservation, $status) {
     return $addableusers;
 }
 
+/**
+ * Gets reservation requests table data, remove reserved user from addableusers array and update counters
+ *
+ * @param object $reservation reservation object
+ * @param array $requests reservation requests
+ * @param array $addableusers users not reserved
+ * @param array $counters reservation counters
+ * @param array $fields requested table fields
+ * @param object $status reservation temp variables
+ *
+ * @return array The requests table array 
+ */
 function reservation_get_table_data($reservation, $requests, &$addableusers, &$counters, $fields, $status) {
     global $USER, $DB, $PAGE, $OUTPUT;
 
@@ -1118,6 +1130,26 @@ function reservation_get_table_data($reservation, $requests, &$addableusers, &$c
         }
     }
     return $rows;
+}
+
+/**
+ * Gets note field
+ *
+ * @param object $reservation reservation object
+ * @return string The request note form field 
+ */
+function reservation_get_note_field($reservation) {
+    $html ='';
+    if ($reservation->note == 1) {
+        $html .= html_writer::start_tag('div', array('class' => 'usernote'));
+        $html .= html_writer::tag('label',
+                                  get_string('note', 'reservation'),
+                                  array('for' => 'note', 'class' => 'note'));
+        $html .= html_writer::tag('textarea', '', array('name' => 'note', 'rows' => '5', 'cols' => '30'));
+        $html .= html_writer::end_tag('div');
+    }
+
+    return $html;
 }
 
 /**
