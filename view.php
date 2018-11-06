@@ -448,9 +448,9 @@ if (empty($status->download)) {
                                           array('for' => 'newparticipant', 'class' => 'addparticipant'));
                 $html .= html_writer::select($addableusers, 'newparticipant');
                 $html .= html_writer::end_tag('div');
-                if ($reservation->note == 1) {
-                    $html .= reservation_get_note_field($reservation);
-                }
+
+                $html .= reservation_get_note_field($reservation);
+
                 $html .= html_writer::empty_tag('input', array('type' => 'submit',
                                                                'name' => 'reserve',
                                                                'class' => 'btn btn-primary manualreservebtn',
@@ -512,9 +512,8 @@ if (empty($status->download)) {
                                                                'class' => 'btn btn-primary',
                                                                'value' => get_string('reservecancel', 'reservation')));
             } else if ((($reservation->maxrequest == 0) && ($available > 0)) || ($available > 0) || ($available + $overbook > 0)) {
-                if ($reservation->note == 1) {
-                    $html .= reservation_get_note_field($reservation);
-                }
+                $html .= reservation_get_note_field($reservation);
+
                 $html .= html_writer::empty_tag('input', array('type' => 'submit',
                                                                'name' => 'reserve',
                                                                'class' => 'btn btn-primary reservebtn',

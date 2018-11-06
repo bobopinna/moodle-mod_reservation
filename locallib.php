@@ -287,7 +287,7 @@ function reservation_multisort($array, $sortorders) {
                     $o = -1;
                 }
                 if (is_numeric($a->$key) && is_numeric($b->$key)) {
-                    return ($a->$key - $b->$key) * $o; 
+                    return ($a->$key - $b->$key) * $o;
                 } else {
                     return strnatcasecmp($a->$key, $b->$key) * $o;
                 }
@@ -709,7 +709,7 @@ function reservation_remove_user_event($reservation, $request) {
  */
 function reservation_print_info($reservation, $cmid) {
     $now = time();
- 
+
     $coursecontext = context_course::instance($reservation->course);
 
     echo html_writer::tag('div', format_module_intro('reservation', $reservation, $cmid), array('class' => 'intro'));
@@ -929,7 +929,7 @@ function reservation_get_addableusers($reservation, $status) {
  * @param array $fields requested table fields
  * @param object $status reservation temp variables
  *
- * @return array The requests table array 
+ * @return array The requests table array
  */
 function reservation_get_table_data($reservation, $requests, &$addableusers, &$counters, $fields, $status) {
     global $USER, $DB, $PAGE, $OUTPUT;
@@ -1136,10 +1136,10 @@ function reservation_get_table_data($reservation, $requests, &$addableusers, &$c
  * Gets note field
  *
  * @param object $reservation reservation object
- * @return string The request note form field 
+ * @return string The request note form field
  */
 function reservation_get_note_field($reservation) {
-    $html ='';
+    $html = '';
     if ($reservation->note == 1) {
         $html .= html_writer::start_tag('div', array('class' => 'usernote'));
         $html .= html_writer::tag('label',
