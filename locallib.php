@@ -441,7 +441,7 @@ function reservation_setup_counters($reservation, $customfields) {
  * @param stdClass $request
  * @return array Updated counters
  */
-function reservation_update_counters($counters, $request) {
+function reservation_update_counters($reservation, $counters, $request) {
 
     $counters[0]->overbooked = 0;
     $counters[0]->matchlimit = 0;
@@ -452,17 +452,28 @@ function reservation_update_counters($counters, $request) {
         for ($i = 1; $i < count($counters); $i++) {
             $fieldname = $counters[$i]->field;
             if (isset($request->$fieldname)) {
-                if (($request->$fieldname == $counters[$i]->matchvalue) && !$counters[$i]->operator) {
+                if ((($request->$fieldname == $counters[$i]->matchvalue) && !$counters[$i]->operator) ||
+                        (($request->$fieldname != $counters[$i]->matchvalue) && $counters[$i]->operator)) {
                     $counters[$i]->count++;
                     $counters[0]->matchlimit++;
                     if ($counters[$i]->count > $counters[$i]->requestlimit) {
                         $counters[0]->overbooked++;
                     }
-                } else if (($request->$fieldname != $counters[$i]->matchvalue) && $counters[$i]->operator) {
-                    $counters[$i]->count++;
-                    $counters[0]->matchlimit++;
-                    if ($counters[$i]->count > $counters[$i]->requestlimit) {
-                        $counters[0]->overbooked++;
+                }
+            } else if ($fieldname == 'group') {
+                $groups = groups_get_user_groups($reservation->course, $request->userid);
+                if (!empty($groups) && !empty($groups['0'])) {
+                    $groupsnames = array();
+                    foreach ($groups['0'] as $groupid) {
+                        $groupsnames[] = groups_get_group_name($groupid);
+                    }
+                    if ((!$counters[$i]->operator && in_array($counters[$i]->matchvalue, $groupsnames)) ||
+                            ($counters[$i]->operator && in_array($counters[$i]->matchvalue, $groupsnames))) {
+                        $counters[$i]->count++;
+                        $counters[0]->matchlimit++;
+                        if ($counters[$i]->count > $counters[$i]->requestlimit) {
+                            $counters[0]->overbooked++;
+                        }
                     }
                 }
             }
@@ -530,9 +541,13 @@ function reservation_get_availability($reservation, $counters, $available) {
                 }
             } else {
                 $groups = groups_get_user_groups($reservation->course, $USER->id);
-                if (!empty($groups)) {
-                    if (($counters[$i]->operator && !in_array($counters[$i]->matchvalue, $groups)) ||
-                        (!$counters[$i]->operator && in_array($counters[$i]->matchvalue, $groups))) {
+                if (!empty($groups) && !empty($groups['0'])) {
+                    $groupsnames = array();
+                    foreach ($groups['0'] as $groupid) {
+                        $groupsnames[] = groups_get_group_name($groupid);
+                    }
+                    if (($counters[$i]->operator && !in_array($counters[$i]->matchvalue, $groupsnames)) ||
+                        (!$counters[$i]->operator && in_array($counters[$i]->matchvalue, $groupsnames))) {
                         if ($availablesublimit <= ($counters[$i]->requestlimit - $counters[$i]->count)) {
                             $availablesublimit = $counters[$i]->requestlimit - $counters[$i]->count;
                             $limitoverbook = round($counters[$i]->requestlimit * $reservation->overbook / 100);
@@ -1022,7 +1037,7 @@ function reservation_get_table_data($reservation, $requests, &$addableusers, &$c
                 $rowclasses[] = 'yourreservation';
             }
 
-            $counters = reservation_update_counters($counters, $request);
+            $counters = reservation_update_counters($reservation, $counters, $request);
             // Set row data.
             if (($counters[0]->matchlimit > 0) && ($counters[0]->matchlimit == $counters[0]->overbooked)
                     && ($request->timecancelled == 0)) {
@@ -1085,6 +1100,7 @@ function reservation_get_table_data($reservation, $requests, &$addableusers, &$c
                 if (has_capability('mod/reservation:viewrequest', $context)) {
                     if (!empty($fields)) {
                         foreach ($fields as $fieldid => $field) {
+                            $fieldvalue = '';
                             if (isset($field->name)) {
                                 switch ($fieldid) {
                                     case 'email':
@@ -1096,6 +1112,14 @@ function reservation_get_table_data($reservation, $requests, &$addableusers, &$c
                                     break;
                                     case 'country':
                                         $fieldvalue = $countrynames[$request->$fieldid];
+                                    break;
+                                    case 'groups':
+                                        $groups = groups_get_user_groups($reservation->course, $request->userid);
+                                        $groupsnames = array();
+                                        foreach ($groups['0'] as $groupid) {
+                                            $groupsnames[] = groups_get_group_name($groupid);
+                                        }
+                                        $fieldvalue = implode(', ', $groupsnames);
                                     break;
                                     default:
                                         $fieldvalue = format_string($request->$fieldid);
