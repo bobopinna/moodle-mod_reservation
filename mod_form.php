@@ -289,7 +289,8 @@ function checkClashes() {
 
         var field = document.getElementById(fieldid);
         var fieldvalue = field.options[field.selectedIndex].value;
-        var sUrl = "'.$CFG->wwwroot.'/mod/reservation/tool/matchlist.php?id='.$COURSE->id.'&field="+fieldvalue+"&match="+matchvalueid;
+        var sUrl = "'.$CFG->wwwroot.'/mod/reservation/tool/matchlist.php?id='.$COURSE->id
+                .'&field="+fieldvalue+"&match="+matchvalueid;
 
         YUI().use("io-base", "node",
             function(Y) {
@@ -368,12 +369,12 @@ function checkClashes() {
 
                 $mform->addGroup($sublimitgrps[$i], 'sublimitgrp_'.$i, get_string('sublimit', 'reservation', $i), ' ', false);
                 $mform->setAdvanced('sublimitgrp_'.$i);
-/*
+                /*
                 if ($i > 1) {
                     $prev = $i - 1;
                     $mform->disabledIf('sublimitgrp_'.$i, 'field_'.$prev, 'eq', '-');
                 }
-*/
+                */
             }
         }
 
