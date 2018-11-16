@@ -257,3 +257,4 @@ $string['privacy:metadata:reservation_request:mailed'] = 'The mailed notificatio
 $string['privacy:metadata:reservation_request'] = 'Store user data of a reservation request';
 $string['privacy:metadata:reservation_note:note'] = 'User note for the reservation request';
 $string['privacy:metadata:reservation_note'] = 'Store user note of a reservation request';
+$string['getreservation'] = 'View reservation';

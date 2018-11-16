@@ -34,7 +34,8 @@ $course = $DB->get_record('course', array('id' => $id), '*', MUST_EXIST);
 
 $coursecontext = context_course::instance($course->id);
 
-if (!isset($CFG->reservation_publiclists) || empty($CFG->reservation_publiclists) || isloggedin()) {
+$publiclists = get_config('reservation', 'publiclists');
+if (empty($publiclists) || isloggedin()) {
     require_course_login($course);
 } else {
     $PAGE->set_context($coursecontext);
@@ -102,22 +103,23 @@ if ($reservations = get_all_instances_in_course('reservation', $course)) {
     $resnames = array();
     $restimestarts = array();
     $ressections = array();
+    $list_sort = get_config('reservation', 'list_sort');
     foreach ($reservations as $key => $row) {
         $resnames[$key]  = $row->name;
-        if ($CFG->reservation_list_sort == 'date') {
+        if ($list_sort == 'date') {
             $restimestarts[$key] = $row->timestart;
         } else {
             $ressections[$key] = $row->section;
         }
     }
 
-    if (!isset($CFG->reservation_list_sort)) {
-         $CFG->reservation_list_sort = 'section';
+    if (empty($list_sort)) {
+         $list_sort = 'section';
     }
 
-    if (($CFG->reservation_list_sort == 'date') || (!$usesections)) {
+    if (($list_sort == 'date') || (!$usesections)) {
         array_multisort($restimestarts, SORT_NUMERIC, $resnames, SORT_ASC, $reservations);
-    } else if ($CFG->reservation_list_sort == 'name') {
+    } else if ($list_sort == 'name') {
         array_multisort($resnames, SORT_ASC, $ressections, SORT_NUMERIC, $reservations);
     } else {
         array_multisort($ressections, SORT_NUMERIC, $resnames, SORT_ASC, $reservations);
@@ -164,12 +166,13 @@ foreach ($reservations as $reservation) {
     }
 
     $now = time();
-    if (!isset($CFG->reservation_deltatime)) {
-        $CFG->reservation_deltatime = -1;
+    $deltatime = get_config('reservation', 'deltatime');
+    if ($deltatime === false) {
+        $deltatime = -1;
     }
     $eventdate = userdate($reservation->timestart, get_string('strftimedate')) .' '.
               userdate($reservation->timestart, get_string('strftimetime'));
-    if (($reservation->timestart + $CFG->reservation_deltatime < $now) && ($CFG->reservation_deltatime > 0)) {
+    if (($reservation->timestart + $deltatime < $now) && ($deltatime > 0)) {
         $dimmed = 'class="dimmed"';
     }
 

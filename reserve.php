@@ -80,7 +80,7 @@ if ($reservationid == $reservation->id) {
                 $notice = 'alreadybooked';
             } else {
                 $overbook = round($reservation->maxrequest * $reservation->overbook / 100);
-                $available = $CFG->reservation_max_requests;
+                $available = get_config('reservation', 'max_requests');
 
                 // Get profile custom fields array.
                 $customfields = reservation_get_profilefields();

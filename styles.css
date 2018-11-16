@@ -76,11 +76,23 @@
 .path-mod-reservation .savegrades {
     text-align: center;
 }
+
 .path-mod-reservation .connectedreservations {
     text-indent: 0;
     margin: 0;
     list-style: none;
     display: inline-block;
+}
+
+.path-mod-reservation .counters {
+    padding: 1em;
+}
+
+.path-mod-reservation .requestoverview td {
+    padding: .5em;
+    text-align: center;
+    border: thin solid grey;
+    border-collapse: collapse;
 }
 
 /**

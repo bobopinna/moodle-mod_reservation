@@ -276,10 +276,11 @@ function reservation_cron () {
     $endtime   = $timenow;
     $starttime = $endtime - 24 * 3600;   // One day earlier.
 
-    if (!isset($CFG->reservation_notifies)) {
-        $CFG->reservation_notifies = 'teachers,students,grades';
+    $notifieslist = get_config('reservation', 'notifies');
+    if ($notifieslist === false) {
+        $notifieslist = 'teachers,students,grades';
     }
-    $notifies = explode(',', $CFG->reservation_notifies);
+    $notifies = explode(',', $notifieslist);
 
     // Notify request grading to students.
     if ($requests = reservation_get_unmailed_requests(0, $starttime)) {
@@ -404,11 +405,8 @@ function reservation_cron () {
 
             $reservationinfo = new stdClass();
             $reservationinfo->reservation = format_string($reservation->name, true);
-            if (!isset($CFG->reservation_download) || empty($CFG->reservation_download)) {
-                $CFG->reservation_download = 'csv';
-            }
-            $reservationinfo->url = $CFG->wwwroot.'/mod/reservation/view.php?id='.$mod->id.
-                    '&amp;download='.$CFG->reservation_download;
+
+            $reservationinfo->url = $CFG->wwwroot.'/mod/reservation/view.php?id='.$mod->id;
 
             if (in_array('teachers', $notifies)) {
                 // Notify to teachers.
@@ -671,6 +669,7 @@ function reservation_refresh_events($courseid = 0) {
         }
     }
 
+    $events = get_config('reservation', 'events'); 
     foreach ($reservations as $reservation) {
         $DB->delete_records('event', array('modulename' => 'reservation', 'instance' => $reservation->id));
 
@@ -679,8 +678,8 @@ function reservation_refresh_events($courseid = 0) {
 
         if (! $requests = $DB->get_records('reservation_request', array('reservation' => $reservation->id))) {
             $usereventsenabled = false;
-            if (isset($CFG->reservation_events) && !empty($CFG->reservation_events)) {
-                $usereventsenabled = in_array('userevent', $CFG->reservation_events);
+            if (!empty($events)) {
+                $usereventsenabled = in_array('userevent', $events);
             }
             foreach ($requests as $request) {
                 if (isset($request->eventid) && !empty($request->eventid)) {
@@ -850,12 +849,12 @@ function reservation_postprocess($reservation) {
 function reservation_set_sublimits($reservation) {
     global $CFG, $DB;
 
-    if (isset($CFG->reservation_sublimits) && !empty($CFG->reservation_sublimits)) {
+    $sublimits = get_config('reservation', 'sublimits');
+    if (!empty($sublimits)) {
 
         $DB->delete_records('reservation_limit', array('reservationid' => $reservation->id));
 
-        $last = false;
-        for ($i = 1; !$last && ($i <= $CFG->reservation_sublimits); $i++) {
+        for ($i = 1; $i <= $sublimits; $i++) {
             $field = 'field_'.$i;
             $operator = 'operator_'.$i;
             $matchvalue = 'matchvalue_'.$i;
@@ -871,8 +870,6 @@ function reservation_set_sublimits($reservation) {
                 if (!$DB->insert_record('reservation_limit', $reservationlimit)) {
                     error('Could not insert sublimit rule '.$i);
                 }
-            } else {
-                $last = true;
             }
         }
     }
@@ -890,14 +887,15 @@ function reservation_set_sublimits($reservation) {
 function reservation_set_events($reservation) {
     global $CFG;
 
-    if (!isset($CFG->reservation_events)) {
-        $CFG->reservation_events = 'reservation,event';
+    $events = get_config('reservation', 'events');
+    if ($events === false) {
+        $events = 'reservation,event';
     }
 
-    if (isset($CFG->reservation_events)  && !empty($CFG->reservation_events)) {
+    if (!empty($events)) {
         require_once($CFG->dirroot.'/calendar/lib.php');
 
-        $events = explode(',', $CFG->reservation_events);
+        $events = explode(',', $events);
         $event = new stdClass();
         $event->name        = $reservation->name;
         $event->description = format_module_intro('reservation', $reservation, $reservation->coursemodule);

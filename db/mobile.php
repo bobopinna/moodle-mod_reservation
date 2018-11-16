@@ -24,6 +24,27 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$addons = array(
-    "mod_reservation" => array()
-);
+$addons = [
+    'mod_reservation' => [ // Plugin identifier.
+        'handlers' => [ // Different places where the plugin will display content.
+            'reservationview' => [ // Handler unique name.
+                'displaydata' => [
+                    'icon' => $CFG->wwwroot . '/mod/reservation/pix/icon.png',
+                    'class' => '',
+                ],
+                'delegate' => 'CoreCourseModuleDelegate', // Delegate (where to display the link to the plugin).
+                'method' => 'mobile_view_activity', // Main function in \mod_reservation\output\mobile.
+                'styles' => [
+                    'url' => '/mod/reservation/mobile/styles.css',
+                    'version' => 1
+                ]
+            ]
+        ],
+        'lang' => [ // Language strings that are used in all the handlers.
+            ['pluginname', 'reservation'],
+            ['getreservation', 'reservation'],
+            ['nothingtodisplay', 'moodle'],
+            ['selectagroup', 'moodle']
+        ]
+    ]
+];

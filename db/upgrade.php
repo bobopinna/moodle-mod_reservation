@@ -69,4 +69,33 @@ function xmldb_reservation_upgrade($oldversion=0) {
     if ($oldversion < 2018100600) {
         upgrade_mod_savepoint(true, 2018100600, 'reservation');
     }
+    if ($oldversion < 2018111400) {
+        $currentsettings = array(
+            'max_requests',
+            'connect_to',
+            'check_clashes',
+            'min_duration',
+            'max_overbook',
+            'overbook_step',
+            'sublimits',
+            'list_sort',
+            'publiclists',
+            'deltatime',
+            'fields',
+            'manual_users',
+            'notifies',
+            'events'
+        );
+        $reservationsettings = $DB->get_records_select('config', 'name like ?', array('reservation_%'));
+        if (!empty($reservationsettings)) {
+            foreach($reservationsettings as $reservationsetting) {
+                $settingname = substr($reservationsetting->name, strlen('reservation_') + 1);
+                if (in_array($settingname, $currentsettings)) {
+                    set_config($settingname, $reservationsetting->value, 'reservation');
+                }
+                $DB->delete_records('config', array('id' => $reservationsetting->id));
+            }
+        }
+        upgrade_mod_savepoint(true, 2018111400, 'reservation');
+    }
 }

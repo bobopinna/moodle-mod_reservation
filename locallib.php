@@ -87,7 +87,8 @@ function reservation_get_parentable($reservationid) {
     $searchfields = array();
     $additionalquery = '';
 
-    if (!isset($CFG->reservation_connect_to) || ($CFG->reservation_connect_to == 'course')) {
+    $connectto = get_config('reservation', 'connect_to');
+    if (($connectto === false) || ($connectto == 'course')) {
         $searchfields['courseid'] = $COURSE->id;
         $additionalquery .= ' AND (res.course = :courseid)';
     }
@@ -450,17 +451,19 @@ function reservation_update_counters($counters, $request) {
         $counters[0]->count++;
         for ($i = 1; $i < count($counters); $i++) {
             $fieldname = $counters[$i]->field;
-            if (($request->$fieldname == $counters[$i]->matchvalue) && !$counters[$i]->operator) {
-                $counters[$i]->count++;
-                $counters[0]->matchlimit++;
-                if ($counters[$i]->count > $counters[$i]->requestlimit) {
-                    $counters[0]->overbooked++;
-                }
-            } else if (($request->$fieldname != $counters[$i]->matchvalue) && $counters[$i]->operator) {
-                $counters[$i]->count++;
-                $counters[0]->matchlimit++;
-                if ($counters[$i]->count > $counters[$i]->requestlimit) {
-                    $counters[0]->overbooked++;
+            if (isset($request->$fieldname)) {
+                if (($request->$fieldname == $counters[$i]->matchvalue) && !$counters[$i]->operator) {
+                    $counters[$i]->count++;
+                    $counters[0]->matchlimit++;
+                    if ($counters[$i]->count > $counters[$i]->requestlimit) {
+                        $counters[0]->overbooked++;
+                    }
+                } else if (($request->$fieldname != $counters[$i]->matchvalue) && $counters[$i]->operator) {
+                    $counters[$i]->count++;
+                    $counters[0]->matchlimit++;
+                    if ($counters[$i]->count > $counters[$i]->requestlimit) {
+                        $counters[0]->overbooked++;
+                    }
                 }
             }
         }
@@ -516,13 +519,26 @@ function reservation_get_availability($reservation, $counters, $available) {
 
     if (count($counters) - 1 > 0) {
         for ($i = 1; $i < count($counters); $i++) {
-            if ((($userdata->{$counters[$i]->field} == $counters[$i]->matchvalue) && !$counters[$i]->operator) ||
-               (($userdata->{$counters[$i]->field} != $counters[$i]->matchvalue) && $counters[$i]->operator)) {
-                if ($availablesublimit <= ($counters[$i]->requestlimit - $counters[$i]->count)) {
-                    $availablesublimit = $counters[$i]->requestlimit - $counters[$i]->count;
-                    $limitoverbook = round($counters[$i]->requestlimit * $reservation->overbook / 100);
+            if ($counters[$i]->field != 'group') {
+                if ((($userdata->{$counters[$i]->field} == $counters[$i]->matchvalue) && !$counters[$i]->operator) ||
+                    (($userdata->{$counters[$i]->field} != $counters[$i]->matchvalue) && $counters[$i]->operator)) {
+                    if ($availablesublimit <= ($counters[$i]->requestlimit - $counters[$i]->count)) {
+                        $availablesublimit = $counters[$i]->requestlimit - $counters[$i]->count;
+                        $limitoverbook = round($counters[$i]->requestlimit * $reservation->overbook / 100);
+                    }
+                    $nolimit = false;
                 }
-                $nolimit = false;
+            } else {
+                $groups = groups_get_user_groups($reservation->course, $USER->id);
+                if (!empty($groups)) {
+                    if (($counters[$i]->operator && !in_array($counters[$i]->matchvalue, $groups)) ||
+                        (!$counters[$i]->operator && in_array($counters[$i]->matchvalue, $groups))) {
+                        if ($availablesublimit <= ($counters[$i]->requestlimit - $counters[$i]->count)) {
+                            $availablesublimit = $counters[$i]->requestlimit - $counters[$i]->count;
+                            $limitoverbook = round($counters[$i]->requestlimit * $reservation->overbook / 100);
+                        }
+                    }
+                }
             }
             $totalrequestlimit += $counters[$i]->requestlimit;
             $totalrequestcount += $counters[$i]->count;
@@ -639,12 +655,13 @@ function reservation_print_tabs($reservation, $mode) {
 function reservation_set_user_event($reservation, $request) {
     global $CFG, $DB;
 
-    if (!isset($CFG->reservation_events)) {
-        $CFG->reservation_events = 'reservation,event';
+    $events = get_config('reservation', 'events');
+    if ($events === false) {
+        $events = 'reservation,event';
     }
 
-    if ($DB->get_record('user', array('id' => $request->userid)) && !empty($CFG->reservation_events)) {
-        $enabledevents = explode(',', $CFG->reservation_events);
+    if ($DB->get_record('user', array('id' => $request->userid)) && !empty($events)) {
+        $enabledevents = explode(',', $events);
         if (in_array('userevent', $enabledevents)) {
             require_once($CFG->dirroot.'/calendar/lib.php');
 
@@ -676,12 +693,13 @@ function reservation_set_user_event($reservation, $request) {
 function reservation_remove_user_event($reservation, $request) {
     global $CFG, $DB;
 
-    if (!isset($CFG->reservation_events)) {
-        $CFG->reservation_events = 'reservation,event';
+    $events = get_config('reservation', 'events');
+    if ($events === false) {
+        $events = 'reservation,event';
     }
 
-    if ($DB->get_record('user', array('id' => $request->userid)) && !empty($CFG->reservation_events)) {
-        $enabledevents = explode(',', $CFG->reservation_events);
+    if ($DB->get_record('user', array('id' => $request->userid)) && !empty($events)) {
+        $enabledevents = explode(',', $events);
         if (in_array('userevent', $enabledevents)) {
             require_once($CFG->dirroot.'/calendar/lib.php');
 
@@ -719,19 +737,19 @@ function reservation_print_info($reservation, $cmid) {
         $teacherroles = get_archetype_roles('editingteacher');
         $teacherrole = array_shift($teacherroles);
         $teacherstr = role_get_name($teacherrole, $coursecontext);
-        echo html_writer::start_tag('div');
+        echo html_writer::start_tag('div', array('class' => 'teachername'));
         echo html_writer::tag('label', $teacherstr.': ', array('class' => 'bold'));
         echo html_writer::tag('span', $teachername);
         echo html_writer::end_tag('div');
     }
     if (!empty($reservation->location)) {
-        echo html_writer::start_tag('div');
+        echo html_writer::start_tag('div', array('class' => 'location'));
         echo html_writer::tag('label', get_string('location', 'reservation').': ', array('class' => 'bold'));
         echo html_writer::tag('span', $reservation->location);
         echo html_writer::end_tag('div');
     }
     $strftimedaydatetime = get_string('strftimedaydatetime');
-    echo html_writer::start_tag('div');
+    echo html_writer::start_tag('div', array('class' => 'timestart'));
     if (!empty($reservation->timeend)) {
         echo html_writer::tag('label', get_string('timestart', 'reservation').': ', array('class' => 'bold'));
     } else {
@@ -740,7 +758,7 @@ function reservation_print_info($reservation, $cmid) {
     echo html_writer::tag('span', userdate($reservation->timestart, $strftimedaydatetime));
     echo html_writer::end_tag('div');
     if (!empty($reservation->timeend)) {
-        echo html_writer::start_tag('div');
+        echo html_writer::start_tag('div', array('class' => 'timeend'));
         echo html_writer::tag('label', get_string('timeend', 'reservation').': ', array('class' => 'bold'));
         echo html_writer::tag('span', userdate($reservation->timeend, $strftimedaydatetime));
         echo html_writer::end_tag('div');
@@ -749,7 +767,7 @@ function reservation_print_info($reservation, $cmid) {
     echo html_writer::empty_tag('hr', array('class' => 'clearfloat'));
 
     if (!empty($reservation->timeopen)) {
-        echo html_writer::start_tag('div');
+        echo html_writer::start_tag('div', array('class' => 'timeopen'));
         echo html_writer::tag('label', get_string('timeopen', 'reservation').': ', array('class' => 'bold'));
         if ($now < $reservation->timeopen) {
             echo html_writer::tag('span',
@@ -762,7 +780,7 @@ function reservation_print_info($reservation, $cmid) {
         }
         echo html_writer::end_tag('div');
     }
-    echo html_writer::start_tag('div');
+    echo html_writer::start_tag('div', array('class' => 'timeclose'));
     echo html_writer::tag('label', get_string('timeclose', 'reservation').': ', array('class' => 'bold'));
     if ($now > $reservation->timeclose) {
         echo html_writer::tag('span', userdate($reservation->timeclose, $strftimedaydatetime), array('class' => 'notopened'));
@@ -781,7 +799,8 @@ function reservation_print_info($reservation, $cmid) {
 function reservation_print_connected($reservation) {
     global $CFG;
 
-    if (isset($CFG->reservation_connect_to) && ($CFG->reservation_connect_to == 'site')) {
+    $connectto = get_config('reservation', 'connect_to');
+    if ($connectto == 'site') {
         require_once($CFG->libdir.'/coursecatlib.php');
         $displaylist = coursecat::make_categories_list();
     }
@@ -793,7 +812,7 @@ function reservation_print_connected($reservation) {
         $connectedlist .= html_writer::start_tag('ul', array('class' => 'connectedreservations'));
         foreach ($connectedreservations as $cr) {
             $linktext = $cr->coursename . ': ' . $cr->name;
-            if (isset($CFG->reservation_connect_to) && ($CFG->reservation_connect_to == 'site')) {
+            if ($connectto == 'site') {
                 $linktext = $displaylist[$cr->category] .'/'. $linktext;
             }
             $linkurl = new moodle_url('/mod/reservation/view.php', array('r' => $cr->id));
@@ -804,6 +823,55 @@ function reservation_print_connected($reservation) {
 
         echo html_writer::tag('div', $connectedlist, array('class' => 'connected'));
     }
+}
+
+/**
+ * Print reservation availability and counters
+ *
+ * @param stdClass $reservation
+ * @param array    $counters
+ */
+function reservation_print_counters($reservation, $counters) {
+    // Show seats availability.
+    $overview = new html_table();
+    $overview->tablealign = 'center';
+    $overview->attributes['class'] = 'requestoverview';
+    $overview->summary = get_string('requestoverview', 'reservation');
+    $overview->data = array();
+
+    $overview->head = array();
+    $overview->head[] = get_string('requests', 'reservation');
+    for ($i = 1; $i < count($counters); $i++) {
+        $operatorstr = (!$counters[$i]->operator) ? get_string('equal', 'reservation') : get_string('notequal', 'reservation');
+        $overview->head[] = $counters[$i]->fieldname.' '.$operatorstr.' '.$counters[$i]->matchvalue;
+    }
+
+    $columns = array();
+    $limitdetailstr = '';
+    $total = $reservation->maxrequest;
+    if (!empty($reservation->overbook) && ($reservation->maxrequest > 0)) {
+        $overbookseats = round($reservation->maxrequest * $reservation->overbook / 100);
+        $limitdetailstr = ' ('.$reservation->maxrequest.'+'.html_writer::tag('span',
+                                                                             $overbookseats,
+                                                                             array('class' => 'overbooked')).')';
+        $total += $overbookseats;
+    }
+    $columns[] = $counters[0]->count.'/'.(($reservation->maxrequest > 0) ? $total : '&infin;').$limitdetailstr;
+    for ($i = 1; $i < count($counters); $i++) {
+        $limitdetailstr = '';
+        $total = $counters[$i]->requestlimit;
+        if (!empty($reservation->overbook)) {
+            $overbookseats = round($counters[$i]->requestlimit * $reservation->overbook / 100);
+            $limitdetailstr = ' ('.$counters[$i]->requestlimit.'+'.html_writer::tag('span',
+                                                                                    $overbookseats,
+                                                                                    array('class' => 'overbooked')).')';
+            $total += $overbookseats;
+        }
+        $columns[] = $counters[$i]->count.'/'.$total.$limitdetailstr;
+    }
+    $overview->data[] = $columns;
+
+    echo html_writer::tag('div', html_writer::table($overview), array('class' => 'counters'));
 }
 
 /**
@@ -819,12 +887,10 @@ function reservation_get_fields($customfields, $status) {
     $fields = array();
 
     // Get request table display fields.
-    if (!isset($CFG->reservation_fields)) {
-        $CFG->reservation_fields = '';
-    }
+    $fieldslist = get_config('reservation', 'fields');
 
     // Add fields to requests table.
-    $field = strtok($CFG->reservation_fields, ',');
+    $field = strtok($fieldslist, ',');
     while ($field !== false) {
         if (isset($customfields[$field])) {
             if (!isset($fields[$field])) {
@@ -877,11 +943,12 @@ function reservation_get_addableusers($reservation, $status) {
 
     if (has_capability('mod/reservation:manualreserve', $context)) {
         $participants = array();
-        if (!isset($CFG->reservation_manual_users)) {
-            $CFG->reservation_manual_users = 'course';
+        $manualusers = get_config('reservation', 'manual_users');
+        if ($manualusers === false) {
+            $manualusers = 'course';
         }
 
-        if ($CFG->reservation_manual_users == 'site') {
+        if ($manualusers == 'site') {
             $participants = $DB->get_records('user', array('deleted' => 0, 'suspended' => 0), 'lastname ASC', '*');
         } else {
             $participants = get_enrolled_users($coursecontext, null, 0, 'u.*', 'u.lastname ASC');

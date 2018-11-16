@@ -22,9 +22,9 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once('../../config.php');
+require_once('../../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
-require_once('locallib.php');
+require_once('../locallib.php');
 
 $url = new moodle_url('/mod/reservation/locations.php');
 

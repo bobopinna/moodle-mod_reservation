@@ -23,7 +23,7 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once('../../config.php');
+require_once('../../../config.php');
 require_once($CFG->dirroot.'/message/lib.php');
 
 $id = required_param('id', PARAM_INT);
@@ -44,7 +44,7 @@ if (isset($id)) {
     }
 }
 
-$url = new moodle_url('/mod/reservation/messageselect.php', array('id' => $id));
+$url = new moodle_url('/mod/reservation/tool/messageselect.php', array('id' => $id));
 if ($messagebody !== '') {
     $url->param('messagebody', $messagebody);
 }

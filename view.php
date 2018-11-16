@@ -171,8 +171,8 @@ if (isset($status->action) && confirm_sesskey()) {
                     $user->teacher = $USER->id;
                     $SESSION->reservation_messageto[$cm->id][$request->userid] = $user;
                 }
-
-                require_once('messageselect.php');
+                $url = new moodle_url('tool/messageselect.php', array('id' => $cm->id, 'sesskey' => $USER->sesskey));
+                redirect($url);
                 exit();
             }
         break;
@@ -377,7 +377,8 @@ if (!empty($requests)) {
 }
 
 // Set available seats in global count.
-$available = max($CFG->reservation_max_requests, ($counters[0]->count + 1));
+$maxrequests = get_config('reservation', 'max_requests');
+$available = max($maxrequests, ($counters[0]->count + 1));
 $overbook = 0;
 if ($reservation->maxrequest > 0) {
     $available = $reservation->maxrequest;
@@ -386,45 +387,7 @@ if ($reservation->maxrequest > 0) {
 $available = min($available, ($available - $counters[0]->count));
 
 if (empty($status->download) && has_capability('mod/reservation:viewrequest', $context)) {
-    // Show seats availability.
-    $overview = new html_table();
-    $overview->tablealign = 'center';
-    $overview->attributes['class'] = 'overview ';
-    $overview->summary = get_string('requestoverview', 'reservation');
-    $overview->data = array();
-
-    $overview->head = array();
-    $overview->head[] = get_string('requests', 'reservation');
-    for ($i = 1; $i < count($counters); $i++) {
-        $operatorstr = (!$counters[$i]->operator) ? get_string('equal', 'reservation') : get_string('notequal', 'reservation');
-        $overview->head[] = $counters[$i]->fieldname.' '.$operatorstr.' '.$counters[$i]->matchvalue;
-    }
-
-    $columns = array();
-    $limitdetailstr = '';
-    $total = $reservation->maxrequest;
-    if (!empty($reservation->overbook) && ($reservation->maxrequest > 0)) {
-        $overbookseats = round($reservation->maxrequest * $reservation->overbook / 100);
-        $limitdetailstr = ' ('.$reservation->maxrequest.'+'.html_writer::tag('span',
-                                                                             $overbookseats,
-                                                                             array('class' => 'overbooked')).')';
-        $total += $overbookseats;
-    }
-    $columns[] = $counters[0]->count.'/'.(($reservation->maxrequest > 0) ? $total : '&infin;').$limitdetailstr;
-    for ($i = 1; $i < count($counters); $i++) {
-        $limitdetailstr = '';
-        $total = $counters[$i]->requestlimit;
-        if (!empty($reservation->overbook)) {
-            $overbookseats = round($counters[$i]->requestlimit * $reservation->overbook / 100);
-            $limitdetailstr = ' ('.$counters[$i]->requestlimit.'+'.html_writer::tag('span',
-                                                                                    $overbookseats,
-                                                                                    array('class' => 'overbooked')).')';
-            $total += $overbookseats;
-        }
-        $columns[] = $counters[$i]->count.'/'.$total.$limitdetailstr;
-    }
-    $overview->data[] = $columns;
-    echo html_writer::tag('div', html_writer::table($overview));
+    reservation_print_counters($reservation, $counters);
     reservation_print_tabs($reservation, $status->mode);
 }
 
@@ -524,7 +487,8 @@ if (empty($status->download)) {
         } else {
             if ($cr !== false) {
                 $linktext = $cr->coursename . ': ' . $cr->name;
-                if (isset($CFG->reservation_connect_to) && ($CFG->reservation_connect_to == 'site')) {
+                $connectto = get_config('reservation', 'connect_to');
+                if ($connectto == 'site') {
                     $linktext = $displaylist[$cr->category] .'/'. $linktext;
                 }
 

@@ -46,6 +46,8 @@ class mod_reservation_mod_form extends moodleform_mod {
         global $CFG, $COURSE, $DB;
         $mform    =& $this->_form;
 
+        $reservationconfig = get_config('reservation');
+
         $mform->addElement('header', 'general', get_string('general', 'form'));
 
         // Name.
@@ -102,12 +104,7 @@ class mod_reservation_mod_form extends moodleform_mod {
         $mform->addElement('date_time_selector', 'timestart', get_string('timestart', 'reservation'));
         $mform->addElement('date_time_selector', 'timeend', get_string('timeend', 'reservation'), array('optional' => true));
 
-        if (!isset($CFG->reservation_check_clashes)) {
-            $CFG->reservation_check_clashes = 0;
-        }
-
-        if ($CFG->reservation_check_clashes) {
-
+        if (!empty($reservationconfig->checkclashes)) {
             $reportdiv = '<div id="collision_report" class="collision"></div>'."\n";
             $collisiondiv = '<div id="collision_list" class="collision"></div>'."\n";
 
@@ -162,7 +159,7 @@ function checkClashes() {
        }
     }
 
-    var sUrl = "'.$CFG->wwwroot.'/mod/reservation/clashes.php?id='.$COURSE->id.'"+timestart+timeend+location+reservationid;
+    var sUrl = "'.$CFG->wwwroot.'/mod/reservation/tool/clashes.php?id='.$COURSE->id.'"+timestart+timeend+location+reservationid;
 
     YUI().use("io-base", "node",
         function(Y) {
@@ -214,14 +211,14 @@ function checkClashes() {
 
         $reservationid = $this->_instance;
         if ($reservations = reservation_get_parentable($reservationid)) {
-            if (isset($CFG->reservation_connect_to) && ($CFG->reservation_connect_to == 'site')) {
+            if (isset($reservationconfig->connectto) && ($reservationconfig->connectto == 'site')) {
                 require_once($CFG->libdir.'/coursecatlib.php');
                 $displaylist = coursecat::make_categories_list();
             }
             $values = array(0 => get_string('noparent', 'reservation'));
             foreach ($reservations as $reservation) {
                 $value = $reservation->coursename.': '.$reservation->name;
-                if (isset($CFG->reservation_connect_to) && ($CFG->reservation_connect_to == 'site')) {
+                if (isset($reservationconfig->connectto) && ($reservationconfig->connectto == 'site')) {
                     $value = $displaylist[$reservation->category] .'/'. $value;
                 }
                 $values[$reservation->id] = $value;
@@ -244,11 +241,11 @@ function checkClashes() {
 
         $mform->addElement('selectyesno', 'note', get_string('enablenote', 'reservation'));
 
-        if (empty($CFG->reservation_max_requests)) {
-            $CFG->reservation_max_requests = '100';
+        if (!isset($reservationconfig->maxrequests)) {
+            $reservationconfig->maxrequests = '100';
         }
         $values = array(0 => get_string('nolimit', 'reservation'));
-        for ($i = 1; $i <= $CFG->reservation_max_requests; $i++) {
+        for ($i = 1; $i <= $reservationconfig->maxrequests; $i++) {
              $values[$i] = "$i";
         }
         $mform->addElement('select', 'maxrequest', get_string('maxrequest', 'reservation'), $values);
@@ -261,25 +258,25 @@ function checkClashes() {
         $choices[4] = get_string('none', 'reservation');
         $mform->addElement('select', 'showrequest', get_string('showuserrequest', 'reservation'), $choices);
 
-        if (empty($CFG->reservation_max_overbook)) {
-            $CFG->reservation_max_overbook = 100;
+        if (!isset($reservationconfig->maxoverbook)) {
+            $reservationconfig->maxoverbook = 100;
         } else {
-            $CFG->reservation_max_overbook = intval($CFG->reservation_max_overbook);
+            $reservationconfig->maxoverbook = intval($reservationconfig->maxoverbook);
         }
-        if (empty($CFG->reservation_overbook_step)) {
-            $CFG->reservation_overbook_step = 5;
+        if (!isset($reservationconfig->overbookstep)) {
+            $reservationconfig->overbookstep = 5;
         }
 
         $values = array(0 => get_string('nooverbook', 'reservation'));
-        $step = $CFG->reservation_overbook_step;
-        for ($i = $step; $i <= $CFG->reservation_max_overbook; $i += $step) {
+        $step = $reservationconfig->overbookstep;
+        for ($i = $step; $i <= $reservationconfig->maxoverbook; $i += $step) {
              $values[$i] = "$i%";
         }
         $mform->addElement('select', 'overbook', get_string('overbook', 'reservation'), $values);
         $mform->disabledIf('overbook', 'maxrequest', 'eq', '0');
         $mform->setAdvanced('overbook');
 
-        if (isset($CFG->reservation_sublimits) && !empty($CFG->reservation_sublimits)) {
+        if (!empty($reservationconfig->sublimits)) {
 
             $matchdiv = '<div id="matchvalue_list" class="matchlist"></div>'."\n";
 
@@ -292,7 +289,7 @@ function checkClashes() {
 
         var field = document.getElementById(fieldid);
         var fieldvalue = field.options[field.selectedIndex].value;
-        var sUrl = "'.$CFG->wwwroot.'/mod/reservation/matchlist.php?id='.$COURSE->id.'&field="+fieldvalue+"&match="+matchvalueid;
+        var sUrl = "'.$CFG->wwwroot.'/mod/reservation/tool/matchlist.php?id='.$COURSE->id.'&field="+fieldvalue+"&match="+matchvalueid;
 
         YUI().use("io-base", "node",
             function(Y) {
@@ -330,11 +327,11 @@ function checkClashes() {
             $mform->setAdvanced('matchvalues');
 
             $sublimitgrps = array();
-            for ($i = 1; $i <= $CFG->reservation_sublimits; $i++) {
+            for ($i = 1; $i <= $reservationconfig->sublimits; $i++) {
                 $sublimitgrps[$i] = array();
 
                 $values = array();
-                for ($j = 0; $j <= $CFG->reservation_max_requests; $j++) {
+                for ($j = 0; $j <= $reservationconfig->maxrequests; $j++) {
                      $values[$j] = "$j";
                 }
                 $sublimitgrps[$i][] = &$mform->createElement('select', 'requestlimit_'.$i, null, $values);
@@ -371,10 +368,12 @@ function checkClashes() {
 
                 $mform->addGroup($sublimitgrps[$i], 'sublimitgrp_'.$i, get_string('sublimit', 'reservation', $i), ' ', false);
                 $mform->setAdvanced('sublimitgrp_'.$i);
+/*
                 if ($i > 1) {
                     $prev = $i - 1;
                     $mform->disabledIf('sublimitgrp_'.$i, 'field_'.$prev, 'eq', '-');
                 }
+*/
             }
         }
 
@@ -414,8 +413,9 @@ function checkClashes() {
                     $defaultvalues['requestlimit_'.$i] = $reservationlimit->requestlimit;
                     $i++;
                 }
-                if ($i > $CFG->reservation_sublimits) {
-                    $CFG->reservation_sublimits = $i;
+                $sublimits = get_config('reservation', 'sublimits');
+                if ($i > $sublimits) {
+                    set_config('sublimits', $i, 'reservation');
                 }
             }
         }
@@ -456,9 +456,9 @@ function checkClashes() {
         if (isset($data['timeopen']) && !empty($data['timeopen']) && ($data['timeclose'] < $data['timeopen'])) {
             $errors['timeopen'] = get_string('err_timeopengreater', 'reservation');
         }
-        if (($data['maxrequest'] > 0) && isset($CFG->reservation_sublimits) && !empty($CFG->reservation_sublimits)) {
+        if (($data['maxrequest'] > 0) && !empty($reservationconfig->sublimits)) {
             $sublimitsum = 0;
-            for ($i = 1; ($data['field_'.$i] != '-') && ($i <= $CFG->reservation_sublimits); $i++) {
+            for ($i = 1; ($data['field_'.$i] != '-') && ($i <= $reservationconfig->sublimits); $i++) {
                 $sublimitsum += $data['requestlimit_'.$i];
             }
             if ($sublimitsum > $data['maxrequest']) {

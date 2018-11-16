@@ -22,8 +22,8 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once('../../config.php');
-require_once('locallib.php');
+require_once('../../../config.php');
+require_once('../locallib.php');
 
 $id = required_param('id', PARAM_INT);
 $timestartstr = required_param('timestart', PARAM_ALPHANUMEXT);
@@ -43,21 +43,18 @@ $coursecontext = context_course::instance($course->id);
 
 require_capability('moodle/course:manageactivities', $coursecontext);
 
-if (!isset($CFG->reservation_check_clashes)) {
-    $CFG->reservation_check_clashes = 0;
-}
-
-if ($CFG->reservation_check_clashes) {
-
-    if (!isset($CFG->reservation_min_duration)) {
+$checkclashes = get_config('reservation', 'check_clashes');
+$minduration = get_config('reservation', 'min_duration');
+if ($checkclashes) {
+    if ($minduration === false) {
         // Minimal duration an hour.
-        $CFG->reservation_min_duration = 3600;
+        $minduration = 3600;
     }
     if (!empty($timestartstr)) {
         $timearray = explode('-', $timestartstr);
         $timestart = make_timestamp($timearray[0], $timearray[1], $timearray[2], $timearray[3], $timearray[4], 0, 99, true);
 
-        $timeend = $timestart + $CFG->reservation_min_duration;
+        $timeend = $timestart + $minduration;
 
         if (!empty($timeendstr)) {
             $timearray = explode('-', $timeendstr);
@@ -86,7 +83,7 @@ if ($CFG->reservation_check_clashes) {
                         $extimestart = $reservation->timestart;
                         $extimeend = $reservation->timeend;
                         if (empty($reservation->timeend)) {
-                            $extimeend = $reservation->timestart + $CFG->reservation_min_duration;
+                            $extimeend = $reservation->timestart + $minduration;
                         }
 
                          // Collision cases

@@ -22,13 +22,13 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
+require_once('../../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
 require_once($CFG->libdir.'/csvlib.class.php');
 require_once($CFG->dirroot.'/course/lib.php');
 require_once($CFG->dirroot.'/course/modlib.php');
-require_once('lib.php');
-require_once('locallib.php');
+require_once('../lib.php');
+require_once('../locallib.php');
 require_once('uploadform.php');
 
 $iid         = optional_param('iid', '', PARAM_INT);
