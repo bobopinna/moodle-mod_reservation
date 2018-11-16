@@ -88,7 +88,7 @@ function xmldb_reservation_upgrade($oldversion=0) {
         );
         $reservationsettings = $DB->get_records_select('config', 'name like ?', array('reservation_%'));
         if (!empty($reservationsettings)) {
-            foreach($reservationsettings as $reservationsetting) {
+            foreach ($reservationsettings as $reservationsetting) {
                 $settingname = substr($reservationsetting->name, strlen('reservation_') + 1);
                 if (in_array($settingname, $currentsettings)) {
                     set_config($settingname, $reservationsetting->value, 'reservation');

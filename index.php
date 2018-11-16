@@ -35,7 +35,7 @@ $course = $DB->get_record('course', array('id' => $id), '*', MUST_EXIST);
 $coursecontext = context_course::instance($course->id);
 
 $publiclists = get_config('reservation', 'publiclists');
-if (empty($publiclists) || isloggedin()) {
+if (($publiclists === false) || isloggedin()) {
     require_course_login($course);
 } else {
     $PAGE->set_context($coursecontext);
@@ -103,23 +103,23 @@ if ($reservations = get_all_instances_in_course('reservation', $course)) {
     $resnames = array();
     $restimestarts = array();
     $ressections = array();
-    $list_sort = get_config('reservation', 'list_sort');
+    $listsort = get_config('reservation', 'list_sort');
     foreach ($reservations as $key => $row) {
         $resnames[$key]  = $row->name;
-        if ($list_sort == 'date') {
+        if ($listsort == 'date') {
             $restimestarts[$key] = $row->timestart;
         } else {
             $ressections[$key] = $row->section;
         }
     }
 
-    if (empty($list_sort)) {
-         $list_sort = 'section';
+    if ($listsort === false) {
+         $listsort = 'section';
     }
 
-    if (($list_sort == 'date') || (!$usesections)) {
+    if (($listsort == 'date') || (!$usesections)) {
         array_multisort($restimestarts, SORT_NUMERIC, $resnames, SORT_ASC, $reservations);
-    } else if ($list_sort == 'name') {
+    } else if ($listsort == 'name') {
         array_multisort($resnames, SORT_ASC, $ressections, SORT_NUMERIC, $reservations);
     } else {
         array_multisort($ressections, SORT_NUMERIC, $resnames, SORT_ASC, $reservations);
