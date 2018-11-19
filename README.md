@@ -1,4 +1,4 @@
-moodle-mod_reservation
+moodle-mod_reservation [![Build Status](https://travis-ci.org/bobopinna/moodle-enrol_autoenrol.svg?branch=master)](https://travis-ci.org/bobopinna/moodle-enrol_autoenrol)
 ======================
 Reservation module
 
