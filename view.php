@@ -194,6 +194,7 @@ $pagetitle = strip_tags($course->shortname.': '.format_string($reservation->name
 
 $PAGE->set_title($pagetitle);
 $PAGE->set_heading($course->fullname);
+$renderer = $PAGE->get_renderer('mod_reservation');
 
 if (empty($status->download)) {
     //
@@ -206,10 +207,10 @@ if (empty($status->download)) {
 
     echo $OUTPUT->box_start('generalbox boxaligncenter boxwidthwide');
 
-    reservation_print_info($reservation, $cm->id);
+    $renderer->print_info($reservation, $cm->id);
 
     if (has_capability('mod/reservation:viewrequest', $context)) {
-        reservation_print_connected($reservation);
+        $renderer->print_connected($reservation);
     }
 
     echo $OUTPUT->box_end();
@@ -387,8 +388,8 @@ if ($reservation->maxrequest > 0) {
 $available = min($available, ($available - $counters[0]->count));
 
 if (empty($status->download) && has_capability('mod/reservation:viewrequest', $context)) {
-    reservation_print_counters($reservation, $counters);
-    reservation_print_tabs($reservation, $status->mode);
+    $renderer->print_counters($reservation, $counters);
+    $renderer->display_tabs($reservation, $status->mode);
 }
 
 if (empty($status->download)) {
@@ -412,7 +413,7 @@ if (empty($status->download)) {
                 $html .= html_writer::select($addableusers, 'newparticipant');
                 $html .= html_writer::end_tag('div');
 
-                $html .= reservation_get_note_field($reservation);
+                $html .= $renderer->display_note_field($reservation);
 
                 $html .= html_writer::empty_tag('input', array('type' => 'submit',
                                                                'name' => 'reserve',
@@ -475,7 +476,7 @@ if (empty($status->download)) {
                                                                'class' => 'btn btn-primary',
                                                                'value' => get_string('reservecancel', 'reservation')));
             } else if ((($reservation->maxrequest == 0) && ($available > 0)) || ($available > 0) || ($available + $overbook > 0)) {
-                $html .= reservation_get_note_field($reservation);
+                $html .= $renderer->display_note_field($reservation);
 
                 $html .= html_writer::empty_tag('input', array('type' => 'submit',
                                                                'name' => 'reserve',
