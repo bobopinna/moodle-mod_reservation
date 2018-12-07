@@ -79,9 +79,6 @@ if ($reservationid == $reservation->id) {
             if ($DB->get_record('reservation_request', $queryparameters)) {
                 $notice = 'alreadybooked';
             } else {
-                $overbook = round($reservation->maxrequest * $reservation->overbook / 100);
-                $available = get_config('reservation', 'max_requests');
-
                 // Get profile custom fields array.
                 $customfields = reservation_get_profilefields();
 
@@ -90,14 +87,26 @@ if ($reservationid == $reservation->id) {
                 // Set sublimits fields.
                 $fields = reservation_setup_sublimit_fields($counters, $customfields);
 
+                $maxrequests = get_config('reservation', 'max_requests');
+                $available = max($maxrequests, ($counters[0]->count + 1));
+                $overbook = 0;
+                if ($reservation->maxrequest > 0) {
+                    $available = $reservation->maxrequest;
+                    $overbook = round($reservation->maxrequest * $reservation->overbook / 100);
+                }
+                $available = min($available, ($available - $counters[0]->count));
+
                 $requests = reservation_get_requests($reservation, false, $fields);
                 if (isset($requests[0])) {
                     // Remove current user reservation infos.
                     unset($requests[0]);
                 }
                 if (!$requests || (count($requests) < ($reservation->maxrequest + $overbook)) || ($reservation->maxrequest == 0)) {
-                    $result = reservation_get_availability($reservation, $counters, $available);
-                    if (($result !== false) && (($result->available > 0) || ($result->available + $result->overbook > 0))) {
+                    if ($result = reservation_get_availability($reservation, $counters, $available)) {
+                        $available = $result->available;
+                        $overbook = $result->overbook;
+                    }
+                    if (($available > 0) || ($available + $overbook > 0)) {
                         $request->reservation = $reservation->id;
                         $request->timecreated = time();
                         if (isset($request->userid) && !empty($request->userid)) {
