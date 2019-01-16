@@ -209,6 +209,28 @@ function checkClashes() {
         $mform->addElement('header', 'reservationsettings', get_string('reservationsettings', 'reservation'));
         $mform->setExpanded('reservationsettings');
 
+        $mform->addElement('date_time_selector', 'timeopen', get_string('timeopen', 'reservation'), array('optional' => true));
+        $mform->addElement('date_time_selector', 'timeclose', get_string('timeclose', 'reservation'));
+
+        $mform->addElement('selectyesno', 'note', get_string('enablenote', 'reservation'));
+
+        if (!isset($reservationconfig->maxrequests)) {
+            $reservationconfig->maxrequests = '100';
+        }
+        $values = array(0 => get_string('nolimit', 'reservation'));
+        for ($i = 1; $i <= $reservationconfig->maxrequests; $i++) {
+             $values[$i] = "$i";
+        }
+        $mform->addElement('select', 'maxrequest', get_string('maxrequest', 'reservation'), $values);
+
+        $choices = array();
+        $choices[0] = get_string('numberafterclose', 'reservation');
+        $choices[1] = get_string('listafterclose', 'reservation');
+        $choices[2] = get_string('listalways', 'reservation');
+        $choices[3] = get_string('numberalways', 'reservation');
+        $choices[4] = get_string('none', 'reservation');
+        $mform->addElement('select', 'showrequest', get_string('showuserrequest', 'reservation'), $choices);
+
         $reservationid = $this->_instance;
         if ($reservations = reservation_get_parentable($reservationid)) {
             if (isset($reservationconfig->connectto) && ($reservationconfig->connectto == 'site')) {
@@ -235,28 +257,6 @@ function checkClashes() {
             $mform->addElement('select', 'parent', get_string('parent', 'reservation'), $values, $attrs);
             $mform->setAdvanced('parent');
         }
-
-        $mform->addElement('date_time_selector', 'timeopen', get_string('timeopen', 'reservation'), array('optional' => true));
-        $mform->addElement('date_time_selector', 'timeclose', get_string('timeclose', 'reservation'));
-
-        $mform->addElement('selectyesno', 'note', get_string('enablenote', 'reservation'));
-
-        if (!isset($reservationconfig->maxrequests)) {
-            $reservationconfig->maxrequests = '100';
-        }
-        $values = array(0 => get_string('nolimit', 'reservation'));
-        for ($i = 1; $i <= $reservationconfig->maxrequests; $i++) {
-             $values[$i] = "$i";
-        }
-        $mform->addElement('select', 'maxrequest', get_string('maxrequest', 'reservation'), $values);
-
-        $choices = array();
-        $choices[0] = get_string('numberafterclose', 'reservation');
-        $choices[1] = get_string('listafterclose', 'reservation');
-        $choices[2] = get_string('listalways', 'reservation');
-        $choices[3] = get_string('numberalways', 'reservation');
-        $choices[4] = get_string('none', 'reservation');
-        $mform->addElement('select', 'showrequest', get_string('showuserrequest', 'reservation'), $choices);
 
         if (!isset($reservationconfig->maxoverbook)) {
             $reservationconfig->maxoverbook = 100;
