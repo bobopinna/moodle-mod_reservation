@@ -137,12 +137,12 @@ class mod_reservation_renderer extends plugin_renderer_base {
             $displaylist = coursecat::make_categories_list();
         }
         // Show connected reservations.
-        if ($connectedreservations = reservation_get_connected($reservation)) {
+        if ($connectedreservs = reservation_get_connected($reservation)) {
             $connectedlist = html_writer::tag('label',
                                                get_string('connectedto', 'reservation').': ',
                                                array('class' => 'bold'));
             $connectedlist .= html_writer::start_tag('ul', array('class' => 'connectedreservations'));
-            foreach ($connectedreservations as $cr) {
+            foreach ($connectedreservs as $cr) {
                 $linktext = $cr->coursename . ': ' . $cr->name;
                 if ($connectto == 'site') {
                     $linktext = $displaylist[$cr->category] .'/'. $linktext;

@@ -840,6 +840,9 @@ function reservation_get_table_data($reservation, $requests, &$addableusers, &$c
 
     $rows = array();
     if (!empty($requests)) {
+        if (isset($fields['country'])) {
+            $countrynames = get_string_manager()->get_list_of_countries();
+        }
         foreach ($requests as $request) {
             $row = array();
             $rowclasses = array();

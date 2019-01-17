@@ -847,7 +847,7 @@ function reservation_postprocess($reservation) {
  * @return void
  */
 function reservation_set_sublimits($reservation) {
-    global $CFG, $DB;
+    global $DB;
 
     $sublimits = get_config('reservation', 'sublimits');
     if (!empty($sublimits)) {

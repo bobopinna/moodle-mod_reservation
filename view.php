@@ -188,8 +188,6 @@ if (isset($status->action) && confirm_sesskey()) {
 $strreservations = get_string('modulenameplural', 'reservation');
 $strreservation  = get_string('modulename', 'reservation');
 
-$countrynames = get_string_manager()->get_list_of_countries();
-
 $pagetitle = strip_tags($course->shortname.': '.format_string($reservation->name));
 
 $PAGE->set_title($pagetitle);

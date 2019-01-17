@@ -164,7 +164,7 @@ class restore_reservation_activity_structure_step extends restore_activity_struc
      * @return void
      */
     protected function after_restore() {
-        global $DB;
+        global $DB, $OUTPUT;
 
         // Now that all the reservation have been restored,
         // let's process the reservation connections.

@@ -388,7 +388,7 @@ function checkClashes() {
      * @param array $defaultvalues
      */
     public function data_preprocessing(&$defaultvalues) {
-        global $CFG, $DB;
+        global $DB;
 
         if (!empty($defaultvalues['instance'])) {
             if (!empty($defaultvalues['teachers'])) {
@@ -447,8 +447,6 @@ function checkClashes() {
      * @param array $files
      */
     public function validation($data, $files) {
-        global $CFG;
-
         $errors = parent::validation($data, $files);
 
         if (isset($data['timeend']) && !empty($data['timeend']) && ($data['timeend'] < $data['timestart'])) {
