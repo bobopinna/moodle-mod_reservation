@@ -15,13 +15,23 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
+ * This file contains renderers to display contents of this module
+ *
+ * @package mod_reservation
+ * @copyright 2018 onwards Roberto Pinna
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+defined('MOODLE_INTERNAL') || die();
+defined('MOODLE_INTERNAL') || die();
+
+/**
  * Moodle renderer used to display elements of the reservation module
  *
  * @package   mod_reservation
  * @copyright 2018 Roberto Pinna
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  **/
-
 class mod_reservation_renderer extends plugin_renderer_base {
 
     /**

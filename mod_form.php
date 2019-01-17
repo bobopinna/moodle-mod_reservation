@@ -369,12 +369,6 @@ function checkClashes() {
 
                 $mform->addGroup($sublimitgrps[$i], 'sublimitgrp_'.$i, get_string('sublimit', 'reservation', $i), ' ', false);
                 $mform->setAdvanced('sublimitgrp_'.$i);
-                /*
-                if ($i > 1) {
-                    $prev = $i - 1;
-                    $mform->disabledIf('sublimitgrp_'.$i, 'field_'.$prev, 'eq', '-');
-                }
-                */
             }
         }
 

@@ -82,7 +82,7 @@ function reservation_get_reservations_by_course($courseid, $location='') {
  * @return array  The reservations menu list or false
  */
 function reservation_get_parentable($reservationid) {
-    global $DB, $CFG, $COURSE;
+    global $DB, $COURSE;
 
     $searchfields = array();
     $additionalquery = '';
@@ -715,8 +715,6 @@ function reservation_remove_user_event($reservation, $request) {
  * @return array
  */
 function reservation_get_fields($customfields, $status) {
-    global $CFG;
-
     $fields = array();
 
     // Get request table display fields.
@@ -765,7 +763,7 @@ function reservation_get_fields($customfields, $status) {
  * @return array
  */
 function reservation_get_addableusers($reservation, $status) {
-    global $CFG, $DB, $USER, $PAGE;
+    global $DB, $USER, $PAGE;
 
     $context = $PAGE->context;
 
@@ -798,7 +796,6 @@ function reservation_get_addableusers($reservation, $status) {
                         } else if (!has_capability('mod/reservation:viewrequest', $context)) {
                             $mygroups = groups_get_user_groups($reservation->course, $USER->id);
                             if (!empty($mygroups['0'])) {
-                                $notmember = true;
                                 $i = 0;
                                 while (($i < count($mygroups['0'])) && (!groups_is_member($mygroups['0'][$i], $participant->id))) {
                                     $i++;
@@ -883,7 +880,6 @@ function reservation_get_table_data($reservation, $requests, &$addableusers, &$c
                 } else if (!has_capability('mod/reservation:viewrequest', $context)) {
                     $mygroups = groups_get_user_groups($reservation->course, $USER->id);
                     if (!empty($mygroups['0'])) {
-                        $notmember = true;
                         $i = 0;
                         while (($i < count($mygroups['0'])) && (!groups_is_member($mygroups['0'][$i], $request->userid))) {
                             $i++;
