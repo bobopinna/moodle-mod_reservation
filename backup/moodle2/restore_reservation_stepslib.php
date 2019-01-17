@@ -183,7 +183,7 @@ class restore_reservation_activity_structure_step extends restore_activity_struc
                     $DB->set_field('reservation', 'parent', $newparentid, array('id' => $rec->id));
                 } else {
                     $DB->set_field('reservation', 'parent', 0, array('id' => $rec->id));
-                    notify(get_string('badparent', 'reservation'));
+                    $OUTPUT->notification(get_string('badparent', 'reservation'));
                 }
             }
         }
