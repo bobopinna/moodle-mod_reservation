@@ -669,7 +669,7 @@ function reservation_refresh_events($courseid = 0) {
         }
     }
 
-    $events = get_config('reservation', 'events');
+    $events = explode(',', get_config('reservation', 'events'));
     foreach ($reservations as $reservation) {
         $DB->delete_records('event', array('modulename' => 'reservation', 'instance' => $reservation->id));
 
