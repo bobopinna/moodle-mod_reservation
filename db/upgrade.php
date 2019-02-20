@@ -98,4 +98,7 @@ function xmldb_reservation_upgrade($oldversion=0) {
         }
         upgrade_mod_savepoint(true, 2018111400, 'reservation');
     }
+    if ($oldversion < 2019022000) {
+        upgrade_mod_savepoint(true, 2019022000, 'reservation');
+    }
 }

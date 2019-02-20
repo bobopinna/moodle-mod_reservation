@@ -24,7 +24,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version  = 2018111400;  // The current plugin version.
+$plugin->version  = 2019022000;  // The current plugin version.
 $plugin->requires = 2017111300;  // Requires this Moodle version (3.4).
 $plugin->component  = 'mod_reservation';
 $plugin->release  = '3.5';       // The current plugin release.

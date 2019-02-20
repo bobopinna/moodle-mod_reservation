@@ -65,8 +65,8 @@ $capabilities = array(
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
         'archetypes' => array(
-            'user' => CAP_ALLOW,
-            'student' => CAP_ALLOW
+            'student' => CAP_ALLOW,
+            'frontpage' => CAP_ALLOW
         )
     ),
 
