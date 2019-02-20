@@ -409,13 +409,12 @@ function reservation_cron () {
             $reservationinfo->url = $CFG->wwwroot.'/mod/reservation/view.php?id='.$mod->id;
 
             if (in_array('teachers', $notifies)) {
+                $context = context_module::instance($mod->id);
                 // Notify to teachers.
                 if (!empty($reservation->teachers)) {
                     $teachers = explode(',', $reservation->teachers);
                 } else {
                     // If no teachers are defined in reservation notify to all editing teachers and managers.
-                    $context = context_module::instance($mod->id);
-
                     $teachers = array_keys(get_users_by_capability($context, 'mod/reservation:addinstance', 'u.id'));
                 }
                 if (!empty($teachers)) {
@@ -423,6 +422,8 @@ function reservation_cron () {
                         mtrace('Processing reservation teacher '.$teacherid);
                         if (! $teacher = $DB->get_record('user', array('id' => $teacherid))) {
                             mtrace('Could not find user '.$teacherid);
+                            continue;
+                        } else if (has_capability('mod/reservation:reserve', $context, $teacherid)) {
                             continue;
                         }
 

@@ -70,10 +70,12 @@ class mod_reservation_mod_form extends moodleform_mod {
             // Fix for tutors.
             $capability = 'mod/reservation:addinstance';
         }
-        if ($teacherusers = get_users_by_capability($context, $capability, 'u.*', 'u.lastname ASC')) {
+        if ($teacherusers = get_enrolled_users($context, $capability, 0, 'u.*', 'u.lastname ASC')) {
             $availableteachers = array();
             foreach ($teacherusers as $teacheruser) {
-                $availableteachers[$teacheruser->id] = fullname($teacheruser);
+                if (! has_capability('mod/reservation:reserve', $context, $teacheruser)) {
+                    $availableteachers[$teacheruser->id] = fullname($teacheruser);
+                }
             }
             $teacherselect = &$mform->addElement('select', 'teachers', get_string('teachers'), $availableteachers);
             $teacherselect->setMultiple(true);
