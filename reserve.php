@@ -102,7 +102,7 @@ if ($reservationid == $reservation->id) {
                     unset($requests[0]);
                 }
                 if (!$requests || (count($requests) < ($reservation->maxrequest + $overbook)) || ($reservation->maxrequest == 0)) {
-                    if ($result = reservation_get_availability($reservation, $counters, $available)) {
+                    if ($result = reservation_get_availability($reservation, $counters, $context)) {
                         $available = $result->available;
                         $overbook = $result->overbook;
                     }
