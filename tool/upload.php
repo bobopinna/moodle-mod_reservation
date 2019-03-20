@@ -56,7 +56,7 @@ $fields = array(
         'teachers',
         'timestart',
         'timeend',
-        'maxgrade',
+        'grade',
         'timeopen',
         'timeclose',
         'maxrequest',
@@ -230,9 +230,9 @@ if (!empty($iid)) {
                             }
                         }
 
-                        $reservation->maxgrade = 0;
-                        if (isset($data->maxgrade) && !empty($data->maxgrade)) {
-                            $reservation->maxgrade = $data->maxgrade;
+                        $reservation->grade = 0;
+                        if (isset($data->grade) && !empty($data->grade)) {
+                            $reservation->grade = $data->grade;
                         }
 
                         $reservation->timeopen = 0;

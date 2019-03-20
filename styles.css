@@ -34,24 +34,35 @@
     vertical-align: text-top;
 }
 
-.path-mod-reservation .note {
+.path-mod-reservation .notelabel {
     display: block;
+}
+
+.path-mod-reservation .usernote {
+    font-size: .75em;
+    margin-top: .5em;
 }
 
 .path-mod-reservation .overview td {
     text-align: center;
 }
 
-.path-mod-reservation .manualreserve {
+.path-mod-reservation .manualreserve,
+.path-mod-reservation .reserve {
     text-align: center;
 }
 
+.path-mod-reservation .graded,
+.path-mod-reservation .alreadybooked,
 .path-mod-reservation .justbooked {
+    text-align: center;
     font-size: 1.5em;
+    margin-bottom: 1em;
 }
 
 .path-mod-reservation .yourreservation,
 .path-mod-reservation .justbookednumber {
+    text-align: center;
     font-weight: bold;
 }
 
@@ -119,54 +130,10 @@
 /**
  * Editing page
  */
-.path-mod-reservation #collision_report {
-    padding-top: 5px;
-    padding-left: 10px;
-    display: inline-block;
-}
-
-.path-mod-reservation #collision_report .timeavailable {
-    padding: 5px;
-    padding-left: 25px;
-    background-image: url([[pix:core|i/valid]]);
-    background-repeat: no-repeat;
-    background-position: 1%;
-}
-
-.path-mod-reservation #collision_report .clashesfound {
-    padding: 5px;
-    padding-left: 25px;
-    background-image: url([[pix:core|i/caution]]);
-    background-repeat: no-repeat;
-    background-position: 1%;
-}
-
-.path-mod-reservation #collision_list {
-    display: none;
-}
-
-.path-mod-reservation #collision_list table.collisions {
+.path-mod-reservation table.collisions {
     margin: 0;
 }
 
-.path-mod-reservation .matchlist {
-    position: absolute;
-    padding: 5px;
-    display: none;
-    width: 50%;
-    float: left;
-    z-index: 99999;
-    background-color: white;
-    border: thin solid black;
-}
-
-.path-mod-reservation .matchlistvalues {
-    height: 19em;
-    overflow-y: auto;
-}
-
-.path-mod-reservation .matchlistcloser {
-    position: relative;
-    float: right;
-    text-align: right;
+.path-mod-reservation .matchvalues {
+    list-style: none;
 }

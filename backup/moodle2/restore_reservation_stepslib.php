@@ -83,6 +83,10 @@ class restore_reservation_activity_structure_step extends restore_activity_struc
             $data->parent = -$data->parent;
         }
 
+        if (!isset($data->grade) && isset($data->maxgrade)) {
+            $data->grade = $data->maxgrade;
+        }
+
         $data->timestart = $this->apply_date_offset($data->timestart);
         $data->timeend = $this->apply_date_offset($data->timeend);
         $data->timeopen = $this->apply_date_offset($data->timeopen);

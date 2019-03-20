@@ -104,7 +104,7 @@ function reservation_update_instance($reservation) {
         $DB->delete_records('event', array('modulename' => 'reservation', 'instance' => $reservation->id));
         reservation_set_events($reservation);
 
-        if (!empty($reservation->maxgrade)) {
+        if (!empty($reservation->grade)) {
             reservation_grade_item_update($reservation);
         } else {
             reservation_grade_item_delete($reservation);
@@ -577,7 +577,7 @@ function reservation_update_grades($reservation=null, $userid=0, $nullifnone=tru
                  WHERE m.name='reservation' AND m.id=cm.module AND cm.instance=a.id";
         if ($rs = $DB->get_recordset_sql($sql)) {
             foreach ($rs as $reservation) {
-                if ($reservation->maxgrade != 0) {
+                if ($reservation->grade != 0) {
                     reservation_update_grades($reservation);
                 } else {
                     reservation_grade_item_update($reservation);
@@ -607,14 +607,14 @@ function reservation_grade_item_update($reservation, $grades=null) {
 
     $params = array('itemname' => $reservation->name, 'idnumber' => $reservation->id);
 
-    if ($reservation->maxgrade > 0) {
+    if ($reservation->grade > 0) {
         $params['gradetype'] = GRADE_TYPE_VALUE;
-        $params['grademax']  = $reservation->maxgrade;
+        $params['grademax']  = $reservation->grade;
         $params['grademin']  = 0;
 
-    } else if ($reservation->maxgrade < 0) {
+    } else if ($reservation->grade < 0) {
         $params['gradetype'] = GRADE_TYPE_SCALE;
-        $params['scaleid']   = -$reservation->maxgrade;
+        $params['scaleid']   = -$reservation->grade;
 
     } else {
         $params['gradetype'] = GRADE_TYPE_TEXT; // Allow text comments only.

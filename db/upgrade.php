@@ -101,4 +101,18 @@ function xmldb_reservation_upgrade($oldversion=0) {
     if ($oldversion < 2019022000) {
         upgrade_mod_savepoint(true, 2019022000, 'reservation');
     }
+    if ($oldversion < 2019031300) {
+        // Rename field maxgrade on table reservation to grade.
+        $table = new xmldb_table('reservation');
+        $field = new xmldb_field('maxgrade', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'timeend');
+
+        // Launch rename field grade.
+        $dbman->rename_field($table, $field, 'grade');
+
+        upgrade_mod_savepoint(true, 2019031300, 'reservation');
+    }
+
+    if ($oldversion < 2019031900) {
+        upgrade_mod_savepoint(true, 2019031900, 'reservation');
+    }
 }

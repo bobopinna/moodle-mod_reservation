@@ -43,7 +43,7 @@ class mod_reservation_mod_form extends moodleform_mod {
      */
     public function definition() {
 
-        global $CFG, $COURSE, $DB;
+        global $CFG, $COURSE, $DB, $PAGE;
         $mform    =& $this->_form;
 
         $reservationconfig = get_config('reservation');
@@ -94,8 +94,8 @@ class mod_reservation_mod_form extends moodleform_mod {
             }
             natsort($associativelocations);
             $locations = array_merge(array(0 => get_string('otherlocation', 'reservation')), $associativelocations);
-            $locationgrp[] = &$mform->createElement('select', 'location', null, $locations,
-                    'onchange="getElementById(\'id_locationtext\').value=\'\'"');
+            $onchange = 'onchange="getElementById(\'id_locationtext\').value=\'\'"';
+            $locationgrp[] = &$mform->createElement('select', 'location', null, $locations, $onchange);
             $locationsize = 40;
         }
         $locationgrp[] = &$mform->createElement('text', 'locationtext', 'size="'.$locationsize.'"');
@@ -106,106 +106,11 @@ class mod_reservation_mod_form extends moodleform_mod {
         $mform->addElement('date_time_selector', 'timestart', get_string('timestart', 'reservation'));
         $mform->addElement('date_time_selector', 'timeend', get_string('timeend', 'reservation'), array('optional' => true));
 
-        if (!empty($reservationconfig->checkclashes)) {
-            $reportdiv = '<div id="collision_report" class="collision"></div>'."\n";
-            $collisiondiv = '<div id="collision_list" class="collision"></div>'."\n";
-
-            $strclashesfound = get_string('clashesfound', 'reservation');
-            $strnoclashes = get_string('noclashes', 'reservation');
-
-            $script = '<script type="text/javascript">
-function checkClashes() {
-
-    var reportdiv = document.getElementById("collision_report");
-    var clashesdiv = document.getElementById("collision_list");
-
-    var timestart_day_element = document.getElementsByName("timestart[day]")[0];
-    var timestart_day = timestart_day_element.options[timestart_day_element.selectedIndex].value;
-    var timestart_month_element = document.getElementsByName("timestart[month]")[0];
-    var timestart_month = timestart_month_element.options[timestart_month_element.selectedIndex].value;
-    var timestart_year_element = document.getElementsByName("timestart[year]")[0];
-    var timestart_year = timestart_year_element.options[timestart_year_element.selectedIndex].value;
-    var timestart_hour_element = document.getElementsByName("timestart[hour]")[0];
-    var timestart_hour = timestart_hour_element.options[timestart_hour_element.selectedIndex].value;
-    var timestart_minute_element = document.getElementsByName("timestart[minute]")[0];
-    var timestart_minute = timestart_minute_element.options[timestart_minute_element.selectedIndex].value;
-    var timestart = "&timestart="+timestart_year+"-"+timestart_month+"-"+timestart_day+"-"+timestart_hour+"-"+timestart_minute;
-
-    var timeend = "";
-    if (document.getElementsByName("timeend[enabled]")[0].checked == true) {
-        var timeend_day_element = document.getElementsByName("timeend[day]")[0];
-        var timeend_day = timeend_day_element.options[timeend_day_element.selectedIndex].value;
-        var timeend_month_element = document.getElementsByName("timeend[month]")[0];
-        var timeend_month = timeend_month_element.options[timeend_month_element.selectedIndex].value;
-        var timeend_year_element = document.getElementsByName("timeend[year]")[0];
-        var timeend_year = timeend_year_element.options[timeend_year_element.selectedIndex].value;
-        var timeend_hour_element = document.getElementsByName("timeend[hour]")[0];
-        var timeend_hour = timeend_hour_element.options[timeend_hour_element.selectedIndex].value;
-        var timeend_minute_element = document.getElementsByName("timeend[minute]")[0];
-        var timeend_minute = timeend_minute_element.options[timeend_minute_element.selectedIndex].value;
-        timeend = "&timeend="+timeend_year+"-"+timeend_month+"-"+timeend_day+"-"+timeend_hour+"-"+timeend_minute;
-    }
-
-    var reservationid = "";
-    if (document.getElementsByName("instance")[0].value != "") {
-        reservationid = "&reservation="+document.getElementsByName("instance")[0].value;
-    }
-
-    var location = "";
-    var location_element = document.getElementsByName("location")[0];
-    if ((typeof location_element != "undefined") && (location_element.selectedIndex != 0)) {
-        location = "&location="+location_element.options[location_element.selectedIndex].value;
-    } else {
-       if (document.getElementsByName("locationtext")[0].value != "") {
-           location = "&location="+document.getElementsByName("locationtext")[0].value;
-       }
-    }
-
-    var sUrl = "'.$CFG->wwwroot.'/mod/reservation/tool/clashes.php?id='.$COURSE->id.'"+timestart+timeend+location+reservationid;
-
-    YUI().use("io-base", "node",
-        function(Y) {
-            var handleSuccess = function(id, o){
-                if (o.responseText !== undefined) {
-                    if (o.responseText !== "") {
-                        reportdiv.innerHTML = \'<span class="clashesfound">'.$strclashesfound.'</span>\';
-                        clashesdiv.innerHTML = o.responseText;
-                        clashesdiv.style.display = "block";
-                    } else {
-                        reportdiv.innerHTML = \'<span class="timeavailable">'.$strnoclashes.'</span>\';
-                        clashesdiv.style.display = "none";
-                    }
-                }
-            }
-
-            var handleFailure = function(id, o){
-                if (o.responseText !== undefined) {
-                    return false;
-                }
-            }
-
-            var cfg = {
-                on: {
-                    success: handleSuccess,
-                    failure: handleFailure
-                }
-            };
-
-            Y.io(sUrl, cfg);
-        }
-    );
-}
-
-</script>
-';
-
+        if (!empty($reservationconfig->check_clashes)) {
             $mform->addElement('static', 'collision', '',
-                    '<input type="button" id="checkclashes" onclick="checkClashes()" value="'.
-                    get_string('checkclashes', 'reservation').'" class="btn btn-primary" />'.$reportdiv.$collisiondiv.$script);
+                    '<input type="button" id="checkclashes" value="'.
+                    get_string('checkclashes', 'reservation').'" class="btn btn-primary" />');
         }
-
-        $mform->addElement('modgrade', 'maxgrade', get_string('grade'));
-        $mform->setDefault('maxgrade', 0);
 
         // Reservation Settings.
         $mform->addElement('header', 'reservationsettings', get_string('reservationsettings', 'reservation'));
@@ -214,13 +119,17 @@ function checkClashes() {
         $mform->addElement('date_time_selector', 'timeopen', get_string('timeopen', 'reservation'), array('optional' => true));
         $mform->addElement('date_time_selector', 'timeclose', get_string('timeclose', 'reservation'));
 
-        $mform->addElement('selectyesno', 'note', get_string('enablenote', 'reservation'));
+        $choices = array();
+        $choices[0] = get_string('no');
+        $choices[1] = get_string('optional', 'reservation');
+        $choices[2] = get_string('required', 'reservation');
+        $mform->addElement('select', 'note', get_string('enablenote', 'reservation'), $choices);
 
-        if (!isset($reservationconfig->maxrequests)) {
-            $reservationconfig->maxrequests = '100';
+        if (!isset($reservationconfig->max_requests)) {
+            $reservationconfig->max_requests = '100';
         }
         $values = array(0 => get_string('nolimit', 'reservation'));
-        for ($i = 1; $i <= $reservationconfig->maxrequests; $i++) {
+        for ($i = 1; $i <= $reservationconfig->max_requests; $i++) {
              $values[$i] = "$i";
         }
         $mform->addElement('select', 'maxrequest', get_string('maxrequest', 'reservation'), $values);
@@ -235,14 +144,14 @@ function checkClashes() {
 
         $reservationid = $this->_instance;
         if ($reservations = reservation_get_parentable($reservationid)) {
-            if (isset($reservationconfig->connectto) && ($reservationconfig->connectto == 'site')) {
+            if (isset($reservationconfig->connect_to) && ($reservationconfig->connect_to == 'site')) {
                 require_once($CFG->libdir.'/coursecatlib.php');
                 $displaylist = coursecat::make_categories_list();
             }
             $values = array(0 => get_string('noparent', 'reservation'));
             foreach ($reservations as $reservation) {
                 $value = $reservation->coursename.': '.$reservation->name;
-                if (isset($reservationconfig->connectto) && ($reservationconfig->connectto == 'site')) {
+                if (isset($reservationconfig->connect_to) && ($reservationconfig->connect_to == 'site')) {
                     $value = $displaylist[$reservation->category] .'/'. $value;
                 }
                 $values[$reservation->id] = $value;
@@ -260,18 +169,18 @@ function checkClashes() {
             $mform->setAdvanced('parent');
         }
 
-        if (!isset($reservationconfig->maxoverbook)) {
-            $reservationconfig->maxoverbook = 100;
+        if (!isset($reservationconfig->max_overbook)) {
+            $reservationconfig->max_overbook = 100;
         } else {
-            $reservationconfig->maxoverbook = intval($reservationconfig->maxoverbook);
+            $reservationconfig->max_overbook = intval($reservationconfig->max_overbook);
         }
-        if (!isset($reservationconfig->overbookstep)) {
-            $reservationconfig->overbookstep = 5;
+        if (!isset($reservationconfig->overbook_step)) {
+            $reservationconfig->overbook_step = 5;
         }
 
         $values = array(0 => get_string('nooverbook', 'reservation'));
-        $step = $reservationconfig->overbookstep;
-        for ($i = $step; $i <= $reservationconfig->maxoverbook; $i += $step) {
+        $step = $reservationconfig->overbook_step;
+        for ($i = $step; $i <= $reservationconfig->max_overbook; $i += $step) {
              $values[$i] = "$i%";
         }
         $mform->addElement('select', 'overbook', get_string('overbook', 'reservation'), $values);
@@ -279,62 +188,12 @@ function checkClashes() {
         $mform->setAdvanced('overbook');
 
         if (!empty($reservationconfig->sublimits)) {
-
-            $matchdiv = '<div id="matchvalue_list" class="matchlist"></div>'."\n";
-
-            $script = '<script type="text/javascript">
-    function selectMatchValue(matchvalueid, fieldid) {
-
-        var div = document.getElementById("matchvalue_list");
-
-        var matchvalue = document.getElementById(matchvalueid);
-
-        var field = document.getElementById(fieldid);
-        var fieldvalue = field.options[field.selectedIndex].value;
-        var sUrl = "'.$CFG->wwwroot.'/mod/reservation/tool/matchlist.php?id='.$COURSE->id
-                .'&field="+fieldvalue+"&match="+matchvalueid;
-
-        YUI().use("io-base", "node",
-            function(Y) {
-                var handleSuccess = function(id, o){
-                    if (o.responseText !== undefined) {
-                        div.innerHTML = o.responseText;
-                        div.style.display = "block";
-                    }
-                }
-
-                var handleFailure = function(id, o){
-                    if (o.responseText !== undefined) {
-                        return false;;
-                    }
-                }
-
-                var cfg = {
-                    on: {
-                        success: handleSuccess,
-                        failure: handleFailure
-                    }
-                };
-
-                Y.io(sUrl, cfg);
-            }
-        );
-
-        //matchvalue.value = fieldid;
-
-    }
-</script>
-';
-
-            $mform->addElement('static', 'matchvalues', get_string('sublimitrules', 'reservation'), $matchdiv.$script);
-            $mform->setAdvanced('matchvalues');
-
             $sublimitgrps = array();
             for ($i = 1; $i <= $reservationconfig->sublimits; $i++) {
                 $sublimitgrps[$i] = array();
 
                 $values = array();
-                for ($j = 0; $j <= $reservationconfig->maxrequests; $j++) {
+                for ($j = 0; $j <= $reservationconfig->max_requests; $j++) {
                      $values[$j] = "$j";
                 }
                 $sublimitgrps[$i][] = &$mform->createElement('select', 'requestlimit_'.$i, null, $values);
@@ -355,8 +214,8 @@ function checkClashes() {
                         $fields[$customfield->shortname] = $customfield->name;
                     }
                 }
-                $onchange = 'onchange="getElementById(\'id_matchvalue_'.$i.'\').value=\'\'"';
-                $sublimitgrps[$i][] = &$mform->createElement('select', 'field_'.$i, null, $fields, $onchange);
+                $attributes = 'class="field"';
+                $sublimitgrps[$i][] = &$mform->createElement('select', 'field_'.$i, null, $fields, $attributes);
 
                 unset($operators);
                 $operators = array();
@@ -364,8 +223,8 @@ function checkClashes() {
                 $operators[] = get_string('notequal', 'reservation');
                 $sublimitgrps[$i][] = &$mform->createElement('select', 'operator_'.$i, null, $operators);
 
-                $onfocus = 'onfocus="selectMatchValue(\'id_matchvalue_'.$i.'\',\'id_field_'.$i.'\')"';
-                $sublimitgrps[$i][] = &$mform->createElement('text', 'matchvalue_'.$i, null, $onfocus);
+                $attributes = 'class="matchvalue"';
+                $sublimitgrps[$i][] = &$mform->createElement('text', 'matchvalue_'.$i, null, $attributes);
                 $mform->setType('matchvalue_'.$i, PARAM_TEXT);
                 $mform->disabledIf('matchvalue_'.$i, 'field_'.$i, 'eq', '-');
 
@@ -374,8 +233,13 @@ function checkClashes() {
             }
         }
 
+        $this->standard_grading_coursemodule_elements();
         $this->standard_coursemodule_elements();
         $this->add_action_buttons();
+
+        $options = new stdClass();
+        $options->courseid = $COURSE->id;
+        $PAGE->requires->js_call_amd('mod_reservation/reservationedit', 'init', [$options]);
     }
 
     /**

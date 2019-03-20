@@ -239,7 +239,7 @@ function reservation_get_requests($reservation, $full=false, $fields=null, $grou
             }
 
             // Add user note.
-            if ($reservation->note == 1) {
+            if ($reservation->note >= 1) {
                 $requests[$requestid]->note = $DB->get_field('reservation_note', 'note', array('request' => $requestid));
             }
 
@@ -323,6 +323,51 @@ function reservation_set_grades($reservation, $teacherid, $grades) {
                 $DB->update_record('reservation_request', $request);
                 require_once('lib.php');
                 reservation_update_grades($reservation, $request->userid);
+            }
+        }
+    }
+}
+
+/**
+ * Delete given reservation requests data and grades
+ *
+ * @param stdClass $reservation
+ * @param array $requestids
+ */
+function reservation_delete_requests($reservation, $requestids) {
+    global $DB;
+
+    $course = $DB->get_record('course', array('id' => $reservation->course));
+    $cm = get_coursemodule_from_instance('reservation', $reservation->id, $course->id);
+    $context = context_module::instance($cm->id);
+    if (is_array($requestids) && !empty($requestids)) {
+        require_once('lib.php');
+        foreach ($requestids as $num => $requestid) {
+            if (!empty($requestid)) {
+                unset($requestids[$num]);
+                $request = $DB->get_record('reservation_request', array('id' => $requestid));
+                $requestnote = $DB->get_record('reservation_note', array('request' => $requestid));
+                $requestnote = !empty($requestnote) ? $requestnote : new stdClass();
+
+                $DB->set_field('reservation_request', 'grade', -1, array('id' => $requestid));
+                $userid = $DB->get_field('reservation_request', 'userid', array('id' => $requestid));
+                reservation_update_grades($reservation, $userid);
+
+                reservation_remove_user_event($reservation, $request);
+
+                $DB->delete_records('reservation_request', array('id' => $requestid));
+                $DB->delete_records('reservation_note', array('request' => $requestid));
+
+                // Update completion state.
+                $completion = new completion_info($course);
+                if ($completion->is_enabled($cm)) {
+                    $completion->update_state($cm, COMPLETION_INCOMPLETE, $userid);
+                }
+
+                \mod_reservation\event\request_deleted::create_from_request($reservation,
+                                                                            $context,
+                                                                            $request,
+                                                                            $requestnote)->trigger();
             }
         }
     }
@@ -437,6 +482,7 @@ function reservation_setup_counters($reservation, $customfields) {
 /**
  * Update counters for the given reservation request
  *
+ * @param stdClass $reservation
  * @param array $counters
  * @param stdClass $request
  * @return array Updated counters
@@ -510,14 +556,15 @@ function reservation_setup_sublimit_fields($counters, $customfields, $fields = a
 }
 
 /**
- * Calculate available seat for USER.
+ * Calculate available seats for USER.
  *
  * @param stdClass $reservation
  * @param array $counters
- * @param integer $available
- * @return bool seat availability
+ * @param context $context
+ *
+ * @return object seat availability
  */
-function reservation_get_availability($reservation, $counters, $available) {
+function reservation_get_availability($reservation, $counters, $context) {
     global $USER;
 
     $availablesublimit = 0;
@@ -526,51 +573,72 @@ function reservation_get_availability($reservation, $counters, $available) {
     $totalrequestlimit = 0;
     $totalrequestcount = 0;
 
-    $userdata = reservation_get_userdata($USER->id);
+    // Set available seats in global count.
+    $seats = new stdClass();
+    $maxrequests = get_config('reservation', 'max_requests');
+    $seats->available = max($maxrequests, ($counters[0]->count + 1));
+    $seats->overbook = 0;
+    if ($reservation->maxrequest > 0) {
+        $seats->available = $reservation->maxrequest;
+        $seats->overbook = round($reservation->maxrequest * $reservation->overbook / 100);
+    }
+    $seats->available = min($seats->available, ($seats->available - $counters[0]->count));
+    $seats->total = $seats->available + $seats->overbook;
 
-    if (count($counters) - 1 > 0) {
-        for ($i = 1; $i < count($counters); $i++) {
-            if ($counters[$i]->field != 'group') {
-                if ((($userdata->{$counters[$i]->field} == $counters[$i]->matchvalue) && !$counters[$i]->operator) ||
-                    (($userdata->{$counters[$i]->field} != $counters[$i]->matchvalue) && $counters[$i]->operator)) {
-                    if ($availablesublimit <= ($counters[$i]->requestlimit - $counters[$i]->count)) {
-                        $availablesublimit = $counters[$i]->requestlimit - $counters[$i]->count;
-                        $limitoverbook = round($counters[$i]->requestlimit * $reservation->overbook / 100);
-                    }
-                    $nolimit = false;
-                }
-            } else {
-                $groups = groups_get_user_groups($reservation->course, $USER->id);
-                if (!empty($groups) && !empty($groups['0'])) {
-                    $groupsnames = array();
-                    foreach ($groups['0'] as $groupid) {
-                        $groupsnames[] = groups_get_group_name($groupid);
-                    }
-                    if (($counters[$i]->operator && !in_array($counters[$i]->matchvalue, $groupsnames)) ||
-                        (!$counters[$i]->operator && in_array($counters[$i]->matchvalue, $groupsnames))) {
+    if (has_capability('mod/reservation:manualreserve', $context)) {
+        return $seats;
+    } else {
+        $userdata = reservation_get_userdata($USER->id);
+
+        if (count($counters) - 1 > 0) {
+            for ($i = 1; $i < count($counters); $i++) {
+                if ($counters[$i]->field != 'group') {
+                    if ((($userdata->{$counters[$i]->field} == $counters[$i]->matchvalue) && !$counters[$i]->operator) ||
+                        (($userdata->{$counters[$i]->field} != $counters[$i]->matchvalue) && $counters[$i]->operator)) {
                         if ($availablesublimit <= ($counters[$i]->requestlimit - $counters[$i]->count)) {
                             $availablesublimit = $counters[$i]->requestlimit - $counters[$i]->count;
                             $limitoverbook = round($counters[$i]->requestlimit * $reservation->overbook / 100);
                         }
+                        $nolimit = false;
+                    }
+                } else {
+                    $groups = groups_get_user_groups($reservation->course, $USER->id);
+                    if (!empty($groups) && !empty($groups['0'])) {
+                        $groupsnames = array();
+                        foreach ($groups['0'] as $groupid) {
+                            $groupsnames[] = groups_get_group_name($groupid);
+                        }
+                        if (($counters[$i]->operator && !in_array($counters[$i]->matchvalue, $groupsnames)) ||
+                            (!$counters[$i]->operator && in_array($counters[$i]->matchvalue, $groupsnames))) {
+                            if ($availablesublimit <= ($counters[$i]->requestlimit - $counters[$i]->count)) {
+                                $availablesublimit = $counters[$i]->requestlimit - $counters[$i]->count;
+                                $limitoverbook = round($counters[$i]->requestlimit * $reservation->overbook / 100);
+                            }
+                        }
                     }
                 }
+                $totalrequestlimit += $counters[$i]->requestlimit;
+                $totalrequestcount += $counters[$i]->count;
             }
-            $totalrequestlimit += $counters[$i]->requestlimit;
-            $totalrequestcount += $counters[$i]->count;
-        }
 
-        if ($nolimit) {
-            $availablesublimit = $available - $totalrequestlimit + $totalrequestcount;
-        }
+            if ($nolimit) {
+                $availablesublimit = $seats->available - $totalrequestlimit + $totalrequestcount;
+            }
 
-        if ($available > $availablesublimit) {
-            $result = new stdClass();
-            $result->available = $availablesublimit;
-            $result->overbook = $limitoverbook;
-            return $result;
+            if ($seats->available > $availablesublimit) {
+                $seats = new stdClass();
+                $seats->available = $availablesublimit;
+                $seats->overbook = $limitoverbook;
+                $seats->total = $seats->available + $seats->overbook;
+                return $seats;
+            }
         }
     }
-    return false;
+    $seats = new stdClass();
+    $seats->available = 0;
+    $seats->overbook = 0;
+    $seats->total = 0;
+    return $seats;
 }
 
 /**
@@ -710,8 +778,8 @@ function reservation_remove_user_event($reservation, $request) {
 /**
  * Get array of defined table fields
  *
- * @param int $group
- * @param int $groupmode
+ * @param array $customfields
+ * @param stdClass $status
  * @return array
  */
 function reservation_get_fields($customfields, $status) {
@@ -756,10 +824,8 @@ function reservation_get_fields($customfields, $status) {
  * Get list of addable users for manual reservation
  *
  *
- * @param context $context
- * @param context $coursecontext
- * @param int $group
- * @param int $groupmode
+ * @param stdClass $reservation
+ * @param stdClass $status
  * @return array
  */
 function reservation_get_addableusers($reservation, $status) {
@@ -808,6 +874,9 @@ function reservation_get_addableusers($reservation, $status) {
                             }
                         }
                     }
+                    if (!empty($reservation->parent) && reservation_reserved_on_connected($reservation, $participant->id)) {
+                        continue;
+                    }
                     $addableusers[$participant->id] = fullname($participant);
                 }
             }
@@ -815,6 +884,143 @@ function reservation_get_addableusers($reservation, $status) {
     }
     return $addableusers;
 }
+
+/**
+ * Get the current user request information (if already reserved)
+ *
+ * @param object $reservation reservation object
+ * @param array $requests reservation requests
+ *
+ * @return object Current user request data
+ */
+function reservation_get_current_user($reservation, &$requests) {
+    global $DB;
+
+    $now = time();
+
+    $currentuser = new stdClass();
+    if (isset($requests[0])) {
+        $currentuser->number = $requests[0]->number;
+        if (($reservation->grade != 0 ) && ($now > $reservation->timestart) && ($requests[0]->grade >= 0)) {
+            if ($reservation->grade < 0) {
+                if ($scale = $DB->get_record('scale', array('id' => -$reservation->grade))) {
+                    $values = explode(',', $scale->scale);
+                    $currentuser->grade = get_string('yourscale', 'reservation', $values[$requests[0]->grade - 1]);
+                }
+            } else {
+                $grade = new stdClass();
+                $grade->grade = $requests[0]->grade;
+                $grade->maxgrade = $reservation->grade;
+                $currentuser->grade = get_string('yourgrade', 'reservation', $grade);
+            }
+        }
+        $currentuser->note = '';
+        if (($reservation->note) && !empty($requests[0]->note)) {
+            $currentuser->note = $requests[0]->note;
+        }
+        unset($requests[0]);
+    }
+    return $currentuser;
+}
+
+/**
+ * Setup the request table headers and columns
+ *
+ * @param object $reservation reservation object
+ * @param array $fields requested table fields
+ * @param object $status reservation temp variables
+ *
+ * @return object The flexible table
+ */
+function reservation_setup_request_table($reservation, $fields, $status) {
+    global $DB;
+
+    $course = $DB->get_record('course', array('id' => $reservation->course));
+    $cm = get_coursemodule_from_instance('reservation', $reservation->id, $course->id);
+    $context = context_module::instance($cm->id);
+
+    $now = time();
+    $strreservations = get_string('modulenameplural', 'reservation');
+
+    // Create requests table.
+    $table = new flexible_table('mod-reservation-requests');
+
+    if ($status->mode == 'overview') {
+        if (has_capability('mod/reservation:downloadrequests', $context)) {
+            $table->is_downloadable(true);
+            $table->show_download_buttons_at(array(TABLE_P_TOP, TABLE_P_BOTTOM));
+        }
+
+        $table->is_downloading($status->download,
+                               clean_filename("$course->shortname ".format_string($reservation->name, true)),
+                               $strreservations);
+    }
+
+    // Define Table headers.
+    if (empty($status->download)) {
+        $tableheaders = array('#', '', get_string('fullname'));
+        $tablecolumns = array('number', 'picture', 'fullname');
+    } else {
+        $tableheaders = array('#', get_string('firstname'), get_string('lastname'));
+        $tablecolumns = array('number', 'firstname', 'lastname');
+    }
+    if (has_capability('mod/reservation:viewrequest', $context)) {
+        if (!empty($fields)) {
+            foreach ($fields as $fieldid => $field) {
+                if (isset($field->name)) {
+                      $tableheaders[] = $field->name;
+                      $tablecolumns[] = $fieldid;
+                }
+            }
+        }
+        $tableheaders[] = get_string('reservedon', 'reservation');
+        $tablecolumns[] = 'timecreated';
+        if ($status->view == 'full') {
+            $tableheaders[] = get_string('cancelledon', 'reservation');
+            $tablecolumns[] = 'timecancelled';
+        }
+
+        if (has_capability('mod/reservation:viewnote', $context) && ($reservation->note >= 1)) {
+            $tableheaders[] = get_string('note', 'reservation');
+            $tablecolumns[] = 'note';
+        }
+        if (($reservation->grade != 0) && ($now > $reservation->timestart)) {
+            $tableheaders[] = get_string('grade');
+            $tablecolumns[] = 'grade';
+        }
+        if (empty($status->download) && !empty($status->actions)) {
+            $tableheaders[] = get_string('select');
+            $tablecolumns[] = 'select';
+        }
+    }
+    $table->define_columns($tablecolumns);
+    $table->define_headers($tableheaders);
+    $table->define_baseurl($status->url);
+
+    if (has_capability('mod/reservation:viewrequest', $context)) {
+        $table->sortable(true);
+        $table->collapsible(true);
+        if (($status->mode == 'manage') && !empty($status->actions)) {
+            $table->no_sorting('select');
+        }
+    } else {
+        $table->sortable(false);
+        $table->collapsible(false);
+    }
+
+    foreach ($tablecolumns as $column) {
+        $table->column_class($column, $column);
+    }
+
+    $table->set_attribute('id', 'requests');
+    $table->set_attribute('class', 'requests');
+
+    // Start working -- this is necessary as soon as the niceties are over.
+    $table->setup();
+
+    return $table;
+}
+
 
 /**
  * Gets reservation requests table data, remove reserved user from addableusers array and update counters
@@ -993,17 +1199,17 @@ function reservation_get_table_data($reservation, $requests, &$addableusers, &$c
                         }
                     }
                     // Display grade or grading dropdown menu.
-                    if (($reservation->maxgrade != 0) && ($now > $reservation->timestart)) {
+                    if (($reservation->grade != 0) && ($now > $reservation->timestart)) {
                         if (($status->mode == 'manage') && ($request->timecancelled == 0)) {
-                            $row[] = html_writer::select(make_grades_menu($reservation->maxgrade),
+                            $row[] = html_writer::select(make_grades_menu($reservation->grade),
                                                          'grades['.$request->id.']',
                                                          $request->grade,
                                                          array(-1 => get_string('nograde')));
                         } else {
                             if ($request->timegraded != 0) {
                                 $usergrade = $request->grade;
-                                if ($reservation->maxgrade < 0) {
-                                    if ($scale = $DB->get_record('scale', array('id' => -$reservation->maxgrade))) {
+                                if ($reservation->grade < 0) {
+                                    if ($scale = $DB->get_record('scale', array('id' => -$reservation->grade))) {
                                         $values = explode(',', $scale->scale);
                                         $usergrade = $values[$request->grade - 1];
                                     }

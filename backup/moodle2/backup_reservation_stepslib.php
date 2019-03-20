@@ -45,7 +45,7 @@ class backup_reservation_activity_structure_step extends backup_activity_structu
         // Define each element separated.
         $reservation = new backup_nested_element('reservation', array('id'), array(
             'name', 'intro', 'introformat', 'teachers',
-            'location', 'timestart', 'timeend', 'maxgrade',
+            'location', 'timestart', 'timeend', 'grade',
             'timeopen', 'timeclose', 'note', 'maxrequest',
             'overbook', 'showrequest', 'parent', 'mailed',
             'completionreserved', 'timemodified'));
