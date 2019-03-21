@@ -73,7 +73,6 @@ function($, Str, ModalFactory, ModalEvents, Templates, Notification, Ajax) {
 
                 var ids = [];
                 $(SELECTORS.BULKREQUESTSELECTEDCHECKBOXES).each(function(index, ele) {
-                    var name = $(ele).attr('name');
                     var id = $(ele).attr('value');
                     ids.push(id);
                 });

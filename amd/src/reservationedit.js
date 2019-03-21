@@ -210,7 +210,7 @@ function($, Str, ModalFactory, ModalEvents, Templates, Notification, Ajax) {
                     reservationid: reservationId,
                 }
             }])[0].then(function(result) {
-                if (result != null) {
+                if (result !== null) {
                     this.modal.setBody(result);
                     return true;
                 }
