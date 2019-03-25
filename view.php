@@ -54,10 +54,11 @@ if (!empty($id)) {
 }
 
 $userid = null;
+$currentuser = null;
 $status = new stdClass();
 $status->view = optional_param('view', null, PARAM_ACTION);              // Full or clean view for teacher.
 $status->mode = optional_param('mode', 'overview', PARAM_ACTION);        // Define the viewed tab.
-$status->action = optional_param('action', null, PARAM_ACTION);          // Delete or message selected requests.
+$status->action = optional_param('action', null, PARAM_ACTION);          // Action on selected requests.
 if (empty($status->action)) {
     if (!empty(optional_param('savegrades', null, PARAM_ACTION))) {
         $status->action = 'savegrades';                                  // Save all modified grades.
