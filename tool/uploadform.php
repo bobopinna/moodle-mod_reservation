@@ -89,7 +89,7 @@ class reservation_upload_confirm_form extends moodleform {
 
         $mform->addElement('header', 'settingsheader', get_string('general'));
         if (!in_array('course', $columns)) {
-            $displaylist = coursecat::make_categories_list();
+            $displaylist = core_course_category::make_categories_list();
 
             $courses = $DB->get_records('course');
             if ($courses) {
@@ -129,7 +129,11 @@ class reservation_upload_confirm_form extends moodleform {
 
         }
         if ($noerror) {
-            $mform->addElement('selectyesno', 'note', get_string('note', 'reservation'));
+            $choices = array();
+            $choices[0] = get_string('no');
+            $choices[1] = get_string('optional', 'reservation');
+            $choices[2] = get_string('required', 'reservation');
+            $mform->addElement('select', 'note', get_string('enablenote', 'reservation'), $choices);
             // Hidden fields.
             $mform->addElement('hidden', 'iid');
             $mform->setType('iid', PARAM_INT);

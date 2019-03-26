@@ -29,6 +29,7 @@ require_once($CFG->dirroot.'/course/lib.php');
 require_once($CFG->dirroot.'/course/modlib.php');
 require_once('../lib.php');
 require_once('../locallib.php');
+require_once('../classes/uploadtracker.php');
 require_once('uploadform.php');
 
 $iid         = optional_param('iid', '', PARAM_INT);
@@ -45,7 +46,7 @@ $systemcontext = context_system::instance();
 
 require_capability('mod/reservation:uploadreservations', $systemcontext);
 
-$returnurl = new moodle_url('/mod/reservation/upload.php');
+$returnurl = new moodle_url('/mod/reservation/tool/upload.php');
 
 $fields = array(
         'course',

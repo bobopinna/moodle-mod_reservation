@@ -857,19 +857,21 @@ function reservation_set_sublimits($reservation) {
 
         for ($i = 1; $i <= $sublimits; $i++) {
             $field = 'field_'.$i;
-            $operator = 'operator_'.$i;
-            $matchvalue = 'matchvalue_'.$i;
-            $requestlimit = 'requestlimit_'.$i;
-            if ($reservation->$field != '-') {
-                $reservationlimit = new stdClass();
-                $reservationlimit->reservationid = $reservation->id;
-                $reservationlimit->field = $reservation->$field;
-                $reservationlimit->operator = $reservation->$operator;
-                $reservationlimit->matchvalue = $reservation->$matchvalue;
-                $reservationlimit->requestlimit = $reservation->$requestlimit;
+            if (isset($reservation->{$field})) {
+                $operator = 'operator_'.$i;
+                $matchvalue = 'matchvalue_'.$i;
+                $requestlimit = 'requestlimit_'.$i;
+                if ($reservation->{$field} != '-') {
+                    $reservationlimit = new stdClass();
+                    $reservationlimit->reservationid = $reservation->id;
+                    $reservationlimit->field = $reservation->$field;
+                    $reservationlimit->operator = $reservation->$operator;
+                    $reservationlimit->matchvalue = $reservation->$matchvalue;
+                    $reservationlimit->requestlimit = $reservation->$requestlimit;
 
-                if (!$DB->insert_record('reservation_limit', $reservationlimit)) {
-                    error('Could not insert sublimit rule '.$i);
+                    if (!$DB->insert_record('reservation_limit', $reservationlimit)) {
+                        error('Could not insert sublimit rule '.$i);
+                    }
                 }
             }
         }
