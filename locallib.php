@@ -632,6 +632,8 @@ function reservation_get_availability($reservation, $counters, $context) {
                 $seats->total = $seats->available + $seats->overbook;
                 return $seats;
             }
+        } else {
+            return $seats;
         }
     }
     $seats = new stdClass();
