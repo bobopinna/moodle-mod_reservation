@@ -128,7 +128,7 @@ function($, Str, ModalFactory, ModalEvents, Templates, Notification, Ajax) {
                         // Display values list.
                         var encodedresult = $('<div/>').text(results[i]).html();
                         html += '<li class="matchvalues">';
-                        html += '<input type="radio" name="value" value="' + encodedresult + '" id="value_' + i + '" />';
+                        html += '<input type="radio" name="matchvalue" value="' + encodedresult + '" id="value_' + i + '" />';
                         html += '<label for="value_' + i + '">' + encodedresult + '</label>';
                         html += '</li>';
                     }
@@ -145,9 +145,9 @@ function($, Str, ModalFactory, ModalEvents, Templates, Notification, Ajax) {
             }.bind(this));
 
             this.modal.getRoot().on(ModalEvents.save, function() {
-                var value = $("input[name='value']:checked").val();
-                $('#' + matchvalueId).attr('value', value);
-            }.bind(this));
+                var matchvalue = $("input[name='matchvalue']:checked").val();
+                $('#' + matchvalueId).prop('value', matchvalue);
+            });
 
             this.modal.show();
 
