@@ -593,8 +593,8 @@ function reservation_get_availability($reservation, $counters, $context) {
         $seats->overbook = round($reservation->maxrequest * $reservation->overbook / 100);
     }
 
-    $seats->available = $seats->available - $counters[0]->count > 0? $seats->available - $counters[0]->count: 0;
-    $seats->overbook = $seats->overbook - $counters[0]->overbooked > 0? $seats->overbook - $counters[0]->overbooked: 0;
+    $seats->available = $seats->available - $counters[0]->count > 0 ? $seats->available - $counters[0]->count : 0;
+    $seats->overbook = $seats->overbook - $counters[0]->overbooked > 0 ? $seats->overbook - $counters[0]->overbooked : 0;
     $seats->total = $seats->available + $seats->overbook;
 
     if (has_capability('mod/reservation:manualreserve', $context)) {
@@ -610,7 +610,7 @@ function reservation_get_availability($reservation, $counters, $context) {
                         if ($availablesublimit <= ($counters[$i]->requestlimit - $counters[$i]->count)) {
                             $availablesublimit = $counters[$i]->requestlimit - $counters[$i]->count;
                             $limitoverbook = round($counters[$i]->requestlimit * $reservation->overbook / 100);
-                            $limitoverbook -= $counters[$i]->overbooked; 
+                            $limitoverbook -= $counters[$i]->overbooked;
                         }
                         $nolimit = false;
                     }
@@ -626,7 +626,7 @@ function reservation_get_availability($reservation, $counters, $context) {
                             if ($availablesublimit <= ($counters[$i]->requestlimit - $counters[$i]->count)) {
                                 $availablesublimit = $counters[$i]->requestlimit - $counters[$i]->count;
                                 $limitoverbook = round($counters[$i]->requestlimit * $reservation->overbook / 100);
-                                $limitoverbook -= $counters[$i]->overbooked; 
+                                $limitoverbook -= $counters[$i]->overbooked;
                             }
                         }
                     }

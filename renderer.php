@@ -218,7 +218,7 @@ class mod_reservation_renderer extends plugin_renderer_base {
             $overbookstr = ' '.html_writer::tag('span', '('.$counters[0]->overbooked.'/'.$overbookseats.')',
                     array('class' => 'overbooked'));
         }
-        $availablestr = $counters[0]->count.'/'.(($reservation->maxrequest > 0) ? $reservation->maxrequest : '&infin;'); 
+        $availablestr = $counters[0]->count.'/'.(($reservation->maxrequest > 0) ? $reservation->maxrequest : '&infin;');
         $columns[] = $availablestr.$overbookstr;
 
         for ($i = 1; $i < count($counters); $i++) {
@@ -228,7 +228,7 @@ class mod_reservation_renderer extends plugin_renderer_base {
                 $overbookstr = ' '.html_writer::tag('span', '('.$counters[$i]->overbooked.'/'.$overbookseats.')',
                         array('class' => 'overbooked'));
             }
-            $availablestr = $counters[$i]->count.'/'.$counters[$i]->requestlimit; 
+            $availablestr = $counters[$i]->count.'/'.$counters[$i]->requestlimit;
             $columns[] = $availablestr.$overbookstr;
         }
         $overview->data[] = $columns;
