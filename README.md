@@ -1,4 +1,4 @@
-moodle-mod_reservation [![Build Status](https://travis-ci.org/bobopinna/moodle-enrol_autoenrol.svg?branch=master)](https://travis-ci.org/bobopinna/moodle-enrol_autoenrol)
+moodle-mod_reservation [![Build Status](https://travis-ci.org/bobopinna/moodle-mod_reservation.svg?branch=master)](https://travis-ci.org/bobopinna/moodle-mod_reservation)
 ======================
 Reservation module
 
@@ -20,3 +20,54 @@ Reservation list may be downloaded in various formats.
 - admin can define which profile fields are shown in reservation list table in reservation module settings;
 - reservation can be connected to another reservation so students can reserve to only one of them;
 - managers and administrators can upload list of reservation through a CSV file;
+
+## Changelog
+* v3.6
+  * Full code revision
+  * Added option to make Note field required
+* v3.5
+  * Added Moodle Privacy API support
+  * Fixed note display to students
+* v3.4
+  * Disabled overbooking when no reservation limit is set
+  * Added option to do not show reservation number to students
+  * No time limit to manual reservation 
+* v3.3
+  * Update to Moodle 3.3
+  * Added options in what student can view in reservation page (number, list and when)
+* v3.2
+  * Added options to choose which calendar events must be created with reservation
+  * Moved italian translation on AMOS
+  * Fixed long sheet name in excel downloading error
+* v3.1
+  * Added Global Search support
+* v3.0
+  * Fixed compatibility with Moodle 2.7/2.8
+  * Changed plugin icon
+* v2.9
+  * Added support on activity completion with rule reserved
+
+## Install
+
+1. Copy the plugin directory "reservation" into moodle/mod/. 
+2. Check admin notifications to install.
+3. Done
+
+## Maintainer
+
+The module is being maintained by Roberto Pinna
+
+## Thanks to
+
+With thanks to various friends for contributing (Angelo, Matteo, Wiktor, Cecilia, Francesco).
+Thanks also to users who have taken the time to share feedback and improve the module.
+
+## Technical Support
+
+Issue tracker can be found on [GitHub](https://github.com/bobopinna/moodle-mod_reservation/issues).
+Please try to give as much detail about your problem as possible and I'll do my best to help.
+
+## License
+
+Released Under the GNU General Public Licence http://www.gnu.org/copyleft/gpl.html
+
