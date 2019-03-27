@@ -460,12 +460,14 @@ function reservation_setup_counters($reservation, $customfields) {
     $counters = array();
     $counters[0] = new stdClass();
     $counters[0]->count = 0;
+    $counters[0]->overbooked = 0;
     $counters[0]->deletedrequests = 0;
     if ($reservationlimits = $DB->get_records('reservation_limit', array('reservationid' => $reservation->id))) {
         $i = 1;
         foreach ($reservationlimits as $reservationlimit) {
             $counters[$i] = $reservationlimit;
             $counters[$i]->count = 0;
+            $counters[$i]->overbooked = 0;
             if (isset($customfields[$reservationlimit->field])) {
                 $counters[$i]->field = $reservationlimit->field;
                 $counters[$i]->fieldname = format_string($customfields[$reservationlimit->field]->name);
@@ -489,12 +491,20 @@ function reservation_setup_counters($reservation, $customfields) {
  */
 function reservation_update_counters($reservation, $counters, $request) {
 
-    $counters[0]->overbooked = 0;
     $counters[0]->matchlimit = 0;
     if ($request->timecancelled != '0') {
         $counters[0]->deletedrequests++;
     } else {
-        $counters[0]->count++;
+        $maxrequests = get_config('reservation', 'max_requests');
+        $maxrequests = max($maxrequests, ($counters[0]->count + 1));
+        if ($reservation->maxrequest > 0) {
+            $maxrequests = $reservation->maxrequest;
+        }
+        if ($counters[0]->count < $maxrequests) {
+            $counters[0]->count++;
+        } else {
+            $counters[0]->overbooked++;
+        }
         for ($i = 1; $i < count($counters); $i++) {
             $fieldname = $counters[$i]->field;
             if (isset($request->$fieldname)) {
@@ -503,7 +513,7 @@ function reservation_update_counters($reservation, $counters, $request) {
                     $counters[$i]->count++;
                     $counters[0]->matchlimit++;
                     if ($counters[$i]->count > $counters[$i]->requestlimit) {
-                        $counters[0]->overbooked++;
+                        $counters[$i]->overbooked++;
                     }
                 }
             } else if ($fieldname == 'group') {
@@ -518,7 +528,7 @@ function reservation_update_counters($reservation, $counters, $request) {
                         $counters[$i]->count++;
                         $counters[0]->matchlimit++;
                         if ($counters[$i]->count > $counters[$i]->requestlimit) {
-                            $counters[0]->overbooked++;
+                            $counters[$i]->overbooked++;
                         }
                     }
                 }
@@ -582,7 +592,9 @@ function reservation_get_availability($reservation, $counters, $context) {
         $seats->available = $reservation->maxrequest;
         $seats->overbook = round($reservation->maxrequest * $reservation->overbook / 100);
     }
-    $seats->available = min($seats->available, ($seats->available - $counters[0]->count));
+
+    $seats->available = $seats->available - $counters[0]->count > 0? $seats->available - $counters[0]->count: 0;
+    $seats->overbook = $seats->overbook - $counters[0]->overbooked > 0? $seats->overbook - $counters[0]->overbooked: 0;
     $seats->total = $seats->available + $seats->overbook;
 
     if (has_capability('mod/reservation:manualreserve', $context)) {
@@ -598,6 +610,7 @@ function reservation_get_availability($reservation, $counters, $context) {
                         if ($availablesublimit <= ($counters[$i]->requestlimit - $counters[$i]->count)) {
                             $availablesublimit = $counters[$i]->requestlimit - $counters[$i]->count;
                             $limitoverbook = round($counters[$i]->requestlimit * $reservation->overbook / 100);
+                            $limitoverbook -= $counters[$i]->overbooked; 
                         }
                         $nolimit = false;
                     }
@@ -613,6 +626,7 @@ function reservation_get_availability($reservation, $counters, $context) {
                             if ($availablesublimit <= ($counters[$i]->requestlimit - $counters[$i]->count)) {
                                 $availablesublimit = $counters[$i]->requestlimit - $counters[$i]->count;
                                 $limitoverbook = round($counters[$i]->requestlimit * $reservation->overbook / 100);
+                                $limitoverbook -= $counters[$i]->overbooked; 
                             }
                         }
                     }

@@ -173,6 +173,8 @@ class mod_reservation_renderer extends plugin_renderer_base {
      * @param stdClass $cr connected reservation data
      */
     public function print_reserved_on_connected($cr) {
+        global $CFG;
+
         $linktext = $cr->coursename . ': ' . $cr->name;
         $connectto = get_config('reservation', 'connect_to');
         if ($connectto == 'site') {
@@ -210,27 +212,24 @@ class mod_reservation_renderer extends plugin_renderer_base {
         }
 
         $columns = array();
-        $limitdetailstr = '';
-        $total = $reservation->maxrequest;
+        $overbookstr = '';
         if (!empty($reservation->overbook) && ($reservation->maxrequest > 0)) {
             $overbookseats = round($reservation->maxrequest * $reservation->overbook / 100);
-            $limitdetailstr = ' ('.$reservation->maxrequest.'+'.html_writer::tag('span',
-                                                                                 $overbookseats,
-                                                                                 array('class' => 'overbooked')).')';
-            $total += $overbookseats;
+            $overbookstr = ' '.html_writer::tag('span', '('.$counters[0]->overbooked.'/'.$overbookseats.')',
+                    array('class' => 'overbooked'));
         }
-        $columns[] = $counters[0]->count.'/'.(($reservation->maxrequest > 0) ? $total : '&infin;').$limitdetailstr;
+        $availablestr = $counters[0]->count.'/'.(($reservation->maxrequest > 0) ? $reservation->maxrequest : '&infin;'); 
+        $columns[] = $availablestr.$overbookstr;
+
         for ($i = 1; $i < count($counters); $i++) {
-            $limitdetailstr = '';
-            $total = $counters[$i]->requestlimit;
+            $overbookstr = '';
             if (!empty($reservation->overbook)) {
                 $overbookseats = round($counters[$i]->requestlimit * $reservation->overbook / 100);
-                $limitdetailstr = ' ('.$counters[$i]->requestlimit.'+'.html_writer::tag('span',
-                                                                                        $overbookseats,
-                                                                                        array('class' => 'overbooked')).')';
-                $total += $overbookseats;
+                $overbookstr = ' '.html_writer::tag('span', '('.$counters[$i]->overbooked.'/'.$overbookseats.')',
+                        array('class' => 'overbooked'));
             }
-            $columns[] = $counters[$i]->count.'/'.$total.$limitdetailstr;
+            $availablestr = $counters[$i]->count.'/'.$counters[$i]->requestlimit; 
+            $columns[] = $availablestr.$overbookstr;
         }
         $overview->data[] = $columns;
 
