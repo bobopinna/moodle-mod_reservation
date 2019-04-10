@@ -158,10 +158,12 @@ class mod_reservation_mod_form extends moodleform_mod {
             }
 
             $attrs = array();
-            if ($reservation = $DB->get_record('reservation', array('id' => $reservationid))) {
-                if (reservation_get_requests($reservation)) {
-                    // Set read only if exists requests to avoid multiple request on connected reservations.
-                    $attrs['readonly'] = 'readonly';
+            if (!empty($reservationid)) {
+                if ($reservation = $DB->get_record('reservation', array('id' => $reservationid))) {
+                    if (reservation_get_requests($reservation)) {
+                        // Set read only if exists requests to avoid multiple request on connected reservations.
+                        $attrs['readonly'] = 'readonly';
+                    }
                 }
             }
 
