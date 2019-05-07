@@ -136,7 +136,7 @@ function($, Str, ModalFactory, ModalEvents, Templates, Notification, Ajax) {
                 this.modal.getRoot().remove();
             }.bind(this));
 
-            this.modal.getRoot().on(ModalEvents.yes, function(){
+            this.modal.getRoot().on(ModalEvents.yes, function() {
                 $(SELECTORS.BULKACTIONFORM).submit();
             });
 

@@ -87,7 +87,7 @@ function($, Str, ModalFactory, ModalEvents, Templates, Notification, Ajax) {
      *
      * @method showMatchvalues
      * @private
-     * @param {string} matchvalueid
+     * @param {string} matchvalueId
      * @return {Promise}
      */
     ReservationEdit.prototype.showMatchvalues = function(matchvalueId) {
@@ -115,7 +115,7 @@ function($, Str, ModalFactory, ModalEvents, Templates, Notification, Ajax) {
             this.modal.setTitle(title);
             this.modal.setBody(body);
 
-            var body = Ajax.call([{
+            body = Ajax.call([{
                 methodname: 'mod_reservation_get_matchvalues',
                 args: {
                     fieldname: fieldValue,
@@ -200,7 +200,7 @@ function($, Str, ModalFactory, ModalEvents, Templates, Notification, Ajax) {
             this.modal.setTitle(title);
             this.modal.setBody(body);
 
-            var body = Ajax.call([{
+            body = Ajax.call([{
                 methodname: 'mod_reservation_get_clashes',
                 args: {
                     courseid: this.courseId,

@@ -230,8 +230,6 @@ class external extends \external_api {
      * @return string HTML that show clashes or errors.
      */
     public static function get_clashes($courseid, $place, $timestartstr, $timeendstr='', $reservationid=0) {
-        global $DB;
-
         $params = array(
             'courseid' => $courseid,
             'place' => $place,
