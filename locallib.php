@@ -281,17 +281,20 @@ function reservation_multisort($array, $sortorders) {
     if (!empty($sortorders)) {
         $orders = array_reverse($sortorders, true);
         foreach ($orders as $key => $order) {
-            $t = 'strnatcasecmp($a->'.$key.', $b->'.$key.')';
-            if (!empty($array)) {
-                $element = current($array);
-                if (is_numeric($element->$key)) {
-                    $t = '$a->'.$key.' - $b->'.$key;
+            $callback = function($a, $b) use ($order, $key) {
+                $o = 1;
+                if ($order == SORT_DESC) {
+                    $o = -1;
                 }
-            }
-            uasort($array, create_function('$a, $b', 'return ' . ($order == SORT_ASC ? '' : '-') . '(' . $t . ');'));
+                if (is_numeric($a->$key) && is_numeric($b->$key)) {
+                    return ($a->$key - $b->$key) * $o;
+                } else {
+                    return strnatcasecmp($a->$key, $b->$key) * $o;
+                }
+            };
+            uasort($array, $callback);
         }
     }
-
     return $array;
 }
 
