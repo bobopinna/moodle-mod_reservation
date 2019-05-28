@@ -63,6 +63,15 @@ class restore_reservation_activity_structure_step extends restore_activity_struc
     protected function process_reservation($data) {
         global $DB;
 
+        // Hack to get if this restore is part of duplicate action.
+        $duplicate = false;
+        $backtraces = debug_backtrace();
+        foreach($backtraces as $i => $backtrace) {
+             if ($backtrace['function'] == 'duplicate_module') {
+                 $duplicate = true;
+             }
+        }
+
         $data = (object)$data;
         $oldid = $data->id;
         $data->course = $this->get_courseid();
@@ -79,7 +88,7 @@ class restore_reservation_activity_structure_step extends restore_activity_struc
             $data->teachers = implode(',', $newteachers);
         }
 
-        if (!empty($data->parent)) {
+        if ((!empty($data->parent)) && (!$duplicate)) {
             $data->parent = -$data->parent;
         }
 
