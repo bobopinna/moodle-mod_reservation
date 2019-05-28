@@ -66,10 +66,10 @@ class restore_reservation_activity_structure_step extends restore_activity_struc
         // Hack to get if this restore is part of duplicate action.
         $duplicate = false;
         $backtraces = debug_backtrace();
-        foreach($backtraces as $i => $backtrace) {
-             if ($backtrace['function'] == 'duplicate_module') {
-                 $duplicate = true;
-             }
+        foreach ($backtraces as $i => $backtrace) {
+            if ($backtrace['function'] == 'duplicate_module') {
+                $duplicate = true;
+            }
         }
 
         $data = (object)$data;
