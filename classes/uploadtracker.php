@@ -28,7 +28,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Class to track upload reservations progress 
+ * Class to track upload reservations progress
  *
  * @package    mod_reservation
  * @copyright  2007 Petr Skoda {@link http://skodak.org}
