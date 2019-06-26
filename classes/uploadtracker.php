@@ -27,6 +27,14 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+/**
+ * Class to track upload reservations progress 
+ *
+ * @package    mod_reservation
+ * @copyright  2007 Petr Skoda {@link http://skodak.org}
+ * @copyright  2012 Roberto Pinna
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class ur_progress_tracker {
     /** @var array The row */
     private $_row;
