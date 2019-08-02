@@ -145,7 +145,9 @@ class mod_reservation_mod_form extends moodleform_mod {
         $reservationid = $this->_instance;
         if ($reservations = reservation_get_parentable($reservationid)) {
             if (isset($reservationconfig->connect_to) && ($reservationconfig->connect_to == 'site')) {
-                require_once($CFG->libdir.'/coursecatlib.php');
+                if ($CFG->branch < 36) {
+                    require_once($CFG->libdir .'/coursecatlib.php');
+                }
                 $displaylist = core_course_category::make_categories_list();
             }
             $values = array(0 => get_string('noparent', 'reservation'));

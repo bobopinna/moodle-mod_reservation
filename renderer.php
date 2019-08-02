@@ -143,7 +143,9 @@ class mod_reservation_renderer extends plugin_renderer_base {
 
         $connectto = get_config('reservation', 'connect_to');
         if ($connectto == 'site') {
-            require_once($CFG->libdir.'/coursecatlib.php');
+            if ($CFG->branch < 36) {
+                require_once($CFG->libdir .'/coursecatlib.php');
+            }
             $displaylist = core_course_category::make_categories_list();
         }
         // Show connected reservations.
@@ -178,7 +180,9 @@ class mod_reservation_renderer extends plugin_renderer_base {
         $linktext = $cr->coursename . ': ' . $cr->name;
         $connectto = get_config('reservation', 'connect_to');
         if ($connectto == 'site') {
-            require_once($CFG->libdir.'/coursecatlib.php');
+            if ($CFG->branch < 36) {
+                require_once($CFG->libdir .'/coursecatlib.php');
+            }
             $displaylist = core_course_category::make_categories_list();
             $linktext = $displaylist[$cr->category] .'/'. $linktext;
         }

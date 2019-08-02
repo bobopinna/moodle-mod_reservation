@@ -149,6 +149,9 @@ $settings->add(new admin_setting_configselect('reservation/manual_users', get_st
 $settings->add(new admin_setting_heading('reservation_other', get_string('reservation_other', 'reservation'), ''));
 unset($choices);
 $choices = array();
+$choices['reservers'] = get_string('notifyreservers', 'reservation');
+$choices['cancellers'] = get_string('notifycancellers', 'reservation');
+//$choices['overbookers'] = get_string('notifyoverbookers', 'reservation');
 $choices['teachers'] = get_string('notifyteachers', 'reservation');
 $choices['students'] = get_string('notifystudents', 'reservation');
 $choices['grades'] = get_string('notifygrades', 'reservation');

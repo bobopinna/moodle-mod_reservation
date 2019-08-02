@@ -137,6 +137,171 @@ function reservation_get_connected($reservation) {
           ' ORDER BY category, coursename, name', $searchfields);
 }
 
+
+/**
+ * Reserve a seat for given user if not already reserved
+ *
+ * @param stdClass $reservation reservation object
+ * @param stdClass $seats availabilty counters
+ * @param string $note User note
+ * @param integer $userid user id
+ *
+ * @return object with boolean and a warning string
+ */
+function reservation_reserve($reservation, $seats, $note='', $userid=0) {
+    global $DB, $USER;
+
+    $result = array();
+    $result['status'] = false;
+    $result['error'] = '';
+
+    if (($seats->available > 0) || ($seats->total > 0)) {
+        if (!empty($userid)) {
+            $queryparameters = array('userid' => $userid,
+                                     'reservation' => $reservation->id,
+                                     'timecancelled' => '0');
+
+            if (!$DB->get_record('reservation_request', $queryparameters)) {
+                $cr = reservation_reserved_on_connected($reservation, $userid);
+                if ($cr === false) {
+                    $request = new stdClass();
+                    $request->userid = $userid;
+                    $request->reservation = $reservation->id;
+                    $request->timecreated = time();
+                    if ($requestid = $DB->insert_record('reservation_request', $request)) {
+
+                        $usernote = new stdClass();
+                        if (($reservation->note >= 1) && (!empty($note))) {
+                            $usernote->request = $requestid;
+                            $usernote->note = strip_tags($note);
+                            $DB->insert_record('reservation_note', $usernote);
+                        }
+                        $request = $DB->get_record('reservation_request', array('id' => $requestid));
+
+                        $course = $DB->get_record('course', array('id' => $reservation->course));
+                        $cm = get_coursemodule_from_instance('reservation', $reservation->id, $course->id);
+
+                        $context = context_module::instance($cm->id);
+                        \mod_reservation\event\request_added::create_from_request($reservation, $context,
+                                $request, $usernote)->trigger();
+
+                        reservation_set_user_event($reservation, $request);
+
+                        // Update completion state.
+                        $completion = new completion_info($course);
+                        if ($completion->is_enabled($cm) && $reservation->completionreserved) {
+                            $completion->update_state($cm, COMPLETION_COMPLETE);
+                        }
+
+                        $user = $DB->get_record('user', array('id' => $userid));
+                        reservation_notify('reservers', $user, $reservation, $course, $cm);
+
+                        $result['status'] = true;
+                    }
+                }
+            } else {
+                if ($userid == $USER->id) {
+                    $result['error'] = 'alreadybooked';
+                } else {
+                    $result['error'] = 'useralreadybooked';
+                }
+            }
+        } else {
+            $result['error'] = 'reservationdenied';
+                }
+    } else {
+        $result['error'] = 'nomorerequest';
+    }
+ 
+    return $result;
+}
+
+/**
+ * Cancel current user active request
+ *
+ * @param stdClass $reservation
+ * @param stdClass $course
+ * @param stdClass $cm
+ * @param stdClass $context
+ * @return boolean true if cancellation succeded, false on errors
+ */
+function reservation_cancel($reservation, $course, $cm, $context) {
+    global $USER, $DB;
+   
+    $queryparameters = array('userid' => $USER->id, 'reservation' => $reservation->id, 'timecancelled' => '0');
+    if ($request = $DB->get_record('reservation_request', $queryparameters)) {
+        $DB->set_field('reservation_request', 'timecancelled', time(), array('id' => $request->id));
+
+        \mod_reservation\event\request_cancelled::create_from_request($reservation, $context, $request)->trigger();
+
+        reservation_remove_user_event($reservation, $request);
+
+        // Update completion state.
+        $completion = new \completion_info($course);
+        if ($completion->is_enabled($cm) && $reservation->completionreserved) {
+            $completion->update_state($cm, COMPLETION_INCOMPLETE);
+        }
+
+        reservation_notify('cancellers', $USER, $reservation, $course, $cm);
+
+        return true;
+    }
+    return false;
+}
+
+/**
+ * Send a email to user about an action or an event
+ *
+ * @param string $notify the selected notify mail
+ * @param stdClass $user user object
+ * @param stdClass $reservation reservation object
+ * @param stdClass $course course object
+ * @param stdClass $cm cm object
+ * @return void
+ */
+function reservation_notify($notify, $user, $reservation, $course, $cm) {
+   global $CFG;
+
+    $notifieslist = get_config('reservation', 'notifies');
+    if ($notifieslist === false) {
+        $notifieslist = 'teachers,students,grades';
+    }
+    $notifies = explode(',', $notifieslist);
+
+    if (in_array($notify, $notifies)) {
+        $strreservations = get_string('modulenameplural', 'reservation');
+        $strreservation  = get_string('modulename', 'reservation');
+
+        $reservationinfo = new stdClass();
+        $reservationinfo->reservation = format_string($reservation->name, true);
+        $reservationinfo->url = $CFG->wwwroot.'/mod/reservation/view.php?id='.$cm->id;
+
+        $postsubject = $course->shortname.': '.$strreservations.': '.format_string($reservation->name, true);
+        $posttext  = $course->shortname.' -> '.$strreservations.' -> '.format_string($reservation->name, true)."\n";
+        $posttext .= '---------------------------------------------------------------------'."\n";
+        $posttext .= get_string($notify.'mail', 'reservation', $reservationinfo);
+        $posttext .= "\n".'---------------------------------------------------------------------'."\n";
+        $posthtml = '';
+
+        if ($user->mailformat == 1) {  // HTML.
+            $posthtml = '<p>';
+            $posthtml .= '<a href="'.$CFG->wwwroot.'/course/view.php?id='.$course->id.'">'.$course->shortname.'</a> ->';
+            $posthtml .= '<a href="'.$CFG->wwwroot.'/mod/reservation/index.php?id='.$course->id.'">'.
+                    $strreservations.'</a> ->';
+            $posthtml .= '<a href="'.$CFG->wwwroot.'/mod/reservation/view.php?id='.$cm->id.'">'.
+                    format_string($reservation->name, true).'</a>';
+            $posthtml .= '</p>';
+            $posthtml .= '<hr />';
+            $posthtml .= '<p>'.get_string($notify.'mailhtml', 'reservation', $reservationinfo).'</p>';
+            $posthtml .= '<hr />';
+        }
+
+        if (! email_to_user($user, $CFG->noreplyaddress, $postsubject, $posttext, $posthtml)) {
+            notice('Could not send out mail to '.$user->email);
+        }
+    }
+}
+
 /**
  * Return a connected reservation where the user is already reserved, if exists
  *

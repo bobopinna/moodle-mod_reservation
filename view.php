@@ -225,72 +225,18 @@ if (isset($status->action) && confirm_sesskey()) {
             } else {
                 $notice = 'reservationdenied';
             }
-            if (($seats->available > 0) || ($seats->total > 0)) {
-                if (($request != null) && (!empty($request->userid))) {
-                    $queryparameters = array('userid' => $request->userid,
-                                             'reservation' => $reservation->id,
-                                             'timecancelled' => '0');
 
-                    if (!$DB->get_record('reservation_request', $queryparameters)) {
-                        $cr = reservation_reserved_on_connected($reservation, $userid);
-                        if ($cr === false) {
-                            if (isset($request->userid) && !empty($request->userid)) {
-                                $request->reservation = $reservation->id;
-                                $request->timecreated = time();
-                                if ($requestid = $DB->insert_record('reservation_request', $request)) {
-                                    $note = optional_param('note', null, PARAM_TEXT);
-                                    $usernote = new stdClass();
-                                    if (($reservation->note >= 1) && (!empty($note))) {
-                                        $usernote->request = $requestid;
-                                        $usernote->note = strip_tags($note);
-                                        $DB->insert_record('reservation_note', $usernote);
-                                    }
-                                    $request = $DB->get_record('reservation_request', array('id' => $requestid));
-                                    \mod_reservation\event\request_added::create_from_request($reservation, $context,
-                                            $request, $usernote)->trigger();
-
-                                    reservation_set_user_event($reservation, $request);
-
-                                    // Update completion state.
-                                    $completion = new completion_info($course);
-                                    if ($completion->is_enabled($cm) && $reservation->completionreserved) {
-                                        $completion->update_state($cm, COMPLETION_COMPLETE);
-                                    }
-
-                                    redirect ('view.php?id='.$cm->id, get_string('reserved', 'reservation'), 2);
-                                }
-                            }
-                        }
-                    } else {
-                        if ($userid == $USER->id) {
-                            $notice = 'alreadybooked';
-                        } else {
-                            $notice = 'useralreadybooked';
-                        }
-                    }
-                } else {
-                    $notice = 'reservationdenied';
-                }
+            $note = optional_param('note', null, PARAM_TEXT);
+            $result = reservation_reserve($reservation, $seats, $note, $userid);
+            if ($result['status'] == true) {
+               redirect ('view.php?id='.$cm->id, get_string('reserved', 'reservation'), 2);
             } else {
-                $notice = 'nomorerequest';
+               $notice = $result['error'];
             }
         break;
         case 'cancel':  // Cancel the reservation for current user.
             if (has_capability('mod/reservation:reserve', $context)) {
-                $queryparameters = array('userid' => $USER->id, 'reservation' => $reservation->id, 'timecancelled' => '0');
-                if ($request = $DB->get_record('reservation_request', $queryparameters)) {
-                    $DB->set_field('reservation_request', 'timecancelled', time(), array('id' => $request->id));
-
-                    \mod_reservation\event\request_cancelled::create_from_request($reservation, $context, $request)->trigger();
-
-                    reservation_remove_user_event($reservation, $request);
-
-                    // Update completion state.
-                    $completion = new completion_info($course);
-                    if ($completion->is_enabled($cm) && $reservation->completionreserved) {
-                        $completion->update_state($cm, COMPLETION_INCOMPLETE);
-                    }
-
+                if (reservation_cancel($reservation, $course, $cm, $context)) {
                     redirect ('view.php?id='.$cm->id, get_string('reservationcancelled', 'reservation'), 2);
                 } else {
                     $notice = 'notbooked';
