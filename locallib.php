@@ -208,11 +208,11 @@ function reservation_reserve($reservation, $seats, $note='', $userid=0) {
             }
         } else {
             $result['error'] = 'reservationdenied';
-                }
+        }
     } else {
         $result['error'] = 'nomorerequest';
     }
- 
+
     return $result;
 }
 
@@ -227,7 +227,7 @@ function reservation_reserve($reservation, $seats, $note='', $userid=0) {
  */
 function reservation_cancel($reservation, $course, $cm, $context) {
     global $USER, $DB;
-   
+
     $queryparameters = array('userid' => $USER->id, 'reservation' => $reservation->id, 'timecancelled' => '0');
     if ($request = $DB->get_record('reservation_request', $queryparameters)) {
         $DB->set_field('reservation_request', 'timecancelled', time(), array('id' => $request->id));
@@ -260,7 +260,7 @@ function reservation_cancel($reservation, $course, $cm, $context) {
  * @return void
  */
 function reservation_notify($notify, $user, $reservation, $course, $cm) {
-   global $CFG;
+    global $CFG;
 
     $notifieslist = get_config('reservation', 'notifies');
     if ($notifieslist === false) {
