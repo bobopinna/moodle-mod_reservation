@@ -151,7 +151,7 @@ unset($choices);
 $choices = array();
 $choices['reservers'] = get_string('notifyreservers', 'reservation');
 $choices['cancellers'] = get_string('notifycancellers', 'reservation');
-//$choices['overbookers'] = get_string('notifyoverbookers', 'reservation');
+// $choices['overbookers'] = get_string('notifyoverbookers', 'reservation');.
 $choices['teachers'] = get_string('notifyteachers', 'reservation');
 $choices['students'] = get_string('notifystudents', 'reservation');
 $choices['grades'] = get_string('notifygrades', 'reservation');

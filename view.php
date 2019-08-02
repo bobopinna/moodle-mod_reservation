@@ -229,9 +229,9 @@ if (isset($status->action) && confirm_sesskey()) {
             $note = optional_param('note', null, PARAM_TEXT);
             $result = reservation_reserve($reservation, $seats, $note, $userid);
             if ($result['status'] == true) {
-               redirect ('view.php?id='.$cm->id, get_string('reserved', 'reservation'), 2);
+                redirect ('view.php?id='.$cm->id, get_string('reserved', 'reservation'), 2);
             } else {
-               $notice = $result['error'];
+                $notice = $result['error'];
             }
         break;
         case 'cancel':  // Cancel the reservation for current user.
