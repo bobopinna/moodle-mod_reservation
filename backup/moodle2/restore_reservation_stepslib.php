@@ -96,6 +96,10 @@ class restore_reservation_activity_structure_step extends restore_activity_struc
             $data->grade = $data->maxgrade;
         }
 
+        if ($data->grade < 0) { // Scale found, get mapping.
+            $data->grade = -($this->get_mappingid('scale', abs($data->grade)));
+        }
+
         $data->timestart = $this->apply_date_offset($data->timestart);
         $data->timeend = $this->apply_date_offset($data->timeend);
         $data->timeopen = $this->apply_date_offset($data->timeopen);
