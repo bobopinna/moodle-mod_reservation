@@ -130,15 +130,15 @@ function($, Str, ModalFactory, ModalEvents, Templates, Notification, Ajax) {
             var yes = Str.get_string('yes', 'core_moodle');
             this.modal.setSaveButtonText(yes);
 
+            this.modal.getRoot().on(ModalEvents.save, function() {
+                $(SELECTORS.BULKACTIONFORM).submit();
+            }.bind(this));
+
             // We want to focus on the action select when the dialog is closed.
             this.modal.getRoot().on(ModalEvents.hidden, function() {
                 $(SELECTORS.BULKACTIONSELECT).focus();
                 this.modal.getRoot().remove();
             }.bind(this));
-
-            this.modal.getRoot().on(ModalEvents.yes, function() {
-                $(SELECTORS.BULKACTIONFORM).submit();
-            });
 
             this.modal.show();
 
