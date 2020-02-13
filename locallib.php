@@ -1387,7 +1387,7 @@ function reservation_get_table_data($reservation, $requests, &$addableusers, &$c
                                                          $request->grade,
                                                          array(-1 => get_string('nograde')));
                         } else {
-                            if ($request->timegraded != 0) {
+                            if (($request->timegraded != 0) && ($request->grade != -1)) {
                                 $usergrade = $request->grade;
                                 if ($reservation->grade < 0) {
                                     if ($scale = $DB->get_record('scale', array('id' => -$reservation->grade))) {
