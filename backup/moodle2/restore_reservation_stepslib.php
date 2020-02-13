@@ -50,6 +50,10 @@ class restore_reservation_activity_structure_step extends restore_activity_struc
             $data->teachers = implode(',', $newteachers);
         }
 
+        if ($data->maxgrade < 0) { // Scale found, get mapping.
+            $data->maxgrade = -($this->get_mappingid('scale', abs($data->maxgrade)));
+        }
+
         $data->timestart = $this->apply_date_offset($data->timestart);
         $data->timeend = $this->apply_date_offset($data->timeend);
         $data->timeopen = $this->apply_date_offset($data->timeopen);
