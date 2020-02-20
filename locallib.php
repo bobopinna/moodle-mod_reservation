@@ -398,7 +398,10 @@ function reservation_get_requests($reservation, $full=false, $fields=null, $grou
                 $userdata = profile_user_record($request->userid);
                 foreach ($fields as $fieldid => $field) {
                     if (($field->custom !== false) && ($field->custom !== 'groups')) {
-                        $requests[$requestid]->$fieldid = format_string($userdata->$fieldid);
+                        $requests[$requestid]->$fieldid = '';
+                        if (isset(($userdata->$fieldid))) {
+                            $requests[$requestid]->$fieldid = format_string($userdata->$fieldid);
+                        }
                     }
                 }
             }
