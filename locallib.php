@@ -270,7 +270,6 @@ function reservation_notify($notify, $user, $reservation, $course, $cm) {
 
     if (in_array($notify, $notifies)) {
         $strreservations = get_string('modulenameplural', 'reservation');
-        $strreservation  = get_string('modulename', 'reservation');
 
         $reservationinfo = new stdClass();
         $reservationinfo->reservation = format_string($reservation->name, true);
@@ -399,7 +398,7 @@ function reservation_get_requests($reservation, $full=false, $fields=null, $grou
                 foreach ($fields as $fieldid => $field) {
                     if (($field->custom !== false) && ($field->custom !== 'groups')) {
                         $requests[$requestid]->$fieldid = '';
-                        if (isset(($userdata->$fieldid))) {
+                        if (isset($userdata->$fieldid)) {
                             $requests[$requestid]->$fieldid = format_string($userdata->$fieldid);
                         }
                     }
