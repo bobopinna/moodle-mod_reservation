@@ -893,7 +893,7 @@ function reservation_validate_upload_columns(csv_import_reader $cir, $fields, $r
  * @param stdClass $request
  */
 function reservation_set_user_event($reservation, $request) {
-    global $CFG, $DB;
+    global $CFG, $DB, $USER, $PAGE;
 
     $events = get_config('reservation', 'events');
     if ($events === false) {
@@ -917,7 +917,12 @@ function reservation_set_user_event($reservation, $request) {
             $event->visible     = instance_is_visible('reservation', $reservation);
             $event->timeduration = max($reservation->timeend - $reservation->timestart, 0);
 
-            $newevent = calendar_event::create($event);
+            $context = $PAGE->context;
+            $selfreserve = true;
+            if (($USER->id != $request->userid) && has_capability('mod/reservation:manualreserve', $context)) {
+                $selfreserve = false;
+            }
+            $newevent = calendar_event::create($event, $selfreserve);
 
             $DB->set_field('reservation_request', 'eventid', $newevent->id, array('id' => $request->id));
         }
