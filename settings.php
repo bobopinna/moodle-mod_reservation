@@ -155,7 +155,7 @@ $choices['cancellers'] = get_string('notifycancellers', 'reservation');
 $choices['teachers'] = get_string('notifyteachers', 'reservation');
 $choices['students'] = get_string('notifystudents', 'reservation');
 $choices['grades'] = get_string('notifygrades', 'reservation');
-$defaultnotifies = 'teachers,students,grades';
+$defaultnotifies = array('teachers' => 1, 'students' => 1, 'grades' => 1);
 $settings->add(new admin_setting_configmulticheckbox('reservation/notifies', get_string('notifies', 'reservation'),
         get_string('confignotifies', 'reservation'), $defaultnotifies, $choices));
 
@@ -164,7 +164,7 @@ $choices = array();
 $choices['reservation'] = get_string('reservationevent', 'reservation');
 $choices['event'] = get_string('eventevent', 'reservation');
 $choices['userevent'] = get_string('userevent', 'reservation');
-$defaultevents = 'reservation,event';
+$defaultevents = array('reservation' => 1, 'event' => 1);
 $settings->add(new admin_setting_configmulticheckbox('reservation/events', get_string('events', 'reservation'),
         get_string('configevents', 'reservation'), $defaultevents, $choices));
 
