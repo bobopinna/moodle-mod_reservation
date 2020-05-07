@@ -42,7 +42,6 @@ $addons = [
         ],
         'lang' => [ // Language strings that are used in all the handlers.
             ['pluginname', 'reservation'],
-            ['getreservation', 'reservation'],
             ['nothingtodisplay', 'moodle'],
             ['selectagroup', 'moodle']
         ]
