@@ -276,3 +276,4 @@ $string['privacy:metadata:reservation_note:note'] = 'User note for the reservati
 $string['privacy:metadata:reservation_note'] = 'Store user note of a reservation request';
 $string['invalidreservationid'] = 'Invalid reservation ID';
 $string['status'] = 'Reservation status';
+$string['crontask'] = 'Send reservation and request grading mails';

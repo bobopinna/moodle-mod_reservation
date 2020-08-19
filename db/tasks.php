@@ -13,19 +13,22 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
 /**
- * Reservation plugin version file
+ * Definition of reservation scheduled tasks.
  *
- * @package mod_reservation
- * @copyright 2006 onwards Roberto Pinna
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   mod_reservation
+ * @copyright 2020 Roberto Pinna
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 defined('MOODLE_INTERNAL') || die();
-
-$plugin->version  = 2020081900;  // The current plugin version.
-$plugin->requires = 2017111300;  // Requires this Moodle version (3.4).
-$plugin->component  = 'mod_reservation';
-$plugin->release  = '3.9';       // The current plugin release.
-$plugin->maturity = MATURITY_STABLE;
+$tasks = array(
+    array(
+        'classname' => '\mod_reservation\task\cron_task',
+        'blocking' => 0,
+        'minute' => '*',
+        'hour' => '*',
+        'day' => '*',
+        'month' => '*',
+        'dayofweek' => '*'
+    )
+);
