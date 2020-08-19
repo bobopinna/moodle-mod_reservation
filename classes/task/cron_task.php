@@ -14,13 +14,19 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * A schedule task for reservation cron.
+ *
+ * @package   mod_reservation
+ * @copyright 2020 Roberto Pinna
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 namespace mod_reservation\task;
 defined('MOODLE_INTERNAL') || die();
 
 /**
  * A schedule task for reservation cron.
  *
- * @package   mod_reservation
  * @copyright 2020 Roberto Pinna
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
