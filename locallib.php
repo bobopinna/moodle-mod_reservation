@@ -190,7 +190,7 @@ function reservation_reserve($reservation, $seats, $note='', $userid=0) {
                         // Update completion state.
                         $completion = new completion_info($course);
                         if ($completion->is_enabled($cm) && $reservation->completionreserved) {
-                            $completion->update_state($cm, COMPLETION_COMPLETE);
+                            $completion->update_state($cm, COMPLETION_COMPLETE, $userid);
                         }
 
                         $user = $DB->get_record('user', array('id' => $userid));
