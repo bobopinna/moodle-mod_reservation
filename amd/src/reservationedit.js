@@ -30,7 +30,7 @@ function($, Str, ModalFactory, ModalEvents, Templates, Notification, Ajax) {
         TIMESTART: "#id_timestart",
         TIMEEND: "#id_timeend",
         BULKFIELD: "select.field",
-        BULKMATCHVALUE: "input.matchvalue",
+        BULKMATCHVALUE: "div.matchvalue input",
     };
 
     /**
