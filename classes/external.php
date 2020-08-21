@@ -230,6 +230,10 @@ class external extends \external_api {
      * @return string HTML that show clashes or errors.
      */
     public static function get_clashes($courseid, $place, $timestartstr, $timeendstr='', $reservationid=0) {
+        if (empty($reservationid)) {
+            $reservationid = 0;
+        }
+
         $params = array(
             'courseid' => $courseid,
             'place' => $place,
@@ -237,6 +241,7 @@ class external extends \external_api {
             'timeend' => $timeendstr,
             'reservationid' => $reservationid,
         );
+
         self::validate_parameters(self::get_clashes_parameters(), $params);
 
         self::validate_context(\context_course::instance($courseid));
