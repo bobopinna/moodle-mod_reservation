@@ -165,7 +165,7 @@ function($, Str, ModalFactory, ModalEvents, Templates, Notification, Ajax) {
     ReservationEdit.prototype.showClashes = function() {
 
         var place = $(SELECTORS.PLACESELECT).val();
-        if (place == 0) {
+        if ((typeof place === 'undefined') || (place == 0)) {
             place = $(SELECTORS.PLACEFIELD).val();
         }
         var timeStartDay = $(SELECTORS.TIMESTART + '_day').val();
