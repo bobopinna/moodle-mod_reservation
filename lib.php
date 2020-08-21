@@ -132,10 +132,7 @@ function reservation_delete_instance($id) {
     $result = true;
 
     // Delete any dependent records here.
-
-    if (! $DB->delete_records('reservation', array('id' => $reservation->id))) {
-        $result = false;
-    }
+    reservation_grade_item_delete($reservation);
 
     $allrequestsql = 'SELECT rq.id
                       FROM {reservation_request} rq
@@ -157,7 +154,13 @@ function reservation_delete_instance($id) {
         $result = false;
     }
 
-    reservation_grade_item_delete($reservation);
+    if (! $DB->delete_records('reservation_limit', array('reservationid' => $reservation->id))) {
+        $result = false;
+    }
+
+    if (! $DB->delete_records('reservation', array('id' => $reservation->id))) {
+        $result = false;
+    }
 
     return $result;
 }
