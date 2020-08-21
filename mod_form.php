@@ -145,10 +145,13 @@ class mod_reservation_mod_form extends moodleform_mod {
         $reservationid = $this->_instance;
         if ($reservations = reservation_get_parentable($reservationid)) {
             if (isset($reservationconfig->connect_to) && ($reservationconfig->connect_to == 'site')) {
-                if ($CFG->branch < 36) {
-                    require_once($CFG->libdir .'/coursecatlib.php');
+                $displaylist = array();
+                if (class_exists('core_course_category')) {
+                    $displaylist = core_course_category::make_categories_list();
+                } else {
+                    require_once($CFG->libdir. '/coursecatlib.php');
+                    $displaylist = coursecat::make_categories_list();
                 }
-                $displaylist = core_course_category::make_categories_list();
             }
             $values = array(0 => get_string('noparent', 'reservation'));
             foreach ($reservations as $reservation) {

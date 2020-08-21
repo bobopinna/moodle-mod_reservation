@@ -89,7 +89,13 @@ class reservation_upload_confirm_form extends moodleform {
 
         $mform->addElement('header', 'settingsheader', get_string('general'));
         if (!in_array('course', $columns)) {
-            $displaylist = core_course_category::make_categories_list();
+            $displaylist = array();
+            if (class_exists('core_course_category')) {
+                $displaylist = core_course_category::make_categories_list();
+            } else {
+                require_once($CFG->libdir. '/coursecatlib.php');
+                $displaylist = coursecat::make_categories_list();
+            }
 
             $courses = $DB->get_records('course');
             if ($courses) {
