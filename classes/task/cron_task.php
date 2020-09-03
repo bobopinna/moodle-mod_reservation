@@ -106,7 +106,7 @@ class cron_task extends \core\task\scheduled_task {
                     $strreservations = get_string('modulenameplural', 'reservation');
                     $strreservation  = get_string('modulename', 'reservation');
 
-                    $reservationinfo = new stdClass();
+                    $reservationinfo = new \stdClass();
                     $reservationinfo->teacher = fullname($teacher);
                     $reservationinfo->reservation = format_string($request->name, true);
                     $reservationinfo->url = $CFG->wwwroot.'/mod/reservation/view.php?id='.$mod->id;
@@ -181,7 +181,7 @@ class cron_task extends \core\task\scheduled_task {
                     continue;
                 }
 
-                $reservationinfo = new stdClass();
+                $reservationinfo = new \stdClass();
                 $reservationinfo->reservation = format_string($reservation->name, true);
 
                 $reservationinfo->url = $CFG->wwwroot.'/mod/reservation/view.php?id='.$mod->id;
