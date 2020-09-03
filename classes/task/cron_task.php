@@ -47,6 +47,8 @@ class cron_task extends \core\task\scheduled_task {
     public function execute() {
         global $CFG, $USER, $DB;
 
+        require_once('../../locallib.php');
+
         // Notices older than 1 day will not be mailed.  This is to avoid the problem where
         // cron has not been running for a long time, and then suddenly people are flooded
         // with mail from the past few weeks or months.
