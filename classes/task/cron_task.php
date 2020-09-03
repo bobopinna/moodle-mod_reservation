@@ -47,8 +47,6 @@ class cron_task extends \core\task\scheduled_task {
     public function execute() {
         global $CFG, $USER, $DB;
 
-        require_once('../../locallib.php');
-
         // Notices older than 1 day will not be mailed.  This is to avoid the problem where
         // cron has not been running for a long time, and then suddenly people are flooded
         // with mail from the past few weeks or months.
@@ -63,7 +61,7 @@ class cron_task extends \core\task\scheduled_task {
         $notifies = explode(',', $notifieslist);
 
         // Notify request grading to students.
-        if ($requests = reservation_get_unmailed_requests(0, $starttime)) {
+        if ($requests = $this->get_unmailed_requests(0, $starttime)) {
             foreach ($requests as $key => $request) {
                 if (! $DB->set_field('reservation_request', 'mailed', '1', array('id' => $request->id))) {
                     mtrace('Could not update the mailed field for request id '.$request->id.'.  Not mailed.');
@@ -71,7 +69,7 @@ class cron_task extends \core\task\scheduled_task {
             }
         }
 
-        if ($requests = reservation_get_unmailed_requests($starttime, $endtime)) {
+        if ($requests = $this->get_unmailed_requests($starttime, $endtime)) {
             foreach ($requests as $request) {
 
                 mtrace('Processing reservation request '.$request->id);
@@ -151,7 +149,7 @@ class cron_task extends \core\task\scheduled_task {
         }
 
         // Notify the end of reservation time with link for info to teachers and students.
-        if ($reservations = reservation_get_unmailed_reservations(0, $starttime)) {
+        if ($reservations = $this->get_unmailed_reservations(0, $starttime)) {
             foreach ($reservations as $key => $reservation) {
                 mtrace('Set unmailed reservation id '.$reservation->id.' as mailed.');
                 if (! $DB->set_field('reservation', 'mailed', '1', array('id' => $reservation->id))) {
@@ -160,7 +158,7 @@ class cron_task extends \core\task\scheduled_task {
             }
         }
 
-        if ($reservations = reservation_get_unmailed_reservations($starttime, $endtime)) {
+        if ($reservations = $this->get_unmailed_reservations($starttime, $endtime)) {
             foreach ($reservations as $reservation) {
                 mtrace('Process reservation id '.$reservation->id.'.');
                 // Mark as mailed just to prevent double mail sending.
@@ -290,5 +288,46 @@ class cron_task extends \core\task\scheduled_task {
             }
         }
         return true;
+    }
+
+    /**
+     * Return list of closed reservation that have not been mailed out to assigned teachers.
+     *
+     * @param int $starttime The date and time to search from
+     * @param int $endtime The date and time to search to
+     * @return array list of closed reservation
+     */
+    private function get_unmailed_reservations($starttime, $endtime) {
+        global $DB;
+
+        return $DB->get_records_sql('SELECT res.*
+                                       FROM {reservation} res
+                                      WHERE res.mailed = 0
+                                        AND res.timeclose <= :endtime
+                                        AND res.timeclose >= :starttime',
+                                    array('endtime' => $endtime, 'starttime' => $starttime));
+    }
+
+    /**
+     * Return list of graded requests that have not been mailed out.
+     *
+     * @param int $starttime The date and time to search from
+     * @param int $endtime The date and time to search to
+     * @return array list of graded request
+     */
+    private function get_unmailed_requests($starttime, $endtime) {
+        global $DB;
+
+        return $DB->get_records_sql('SELECT req.*, res.course, res.name
+                                       FROM {reservation_request} req,
+                                            {reservation} res,
+                                            {user} u
+                                      WHERE req.mailed = 0
+                                        AND req.timecancelled = 0
+                                        AND req.timegraded <= :endtime
+                                        AND req.timegraded >= :starttime
+                                        AND req.reservation = res.id
+                                        AND req.userid = u.id',
+                                    array('endtime' => $endtime, 'starttime' => $starttime));
     }
 }

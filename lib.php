@@ -516,49 +516,6 @@ function reservation_reset_course_form_defaults($course) {
 }
 
 /**
- * Return list of closed reservation that have not been mailed out to assigned teachers.
- * Used by reservation_cron function
- *
- * @param int $starttime The date and time to search from
- * @param int $endtime The date and time to search to
- * @return array list of closed reservation
- */
-function reservation_get_unmailed_reservations($starttime, $endtime) {
-    global $DB;
-
-    return $DB->get_records_sql('SELECT res.*
-                                   FROM {reservation} res
-                                  WHERE res.mailed = 0
-                                    AND res.timeclose <= :endtime
-                                    AND res.timeclose >= :starttime',
-                                array('endtime' => $endtime, 'starttime' => $starttime));
-}
-
-/**
- * Return list of graded requests that have not been mailed out.
- * Used by reservation_cron function
- *
- * @param int $starttime The date and time to search from
- * @param int $endtime The date and time to search to
- * @return array list of graded request
- */
-function reservation_get_unmailed_requests($starttime, $endtime) {
-    global $DB;
-
-    return $DB->get_records_sql('SELECT req.*, res.course, res.name
-                                   FROM {reservation_request} req,
-                                        {reservation} res,
-                                        {user} u
-                                  WHERE req.mailed = 0
-                                    AND req.timecancelled = 0
-                                    AND req.timegraded <= :endtime
-                                    AND req.timegraded >= :starttime
-                                    AND req.reservation = res.id
-                                    AND req.userid = u.id',
-                                array('endtime' => $endtime, 'starttime' => $starttime));
-}
-
-/**
  * Make some postprocessing settings on reservation to set defaults.
  * Used by reservation_add_instance and reservation_update_instance functions
  *
