@@ -187,7 +187,7 @@ class cron_task extends \core\task\scheduled_task {
                 $reservationinfo->url = $CFG->wwwroot.'/mod/reservation/view.php?id='.$mod->id;
 
                 if (in_array('teachers', $notifies)) {
-                    $context = context_module::instance($mod->id);
+                    $context = \context_module::instance($mod->id);
                     // Notify to teachers.
                     if (!empty($reservation->teachers)) {
                         $teachers = explode(',', $reservation->teachers);
