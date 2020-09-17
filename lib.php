@@ -150,15 +150,15 @@ function reservation_delete_instance($id) {
         $DB->delete_records('reservation_request', array('reservation' => $reservation->id));
     }
 
-    if (! $DB->delete_records('event', array('modulename' => 'reservation', 'instance' => $reservation->id))) {
-        $result = false;
-    }
-
     if (! $DB->delete_records('reservation_limit', array('reservationid' => $reservation->id))) {
         $result = false;
     }
 
     if (! $DB->delete_records('reservation', array('id' => $reservation->id))) {
+        $result = false;
+    }
+
+    if (! $DB->delete_records('event', array('modulename' => 'reservation', 'instance' => $reservation->id))) {
         $result = false;
     }
 
