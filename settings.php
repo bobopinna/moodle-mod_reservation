@@ -119,6 +119,7 @@ $settings->add(new admin_setting_configselect('reservation/deltatime', get_strin
 $settings->add(new admin_setting_heading('reservation_view', get_string('reservation_view', 'reservation'), ''));
 unset($choices);
 $choices = array();
+$choices['username'] = get_string('username');
 $choices['email'] = get_string('email');
 $choices['city'] = get_string('city');
 $choices['country'] = get_string('state');
