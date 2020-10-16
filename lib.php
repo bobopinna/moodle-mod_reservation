@@ -144,6 +144,7 @@ function reservation_delete_instance($id) {
     if ($requests = $DB->get_records('reservation_request', array('reservation' => $reservation->id))) {
         foreach ($requests as $request) {
             if (isset($request->eventid) && !empty($request->eventid)) {
+                require_once(__DIR__.'/locallib.php');
                 reservation_remove_user_event($reservation, $request);
             }
         }
@@ -420,6 +421,7 @@ function reservation_refresh_events($courseid = 0) {
         }
     }
 
+    require_once(__DIR__.'/locallib.php');
     $events = explode(',', get_config('reservation', 'events'));
     foreach ($reservations as $reservation) {
         $DB->delete_records('event', array('modulename' => 'reservation', 'instance' => $reservation->id));
@@ -471,6 +473,7 @@ function reservation_reset_userdata($data) {
             $DB->delete_records_select('reservation_request', 'reservation IN ('.$allreservationsql.')', $queryparameters);
             $DB->delete_records_select('reservation_note', 'request IN ('.$allrequestsql.')', $queryparameters);
 
+            require_once(__DIR__.'/locallib.php');
             $reservations[] = array();
             foreach ($requests as $request) {
                 if (isset($request->eventid) && !empty($request->eventid)) {
