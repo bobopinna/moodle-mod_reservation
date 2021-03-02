@@ -229,7 +229,7 @@ if (isset($status->action) && confirm_sesskey()) {
             $note = optional_param('note', null, PARAM_TEXT);
             $result = reservation_reserve($reservation, $seats, $note, $userid);
             if ($result['status'] == true) {
-                redirect ('view.php?id='.$cm->id, get_string('reserved', 'reservation'), 2);
+                redirect ($CFG->wwwroot.'/mod/reservation/view.php?id='.$cm->id, get_string('reserved', 'reservation'), 2);
             } else {
                 $notice = $result['error'];
             }
@@ -237,7 +237,8 @@ if (isset($status->action) && confirm_sesskey()) {
         case 'cancel':  // Cancel the reservation for current user.
             if (has_capability('mod/reservation:reserve', $context)) {
                 if (reservation_cancel($reservation, $course, $cm, $context)) {
-                    redirect ('view.php?id='.$cm->id, get_string('reservationcancelled', 'reservation'), 2);
+                    $strcancelled = get_string('reservationcancelled', 'reservation');
+                    redirect ($CFG->wwwroot.'/mod/reservation/view.php?id='.$cm->id, $strcancelled, 2);
                 } else {
                     $notice = 'notbooked';
                 }
