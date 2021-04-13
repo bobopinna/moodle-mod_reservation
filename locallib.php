@@ -488,7 +488,7 @@ function reservation_set_grades($reservation, $teacherid, $grades) {
                 $request->mailed = 0;
                 $request->timegraded = $now;
                 $DB->update_record('reservation_request', $request);
-                require_once('lib.php');
+                require_once(__DIR__.'/lib.php');
                 reservation_update_grades($reservation, $request->userid);
             }
         }
@@ -508,7 +508,7 @@ function reservation_delete_requests($reservation, $requestids) {
     $cm = get_coursemodule_from_instance('reservation', $reservation->id, $course->id);
     $context = context_module::instance($cm->id);
     if (is_array($requestids) && !empty($requestids)) {
-        require_once('lib.php');
+        require_once(__DIR__.'/lib.php');
         foreach ($requestids as $num => $requestid) {
             if (!empty($requestid)) {
                 unset($requestids[$num]);
@@ -942,7 +942,7 @@ function reservation_remove_user_event($reservation, $request) {
         $events = 'reservation,event';
     }
 
-    if ($DB->get_record('user', array('id' => $request->userid)) && !empty($events)) {
+    if ($DB->get_record('user', array('id' => $request->userid, 'deleted' => 0)) && !empty($events)) {
         $enabledevents = explode(',', $events);
         if (in_array('userevent', $enabledevents)) {
             require_once($CFG->dirroot.'/calendar/lib.php');
