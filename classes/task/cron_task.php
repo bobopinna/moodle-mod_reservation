@@ -79,6 +79,9 @@ class cron_task extends \core\task\scheduled_task {
                     if (! $user = $DB->get_record('user', array('id' => $request->userid))) {
                         mtrace('Could not find user '.$request->userid);
                         continue;
+                    } else if ($user->emailstop == 1) {
+                        mtrace('Email sending disabled by user '.$user->username);
+                        continue;
                     }
 
                     $USER->lang = $user->lang;
@@ -203,6 +206,9 @@ class cron_task extends \core\task\scheduled_task {
                                 continue;
                             } else if (has_capability('mod/reservation:reserve', $context, $teacherid)) {
                                 continue;
+                            } else if ($teacher->emailstop == 1) {
+                                mtrace('Email sending disabled by user '.$user->username);
+                                continue;
                             }
 
                             $USER->lang = $teacher->lang;
@@ -249,6 +255,9 @@ class cron_task extends \core\task\scheduled_task {
                             mtrace('Processing reservation user '.$request->userid);
                             if (! $user = $DB->get_record('user', array('id' => $request->userid))) {
                                 mtrace('Could not find user '.$user->id);
+                                continue;
+                            } else if ($user->emailstop == 1) {
+                                mtrace('Email sending disabled by user '.$user->username);
                                 continue;
                             }
 
