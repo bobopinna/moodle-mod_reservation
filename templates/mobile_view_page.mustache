@@ -1,0 +1,198 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+ This file contains template to display contents of this module on moodle mobile
+
+ @package mod_reservation
+ @copyright 2019 onwards Roberto Pinna
+ @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+}}
+{{=<% %>=}}
+<div>
+    <core-course-module-description description="<% reservation.intro %>" component="mod_reservation" componentId="<% cmid %>">
+    </core-course-module-description>
+    <ion-list>
+        <ion-item>
+            <ion-label>
+                <%#reservation.timeend%>
+                    {{ 'plugin.mod_reservation.timestart' | translate }}
+                <%/reservation.timeend%>
+                <%^reservation.timeend%>
+                    {{ 'core.date' | translate }}
+                <%/reservation.timeend%>
+                <p class="timestart">{{ <% reservation.timestart %> * 1000 | coreFormatDate: "dffulldate" }}</p>
+            </ion-label>
+        </ion-item>
+        <%#reservation.timeend%>
+            <ion-item>
+                <ion-label>
+                    {{ 'plugin.mod_reservation.timeend' | translate }}
+                    <p class="timeend">{{ <% reservation.timeend %> * 1000 | coreFormatDate: "dffulldate" }}</p>
+                </ion-label>
+            </ion-item>
+        <%/reservation.timeend%>
+        <%#reservation.teachername%>
+            <ion-item>
+                <ion-label>
+                    <% reservation.teacherstr %>
+                    <p class="teacher"><% reservation.teachername %></p>
+                </ion-label>
+            </ion-item>
+        <%/reservation.teachername%>
+        <%#reservation.location%>
+            <ion-item>
+                <ion-label>
+                    {{ 'plugin.mod_reservation.location' | translate }}
+                    <p class="location"><% reservation.location %></p>
+                </ion-label>
+            </ion-item>
+        <%/reservation.location%>
+    </ion-list>
+    <ion-list>
+        <ion-item>
+            <ion-label>
+                {{ 'plugin.mod_reservation.status' | translate }}
+                <div class="status">
+                    <%#status.opened%>
+                        <ion-badge item-end class="badge badge-md badge-md-info ng-star-inserted">
+                            {{ 'plugin.mod_reservation.opened' | translate }}
+                        </ion-badge>
+                    <%/status.opened%>
+                    <%#status.notopened%>
+                        <ion-badge item-end class="badge badge-md badge-md-danger ng-star-inserted">
+                            {{ 'plugin.mod_reservation.notopened' | translate }}
+                        </ion-badge>
+                    <%/status.notopened%>
+                    <%#status.closed%>
+                        <ion-badge item-end class="badge badge-md badge-md-danger ng-star-inserted">
+                            {{ 'plugin.mod_reservation.closed' | translate }}
+                        </ion-badge>
+                    <%/status.closed%>
+                    <%#status.canreserve%>
+                        <%#status.reserved%>
+                            <ion-badge item-end class="badge badge-md badge-md-success ng-star-inserted">
+                                {{ 'plugin.mod_reservation.reserved' | translate }}
+                            </ion-badge>
+                        <%/status.reserved%>
+                        <%#status.notgraded%>
+                            <ion-badge item-end class="badge badge-md badge-md-danger ng-star-inserted">
+                                {{ 'plugin.mod_reservation.notgraded' | translate }}
+                            </ion-badge>
+                        <%/status.notgraded%>
+                        <%^status.reserved%>
+                            <ion-badge item-end class="badge badge-md badge-md-danger ng-star-inserted">
+                                {{ 'plugin.mod_reservation.notreserved' | translate }}
+                            </ion-badge>
+                            <%#status.opened%>
+                                <%#seats.available%>
+                                    <ion-badge item-end class="badge badge-md badge-md-success ng-star-inserted">
+                                        {{ 'plugin.mod_reservation.availablerequests' | translate }}
+                                    </ion-badge>
+                                <%/seats.available%>
+                                <%^seats.available%>
+                                    <%#seats.total%>
+                                        <ion-badge item-end class="badge badge-md badge-md-alert ng-star-inserted">
+                                            {{ 'plugin.mod_reservation.o]->requestlimitserbookonly' | translate }}
+                                        </ion-badge>
+                                    <%/seats.total%>
+                                    <%^seats.total%>
+                                        <ion-badge item-end class="badge badge-md badge-md-danger ng-star-inserted">
+                                            {{ 'plugin.mod_reservation.nomorerequest' | translate }}
+                                        </ion-badge>
+                                    <%/seats.total%>
+                                <%/seats.available%>
+                            <%/status.opened%>
+                        <%/status.reserved%>
+                    <%/status.canreserve%>
+                </div>
+            </ion-label>
+        </ion-item>
+        <%#reservation.timeopen%>
+            <ion-item>
+                <ion-label>
+                     {{ 'plugin.mod_reservation.timeopen' | translate }}
+                     <p class="timeopen">{{ <% reservation.timeopen %> * 1000 | coreFormatDate: "dffulldate" }}</p>
+                </ion-label>
+            </ion-item>
+        <%/reservation.timeopen%>
+        <ion-item>
+            <ion-label>
+                 {{ 'plugin.mod_reservation.timeclose' | translate }}
+                 <p class="timeclose">{{ <% reservation.timeclose %> * 1000 | coreFormatDate: "dffulldate" }}</p>
+            </ion-label>
+        </ion-item>
+    </ion-list>
+    <%#status.canreserve%>
+        <%#status.opened%>
+        <form #f="ngForm" id="reserveform">
+            <ion-list>
+                <%#reservation.note%>
+                    <ion-item>
+                        <%#seats.total%>
+                            <%^status.reserved%>
+                                <ion-label>{{ 'plugin.mod_reservation.note' | translate }}</ion-label>
+                                <ion-textarea class="note" name="note"
+                                    <%#status.noterequired%>
+                                        required
+                                        placeholder="{{ 'plugin.mod_reservation.noterequired' | translate }}"
+                                    <%/status.noterequired%>
+                                    [(ngModel)]="note"></ion-textarea>
+                            <%/status.reserved%>
+                        <%/seats.total%>
+                        <%#status.currentuser.note%>
+                            <ion-label>
+                                {{ 'plugin.mod_reservation.yournote' | translate }}
+                                <p class="note"><% status.currentuser.note %></p>
+                            </ion-label>
+                        <%/status.currentuser.note%>
+                    </ion-item>
+                <%/reservation.note%>
+                <ion-item>
+                    <%#status.reserved%>
+                        <button ion-button block type="submit" core-site-plugins-call-ws name="mod_reservation_cancel_request"
+                            form="reserveform"
+                            [params]="{reservationid: <% reservation.id %>}"
+                            [preSets]="{getFromCache: 0, saveToCache: 0}"
+                            refreshOnSuccess="true">
+                            <span>{{ 'plugin.mod_reservation.reservecancel' | translate }}</span>
+                        </button>
+                    <%/status.reserved%>
+                    <%#seats.total%>
+                        <%^status.reserved%>
+                            <button ion-button block type="submit" core-site-plugins-call-ws name="mod_reservation_reserve_request"
+                                form="reserveform"
+                                [params]="{reservationid: <% reservation.id %>, userid: 0, note: note}"
+                                [preSets]="{getFromCache: 0, saveToCache: 0}"
+                                <%#status.noterequired%>[disabled]="!note"<%/status.noterequired%>
+                                refreshOnSuccess="true">
+                                <span>{{ 'plugin.mod_reservation.reserve' | translate }}</span>
+                            </button>
+                        <%/status.reserved%>
+                    <%/seats.total%>
+                </ion-item>
+            </ion-list>
+        </form>
+        <%/status.opened%>
+    <%/status.canreserve%>
+    <%#status.canmanage%>
+       <ion-select (ionChange)="updateContent({cmid: <% cmid %>, courseid: <% courseid %>, group: $event})" interface="popover">
+       <%#groups%>
+           <ion-option value="<% id %>" <%#selected%>selected<%/selected%> ><% name %></ion-option>
+       <%/groups%>
+       </ion-select>
+    <%/status.canmanage%>
+</div>

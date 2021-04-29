@@ -90,6 +90,7 @@ $string['enablenote'] = 'Enable users note';
 $string['noterequired'] = 'Note required, please enter here before reserve.';
 $string['optional'] = 'Optional';
 $string['required'] = 'Required';
+$string['opened'] = 'Opened';
 $string['notopened'] = 'Not opened';
 $string['closed'] = 'Closed';
 $string['fields'] = 'Shown fields';

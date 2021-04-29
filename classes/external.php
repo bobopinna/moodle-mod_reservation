@@ -213,7 +213,7 @@ class external extends \external_api {
                 'place' => new \external_value(PARAM_NOTAGS, 'Location string'),
                 'timestart' => new \external_value(PARAM_ALPHANUMEXT, 'Timestamp of event start time'),
                 'timeend' => new \external_value(PARAM_ALPHANUMEXT, 'Timestamp of event end time'),
-                'reservationid' => new \external_value(PARAM_INT, 'Reservation id'),
+                'reservationid' => new \external_value(PARAM_ALPHANUM, 'Reservation id'),
             )
         );
     }
@@ -352,4 +352,184 @@ class external extends \external_api {
         return new \external_value(PARAM_RAW, 'Clashes table or messages');
     }
 
+    /* 
+     * Returns the cancel_request() parameters.
+     *
+     * @return \external_function_parameters
+     */
+    public static function cancel_request_parameters() {
+        return new \external_function_parameters(
+            array(
+                'reservationid' => new \external_value(PARAM_INT, 'Reservation id'),
+            )
+        );
+    }
+
+    /**
+     * Try to cancel user current request.
+     *
+     * @param int $reservationid Reservation id.
+     *
+     * @return bool True on success or false on fail.
+     */
+    public static function cancel_request($reservationid) {
+        global $DB, $USER;
+
+        // Generate the result.
+        $result = array();
+        $result['error'] = '';
+
+        $params = array(
+            'reservationid' => $reservationid,
+        );
+        self::validate_parameters(self::cancel_request_parameters(), $params);
+
+        $reservation = $DB->get_record('reservation', array('id' => $reservationid));
+        $course = $DB->get_record('course', array('id' => $reservation->course));
+        $cm = get_coursemodule_from_instance('reservation', $reservation->id, $course->id);
+
+        $context = \context_module::instance($cm->id);
+
+        self::validate_context($context);
+
+        require_once(__DIR__ . '/../locallib.php');
+        if (reservation_cancel($reservation, $course, $cm, $context)) {
+            $result['status'] = true;
+        } else {
+            $result['status'] = false;
+            $result['error'] = 'notreserved';
+        }
+        return $result;
+    }
+
+
+    /**
+     * Returns the cancel_request result value.
+     *
+     * @return \external_value
+     */
+    public static function cancel_request_returns() {
+        return new \external_single_structure(
+            array(
+                'status' => new \external_value(PARAM_BOOL, 'status: true if success'),
+                'error' => new \external_value(PARAM_ALPHANUMEXT, 'Message on failure')
+            )
+        );
+    }
+
+    /* 
+     * Returns the reserve_request() parameters.
+     *
+     * @return \external_function_parameters
+     */
+    public static function reserve_request_parameters_with_note() {
+        return new \external_function_parameters(
+            array(
+                'reservationid' => new \external_value(PARAM_INT, 'Reservation id'),
+                'userid' => new \external_value(PARAM_INT, 'User id'),
+                'note' => new \external_value(PARAM_NOTAGS, 'User note'),
+            )
+        );
+    }
+
+    /* 
+     * Returns the reserve_request() parameters.
+     *
+     * @return \external_function_parameters
+     */
+    public static function reserve_request_parameters() {
+        return new \external_function_parameters(
+            array(
+                'reservationid' => new \external_value(PARAM_INT, 'Reservation id'),
+                'userid' => new \external_value(PARAM_INT, 'User id'),
+            )
+        );
+    }
+
+    /**
+     * Try to reserve a user request.
+     *
+     * @param int $reservationid Reservation id.
+     * @param int $userid User id.
+     * @param string $note User note.
+
+     *
+     * @return bool True on success or false on fail.
+     */
+    public static function reserve_request($reservationid, $userid=0, $note='') {
+        global $DB, $USER;
+
+        $reservation = $DB->get_record('reservation', array('id' => $reservationid));
+        $course = $DB->get_record('course', array('id' => $reservation->course));
+        $cm = get_coursemodule_from_instance('reservation', $reservation->id, $course->id);
+
+        $context = \context_module::instance($cm->id);
+
+        self::validate_context($context);
+
+        if (empty($userid) || !has_capability('mod/reservation:manualreserve', $context)) {
+            $userid = $USER->id;
+        }
+
+        $params = array(
+            'reservationid' => $reservationid,
+            'userid' => $userid,
+        );
+        if ($reservation->note > 0) {
+            $params['note'] = $note;
+            self::validate_parameters(self::reserve_request_parameters_with_note(), $params);
+        } else {
+            self::validate_parameters(self::reserve_request_parameters(), $params);
+        }
+
+        require_once(__DIR__ . '/../locallib.php');
+
+        $status = new \stdClass();
+        $status->mode = 'overview';
+        $status->view = '';
+        // Check to see if groups are being used in this reservation.
+        $status->groupmode = groups_get_activity_groupmode($cm);
+        if ($status->groupmode != NOGROUPS) {
+            $status->group = groups_get_activity_group($cm, true);
+        }
+
+        // Get profile custom fields array.
+        $customfields = reservation_get_profilefields();
+
+        // Set global and sublimit counters.
+        $counters = reservation_setup_counters($reservation, $customfields);
+
+        // Add sublimits fields to used fields.
+        $fields = reservation_setup_sublimit_fields($counters, $customfields);
+
+        // Get all reservation requests.
+        $requests = reservation_get_requests($reservation, true, $fields, $status);
+        $rows = array();
+        if (!empty($requests)) {
+            $rows = reservation_get_table_data($reservation, $requests, $addableusers, $counters, $fields, $status);
+        }
+
+        // Set available seats in global count.
+        $seats = reservation_get_availability($reservation, $counters, $context);
+
+        $result = reservation_reserve($reservation, $seats, $note, $userid);
+       
+        return $result;
+        
+    }
+
+
+    /**
+     * Returns the cancel_request result value.
+     *
+     * @return \external_value
+     */
+    public static function reserve_request_returns() {
+        return new \external_single_structure(
+            array(
+                'status' => new \external_value(PARAM_BOOL, 'status: true if success'),
+                'error' => new \external_value(PARAM_ALPHANUMEXT, 'Message string on failure')
+            )
+        );
+    }
 }

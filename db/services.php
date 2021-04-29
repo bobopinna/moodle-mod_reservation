@@ -56,4 +56,22 @@ $functions = array(
         'ajax'          => true,
         'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
     ),
+
+    'mod_reservation_reserve_request' => array(
+        'classname'     => 'mod_reservation\external',
+        'methodname'    => 'reserve_request',
+        'description'   => 'Add a reservation request',
+        'type'          => 'write',
+        'capabilities'  => 'moodle/reservation:reserve',
+        'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
+    ),
+
+    'mod_reservation_cancel_request' => array(
+        'classname'     => 'mod_reservation\external',
+        'methodname'    => 'cancel_request',
+        'description'   => 'Cancel an existing reservation request',
+        'type'          => 'write',
+        'capabilities'  => 'moodle/reservation:reserve',
+        'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
+    ),
 );
