@@ -216,8 +216,10 @@ class cron_task extends \core\task\scheduled_task {
                             $strreservations = get_string('modulenameplural', 'reservation');
                             $strreservation  = get_string('modulename', 'reservation');
 
-                            $postsubject = $course->shortname.': '.$strreservations.': '.format_string($reservation->name, true);
-                            $posttext  = $course->shortname.' -> '.$strreservations.' -> '.format_string($reservation->name, true)."\n";
+                            $postsubject = $course->shortname . ': ' . $strreservations . ': ' .
+                                    format_string($reservation->name, true);
+                            $posttext  = $course->shortname . ' -> ' . $strreservations . ' -> ' .
+                                    format_string($reservation->name, true)."\n";
                             $posttext .= '---------------------------------------------------------------------'."\n";
                             $posttext .= get_string('mail', 'reservation', $reservationinfo);
                             $posttext .= "\n".'---------------------------------------------------------------------'."\n";
@@ -266,8 +268,10 @@ class cron_task extends \core\task\scheduled_task {
                             $strreservations = get_string('modulenameplural', 'reservation');
                             $strreservation  = get_string('modulename', 'reservation');
 
-                            $postsubject = $course->shortname.': '.$strreservations.': '.format_string($reservation->name, true);
-                            $posttext  = $course->shortname.' -> '.$strreservations.' -> '.format_string($reservation->name, true)."\n";
+                            $postsubject = $course->shortname . ': ' . $strreservations . ': ' .
+                                   format_string($reservation->name, true);
+                            $posttext  = $course->shortname . ' -> ' . $strreservations . ' -> ' .
+                                   format_string($reservation->name, true)."\n";
                             $posttext .= '---------------------------------------------------------------------'."\n";
                             $posttext .= get_string('mailrequest', 'reservation', $reservationinfo);
                             $posttext .= "\n".'---------------------------------------------------------------------'."\n";

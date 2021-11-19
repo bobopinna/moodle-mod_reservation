@@ -60,11 +60,11 @@ Example:
 // Turn on debugging so we can see the detailed progress.
 set_debugging(DEBUG_DEVELOPER, true);
 
-$module = $DB->get_record('modules', array('name' => 'reservation')); 
+$module = $DB->get_record('modules', array('name' => 'reservation'));
 $coursemodules = $DB->get_records('course_modules', array('module' => $module->id));
 if (!empty($coursemodules)) {
     foreach ($coursemodules as $coursemodule) {
-        // Cleanup orphans records
+        // Cleanup orphans records.
         if (!$DB->record_exists('reservation', array('id' => $coursemodule->instance))) {
             cli_writeln('Missing reservation: '. $coursemodule->instance);
             if (! $options['check']) {

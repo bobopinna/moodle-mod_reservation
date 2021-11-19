@@ -302,7 +302,8 @@ class mod_reservation_renderer extends plugin_renderer_base {
             $html .= html_writer::start_tag('div', array('class' => 'note'));
             $required = '';
             if ($reservation->note == 2) {
-                $required = '<span class="req">' . $this->output->pix_icon('req', get_string('requiredelement', 'form')) . '</span>';
+                $required = '<span class="req">' .
+                       $this->output->pix_icon('req', get_string('requiredelement', 'form')) . '</span>';
             }
             $html .= html_writer::tag('label',
                                       get_string('note', 'reservation').$required,

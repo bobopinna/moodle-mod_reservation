@@ -832,6 +832,7 @@ function reservation_get_availability($reservation, $counters, $context) {
  * @param array $fields standard user fields
  * @param array $requiredfields mandatory user fields
  * @param moodle_url $returnurl return url in case of any error
+ * @throws moodle_exception
  * @return array list of fields
  */
 function reservation_validate_upload_columns(csv_import_reader $cir, $fields, $requiredfields, moodle_url $returnurl) {
@@ -840,12 +841,12 @@ function reservation_validate_upload_columns(csv_import_reader $cir, $fields, $r
     if (empty($columns)) {
         $cir->close();
         $cir->cleanup();
-        print_error('cannotreadtmpfile', 'error', $returnurl);
+        throw new moodle_exception('cannotreadtmpfile', 'error', $returnurl);
     }
     if (count($columns) < count($requiredfields)) {
         $cir->close();
         $cir->cleanup();
-        print_error('csvfewcolumns', 'error', $returnurl);
+        throw new moodle_exception('csvfewcolumns', 'error', $returnurl);
     }
 
     // Test columns.
@@ -863,12 +864,12 @@ function reservation_validate_upload_columns(csv_import_reader $cir, $fields, $r
         } else {
             $cir->close();
             $cir->cleanup();
-            print_error('invalidfieldname', 'error', $returnurl, $field);
+            throw new moodle_exception('invalidfieldname', 'error', $returnurl, $field);
         }
         if (in_array($newfield, $processed)) {
             $cir->close();
             $cir->cleanup();
-            print_error('duplicatefieldname', 'error', $returnurl, $newfield);
+            throw new moodle_exception('duplicatefieldname', 'error', $returnurl, $newfield);
         }
         if (in_array($newfield, $requiredfields)) {
             $required++;
@@ -879,7 +880,7 @@ function reservation_validate_upload_columns(csv_import_reader $cir, $fields, $r
     if ($required < count($requiredfields)) {
         $cir->close();
         $cir->cleanup();
-        print_error('missingrequiredfield', 'error', $returnurl);
+        throw new moodle_exception('missingrequiredfield', 'error', $returnurl);
     }
 
     return $processed;
@@ -933,6 +934,7 @@ function reservation_set_user_event($reservation, $request) {
  *
  * @param stdClass $reservation
  * @param stdClass $request
+ * @throws moodle_exception
  */
 function reservation_remove_user_event($reservation, $request) {
     global $CFG, $DB;
@@ -955,7 +957,7 @@ function reservation_remove_user_event($reservation, $request) {
                         calendar_event::load($event)->delete();
                         $deleted = true;
                     } else {
-                        print_error('Found more than one user event for reservation '. $reservation->id);
+                        throw new moodle_exception('Found more than one user event for reservation '. $reservation->id);
                     }
                 }
             }

@@ -56,7 +56,7 @@ class restore_reservation_activity_task extends restore_activity_task {
      *
      * @return array
      */
-    static public function define_decode_contents() {
+    public static function define_decode_contents() {
         $contents = array();
 
         $contents[] = new restore_decode_content('reservation', array('intro'), 'reservation');
@@ -70,7 +70,7 @@ class restore_reservation_activity_task extends restore_activity_task {
      *
      * @return array of restore_decode_rule
      */
-    static public function define_decode_rules() {
+    public static function define_decode_rules() {
         $rules = array();
 
         $rules[] = new restore_decode_rule('RESERVATIONVIEWBYID', '/mod/reservation/view.php?id=$1', 'course_module');
@@ -82,13 +82,13 @@ class restore_reservation_activity_task extends restore_activity_task {
 
     /**
      * Define the restore log rules that will be applied
-     * by the {@link restore_logs_processor} when restoring
+     * by the restore_logs_processor when restoring
      * reservation logs. It must return one array
-     * of {@link restore_log_rule} objects
+     * of restore_log_rule objects
      *
      * @return array of restore_log_rule
      */
-    static public function define_restore_log_rules() {
+    public static function define_restore_log_rules() {
         $rules = array();
 
         $rules[] = new restore_log_rule('reservation', 'add', 'view.php?id={course_module}', '{reservation}');
@@ -103,9 +103,9 @@ class restore_reservation_activity_task extends restore_activity_task {
 
     /**
      * Define the restore log rules that will be applied
-     * by the {@link restore_logs_processor} when restoring
+     * by the restore_logs_processor when restoring
      * course logs. It must return one array
-     * of {@link restore_log_rule} objects
+     * of restore_log_rule objects
      *
      * Note this rules are applied when restoring course logs
      * by the restore final task, but are defined here at
@@ -113,7 +113,7 @@ class restore_reservation_activity_task extends restore_activity_task {
      *
      * @return array
      */
-    static public function define_restore_log_rules_for_course() {
+    public static function define_restore_log_rules_for_course() {
         $rules = array();
 
         // Fix old wrong uses (missing extension).
