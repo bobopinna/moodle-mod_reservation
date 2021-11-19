@@ -253,8 +253,6 @@ class mod_reservation_renderer extends plugin_renderer_base {
      * @param stdClass $currentuser
      */
     public function print_user_request_status($reservation, $currentuser) {
-        global $OUTPUT;
-
         $now = time();
         if (isset($currentuser->number) && ($currentuser->number > 0)) {
             $note = '';
@@ -269,22 +267,22 @@ class mod_reservation_renderer extends plugin_renderer_base {
                 $numberspan = html_writer::tag('span', $currentuser->number, array('class' => 'justbookednumber'));
                 if (($reservation->maxrequest > 0) && ($currentuser->number > $reservation->maxrequest)) {
                     $strjustbooked = get_string('justoverbooked', 'reservation', html_writer::tag('span', $numberspan));
-                    echo $OUTPUT->box($strjustbooked.$note, 'justbooked overbooked');
+                    echo $this->output->box($strjustbooked.$note, 'justbooked overbooked');
                 } else {
                     $strjustbooked = get_string('justbooked', 'reservation', html_writer::tag('span', $numberspan));
-                    echo $OUTPUT->box($strjustbooked.$note, 'justbooked');
+                    echo $this->output->box($strjustbooked.$note, 'justbooked');
                 }
             } else {
                 $classes = 'alreadybooked';
                 if (($reservation->maxrequest > 0) && ($currentuser->number > $reservation->maxrequest)) {
                     $classes .= ' overbooked';
-                    echo $OUTPUT->box(get_string('alreadyoverbooked', 'reservation').$note, $classes);
+                    echo $this->output->box(get_string('alreadyoverbooked', 'reservation').$note, $classes);
                 } else {
-                    echo $OUTPUT->box(get_string('alreadybooked', 'reservation').$note, $classes);
+                    echo $this->output->box(get_string('alreadybooked', 'reservation').$note, $classes);
                 }
             }
             if (!empty($currentuser->grade)) {
-                echo $OUTPUT->box($currentuser->grade, 'graded');
+                echo $this->output->box($currentuser->grade, 'graded');
             }
         }
     }
@@ -299,14 +297,12 @@ class mod_reservation_renderer extends plugin_renderer_base {
      * @return string The request note form field
      */
     public function display_note_field($reservation) {
-        global $OUTPUT;
-
         $html = '';
         if ($reservation->note >= 1) {
             $html .= html_writer::start_tag('div', array('class' => 'note'));
             $required = '';
             if ($reservation->note == 2) {
-                $required = '<span class="req">' . $OUTPUT->pix_icon('req', get_string('requiredelement', 'form')) . '</span>';
+                $required = '<span class="req">' . $this->output->pix_icon('req', get_string('requiredelement', 'form')) . '</span>';
             }
             $html .= html_writer::tag('label',
                                       get_string('note', 'reservation').$required,
@@ -357,7 +353,7 @@ class mod_reservation_renderer extends plugin_renderer_base {
      * @param array $addableusers
      */
     public function print_manualreserve_form($reservation, $status, $addableusers) {
-        global $USER, $OUTPUT;
+        global $USER;
 
         $html = '';
         $formattributes = array();
@@ -386,7 +382,7 @@ class mod_reservation_renderer extends plugin_renderer_base {
                                                        'name' => 'sesskey',
                                                        'value' => $USER->sesskey));
         $html .= html_writer::start_tag('div');
-        $required = '<span class="req">' . $OUTPUT->pix_icon('req', get_string('requiredelement', 'form')) . '</span>';
+        $required = '<span class="req">' . $this->output->pix_icon('req', get_string('requiredelement', 'form')) . '</span>';
         $html .= html_writer::tag('label',
                                   get_string('addparticipant', 'reservation').$required,
                                   array('for' => 'newparticipant', 'class' => 'addparticipant'));
@@ -497,7 +493,7 @@ class mod_reservation_renderer extends plugin_renderer_base {
      * @param object $context
      */
     public function print_requests_table($reservation, $table, $rows, $status, $counters, $context) {
-        global $USER, $PAGE;
+        global $USER;
 
         $now = time();
 
@@ -560,7 +556,7 @@ class mod_reservation_renderer extends plugin_renderer_base {
 
                 $options = new stdClass();
                 $options->reservationid = $reservation->id;
-                $PAGE->requires->js_call_amd('mod_reservation/requests', 'init', [$options]);
+                $this->page->requires->js_call_amd('mod_reservation/requests', 'init', [$options]);
             }
 
             echo html_writer::end_tag('form');
