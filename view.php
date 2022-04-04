@@ -31,26 +31,26 @@ $r = optional_param('r', null, PARAM_INT);                      // Reservation I
 
 if (!empty($id)) {
     if (! $cm = get_coursemodule_from_id('reservation', $id)) {
-        print_error('invalidcoursemodule');
+        throw new moodle_exception('invalidcoursemodule');
     }
     if (! $course = $DB->get_record('course', array('id' => $cm->course))) {
-        print_error('coursemisconf');
+        throw new moodle_exception('coursemisconf');
     }
     if (! $reservation = $DB->get_record('reservation', array('id' => $cm->instance))) {
-        print_error('invalidreservationid', 'reservation');
+        throw new moodle_exception('invalidreservationid', 'reservation');
     }
 } else if (!empty($r)) {
     if (! $reservation = $DB->get_record('reservation', array('id' => $r))) {
-        print_error('invalidreservationid', 'reservation');
+        throw new moodle_exception('invalidreservationid', 'reservation');
     }
     if (! $course = $DB->get_record('course', array('id' => $reservation->course))) {
-        print_error('invalidcourseid');
+        throw new moodle_exception('invalidcourseid');
     }
     if (! $cm = get_coursemodule_from_instance('reservation', $reservation->id, $course->id)) {
-        print_error('invalidcoursemodule');
+        throw new moodle_exception('invalidcoursemodule');
     }
 } else {
-        print_error('missingparam', null, null, 'id | r');
+        throw new moodle_exception('missingparam', null, null, 'id | r');
 }
 
 $userid = null;

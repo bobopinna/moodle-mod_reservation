@@ -80,9 +80,9 @@ if (empty($iid)) {
         unset($content);
 
         if ($readcount === false) {
-            print_error('csvloaderror', 'error', $returnurl);
+            throw new moodle_exception('csvloaderror', 'error', $returnurl);
         } else if ($readcount == 0) {
-            print_error('csvemptyfile', 'error', $returnurl);
+            throw new moodle_exception('csvemptyfile', 'error', $returnurl);
         }
         // Test if columns are ok.
         $filecolumns = reservation_validate_upload_columns($cir, $fields, $requiredfields, $returnurl);
