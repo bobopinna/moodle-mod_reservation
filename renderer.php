@@ -72,7 +72,6 @@ class mod_reservation_renderer extends plugin_renderer_base {
 
         $coursecontext = context_course::instance($reservation->course);
 
-        echo html_writer::tag('div', format_module_intro('reservation', $reservation, $cmid), array('class' => 'intro'));
         // Retrive teachers list.
         $teachername = reservation_get_teacher_names($reservation, $cmid);
         if (!empty($teachername)) {
