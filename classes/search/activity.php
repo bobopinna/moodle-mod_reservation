@@ -24,8 +24,6 @@
 
 namespace mod_reservation\search;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Reservation activities search area.
  *

@@ -22,7 +22,6 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 namespace mod_reservation\task;
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * A schedule task for reservation cron.
