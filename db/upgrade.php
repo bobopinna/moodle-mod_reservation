@@ -22,8 +22,6 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Reservation module upgrade task
  *
@@ -130,5 +128,9 @@ function xmldb_reservation_upgrade($oldversion=0) {
 
     if ($oldversion < 2021091500) {
         upgrade_mod_savepoint(true, 2021091500, 'reservation');
+    }
+
+    if ($oldversion < 2022041900) {
+        upgrade_mod_savepoint(true, 2022041900, 'reservation');
     }
 }

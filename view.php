@@ -264,9 +264,6 @@ if (empty($status->download)) {
         notice(get_string($notice, 'reservation'), 'view.php?id='.$cm->id);
     }
 
-    // Display Intro.
-    echo $OUTPUT->heading(format_string($reservation->name));
-
     echo $OUTPUT->box_start('generalbox boxaligncenter boxwidthwide');
 
     $renderer->print_info($reservation, $cm->id);

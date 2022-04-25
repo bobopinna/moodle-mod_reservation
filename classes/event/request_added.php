@@ -23,7 +23,6 @@
  */
 
 namespace mod_reservation\event;
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * The mod_reservation request added event class.
