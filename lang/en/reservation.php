@@ -63,6 +63,7 @@ $string['reservecancel'] = 'Cancel reservation';
 $string['reserved'] = 'Reserved';
 $string['notreserved'] = 'Not reserved';
 $string['reservedon'] = 'Reserved on';
+$string['grade'] = 'Grade';
 $string['timeclose'] = 'Reservation end on';
 $string['timeopen'] = 'Reservation start on';
 $string['timestart'] = 'Start date';

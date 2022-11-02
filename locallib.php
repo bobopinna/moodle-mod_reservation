@@ -1173,7 +1173,7 @@ function reservation_setup_request_table($reservation, $fields, $status) {
             $tablecolumns[] = 'note';
         }
         if (($reservation->grade != 0) && ($now > $reservation->timestart)) {
-            $tableheaders[] = get_string('grade');
+            $tableheaders[] = get_string('grade', 'reservation');
             $tablecolumns[] = 'grade';
         }
         if (empty($status->download) && !empty($status->actions)) {
