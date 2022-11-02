@@ -210,10 +210,10 @@ class external extends \external_api {
         return new \external_function_parameters(
             array(
                 'courseid' => new \external_value(PARAM_INT, 'Course id'),
-                'place' => new \external_value(PARAM_NOTAGS, 'Location string'),
+                'place' => new \external_value(PARAM_NOTAGS, 'Location string', VALUE_DEFAULT, ''),
                 'timestart' => new \external_value(PARAM_ALPHANUMEXT, 'Timestamp of event start time'),
                 'timeend' => new \external_value(PARAM_ALPHANUMEXT, 'Timestamp of event end time'),
-                'reservationid' => new \external_value(PARAM_INT, 'Reservation id'),
+                'reservationid' => new \external_value(PARAM_ALPHANUM, 'Reservation id'),
             )
         );
     }
@@ -232,6 +232,10 @@ class external extends \external_api {
     public static function get_clashes($courseid, $place, $timestartstr, $timeendstr='', $reservationid=0) {
         if (empty($reservationid)) {
             $reservationid = 0;
+        } else {
+            if (!is_numeric($reservationid)) {
+                return \html_writer::tag('span', get_string('noclashcheck', 'reservation'));
+            }
         }
 
         $params = array(

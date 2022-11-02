@@ -107,6 +107,7 @@ $string['equal'] = 'equal to';
 $string['notequal'] = 'not equal to';
 $string['sublimits'] = 'Reservation Sublimits';
 $string['configsublimits'] = 'Define the number of sublimits rules row in reservation edit page';
+$string['err_notimestart'] = 'Event start date is not set';
 $string['err_timeendlower'] = 'Event end date is set prior start date';
 $string['err_timeopengreater'] = 'Reservation start date is set after end date';
 $string['err_sublimitsgreater'] = 'Sublimits sum is greater than max allowed request';

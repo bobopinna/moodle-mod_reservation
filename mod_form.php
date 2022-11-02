@@ -108,8 +108,8 @@ class mod_reservation_mod_form extends moodleform_mod {
 
         if (!empty($reservationconfig->check_clashes)) {
             $mform->addElement('static', 'collision', '',
-                    '<input type="button" id="checkclashes" value="'.
-                    get_string('checkclashes', 'reservation').'" class="btn btn-primary" />');
+                    '<button type="button" id="checkclashes" class="btn btn-primary">' . 
+                    get_string('checkclashes', 'reservation') . '</button>');
         }
 
         // Reservation Settings.
