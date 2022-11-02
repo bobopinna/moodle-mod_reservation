@@ -391,10 +391,11 @@ class mod_reservation_renderer extends plugin_renderer_base {
 
         $html .= $this->display_note_field($reservation);
 
-        $html .= html_writer::empty_tag('input', array('type' => 'submit',
-                                                       'name' => 'reserve',
-                                                       'class' => 'btn btn-primary manualreservebtn',
-                                                       'value' => get_string('reserve', 'reservation')));
+        $html .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'reserve', 'value' => 'reserve'));
+
+        $html .= html_writer::tag('button', get_string('reserve', 'reservation'),
+                                   array('type' => 'submit', 'class' => 'btn btn-primary reservebtn'));
+
         $html .= html_writer::end_tag('form');
 
         echo html_writer::tag('div', $html, array('class' => 'manualreserve'));
@@ -435,17 +436,17 @@ class mod_reservation_renderer extends plugin_renderer_base {
                                                        'name' => 'sesskey',
                                                        'value' => $USER->sesskey));
         if (isset($currentuser->number) && ($currentuser->number > 0)) {
-            $html .= html_writer::empty_tag('input', array('type' => 'submit',
-                                                           'name' => 'cancel',
-                                                           'class' => 'btn btn-primary',
-                                                           'value' => get_string('reservecancel', 'reservation')));
+            $html .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'cancel', 'value' => 'cancel'));
+
+            $html .= html_writer::tag('button', get_string('reservecancel', 'reservation'),
+                                   array('type' => 'submit', 'class' => 'btn btn-primary reservebtn'));
         } else if (($reservation->maxrequest == 0) || ($seats->available > 0) || ($seats->total > 0)) {
             $html .= $this->display_note_field($reservation);
 
-            $html .= html_writer::empty_tag('input', array('type' => 'submit',
-                                                           'name' => 'reserve',
-                                                           'class' => 'btn btn-primary reservebtn',
-                                                           'value' => get_string('reserve', 'reservation')));
+            $html .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'reserve', 'value' => 'reserve'));
+
+            $html .= html_writer::tag('button', get_string('reserve', 'reservation'),
+                                   array('type' => 'submit', 'class' => 'btn btn-primary reservebtn'));
         }
         $html .= html_writer::end_tag('form');
         echo html_writer::tag('div', $html, array('class' => 'reserve'));
@@ -465,16 +466,12 @@ class mod_reservation_renderer extends plugin_renderer_base {
         $html .= html_writer::start_tag('fieldset');
         if ($status->view == 'full') {
             $html .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'view', 'value' => 'clean'));
-            $html .= html_writer::empty_tag('input', array('type' => 'submit',
-                                                           'name' => 'save',
-                                                           'class' => 'btn btn-secondary',
-                                                           'value' => get_string('cleanview', 'reservation')));
+            $html .= html_writer::tag('button', get_string('cleanview', 'reservation'),
+                                   array('type' => 'submit', 'class' => 'btn btn-secondary'));
         } else if ($counters[0]->deletedrequests > 0) {
             $html .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'view', 'value' => 'full'));
-            $html .= html_writer::empty_tag('input', array('type' => 'submit',
-                                                           'name' => 'save',
-                                                           'class' => 'btn btn-secondary',
-                                                           'value' => get_string('fullview', 'reservation')));
+            $html .= html_writer::tag('button', get_string('fullview', 'reservation'),
+                                   array('type' => 'submit', 'class' => 'btn btn-secondary'));
         }
         $html .= html_writer::end_tag('fieldset');
         $html .= html_writer::end_tag('form');
@@ -525,10 +522,11 @@ class mod_reservation_renderer extends plugin_renderer_base {
            ((($reservation->grade != 0) && ($now > $reservation->timestart) && ($counters[0]->count > 0))
             || ($counters[0]->count > 0) || ($counters[0]->deletedrequests > 0))) {
             if (($reservation->grade != 0) && ($now > $reservation->timestart) && ($counters[0]->count > 0)) {
-                $html = html_writer::empty_tag('input', array('type' => 'submit',
-                                                              'name' => 'savegrades',
-                                                              'class' => 'btn btn-primary',
-                                                              'value' => get_string('save', 'reservation')));
+                $html .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'savegrades', 'value' => 'save'));
+
+                $html .= html_writer::tag('button', get_string('save', 'reservation'),
+                                          array('type' => 'submit', 'class' => 'btn btn-primary'));
+
                 echo html_writer::tag('div', $html, array('class' => 'savegrades'));
             }
             // Print "Select all" etc.
@@ -536,21 +534,19 @@ class mod_reservation_renderer extends plugin_renderer_base {
                (($status->view == 'full') && ($counters[0]->deletedrequests > 0)))) {
                 $html = '';
                 $html .= html_writer::start_tag('div', array('class' => 'btn-group'));
-                $html .= html_writer::empty_tag('input', array('type' => 'button',
-                                                'id' => 'checkall',
-                                                'class' => 'btn btn-secondary',
-                                                'value' => get_string('selectall')));
-                $html .= html_writer::empty_tag('input', array('type' => 'button',
-                                                               'id' => 'checknone',
-                                                               'class' => 'btn btn-secondary',
-                                                               'value' => get_string('deselectall')));
+                $html .= html_writer::tag('button', get_string('selectall'),
+                                          array('id' => 'checkall', 'type' => 'button', 'class' => 'btn btn-secondary'));
+                $html .= html_writer::tag('button', get_string('deselectall'),
+                                          array('id' => 'checknone', 'type' => 'button', 'class' => 'btn btn-secondary'));
+
                 $html .= html_writer::end_tag('div');
                 $html .= html_writer::select($status->actions, 'action', '0',
                                              array('0' => get_string('withselected', 'reservation')));
-                $okbutton = html_writer::empty_tag('input', array('type' => 'submit',
-                                                               'name' => 'selectedaction',
-                                                               'class' => 'btn btn-secondary m-r-1',
-                                                               'value' => get_string('ok')));
+                $html .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'selectedaction', 'value' => 'ok'));
+
+                $html .= html_writer::tag('button', get_string('ok'),
+                                          array('type' => 'submit', 'class' => 'btn btn-secondary m-r-1'));
+
                 $html .= html_writer::tag('noscript', $okbutton);
                 echo html_writer::tag('div', $html, array('class' => 'form-buttons'));
 
