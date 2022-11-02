@@ -523,7 +523,7 @@ class mod_reservation_renderer extends plugin_renderer_base {
            ((($reservation->grade != 0) && ($now > $reservation->timestart) && ($counters[0]->count > 0))
             || ($counters[0]->count > 0) || ($counters[0]->deletedrequests > 0))) {
             if (($reservation->grade != 0) && ($now > $reservation->timestart) && ($counters[0]->count > 0)) {
-                $html .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'savegrades', 'value' => 'save'));
+                $html = html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'savegrades', 'value' => 'save'));
 
                 $html .= html_writer::tag('button', get_string('save', 'reservation'),
                                           array('type' => 'submit', 'class' => 'btn btn-primary'));
@@ -543,9 +543,9 @@ class mod_reservation_renderer extends plugin_renderer_base {
                 $html .= html_writer::end_tag('div');
                 $html .= html_writer::select($status->actions, 'action', '0',
                                              array('0' => get_string('withselected', 'reservation')));
-                $html .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'selectedaction', 'value' => 'ok'));
+                $okbutton = html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'selectedaction', 'value' => 'ok'));
 
-                $html .= html_writer::tag('button', get_string('ok'),
+                $okbutton .= html_writer::tag('button', get_string('ok'),
                                           array('type' => 'submit', 'class' => 'btn btn-secondary m-r-1'));
 
                 $html .= html_writer::tag('noscript', $okbutton);
