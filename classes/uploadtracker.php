@@ -67,7 +67,7 @@ class ur_progress_tracker {
      * @return void
      */
     public function flush() {
-        if (empty($this->_row) or empty($this->_row['line']['normal'])) {
+        if (empty($this->_row) || empty($this->_row['line']['normal'])) {
             // Nothing to print - each line has to have at least number.
             $this->_row = array();
             foreach ($this->columns as $col) {

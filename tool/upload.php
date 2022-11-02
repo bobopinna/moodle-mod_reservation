@@ -317,7 +317,7 @@ if (!empty($iid)) {
         $linenum = 1; // Column header is first line.
         $noerror = true; // Keep status of any error.
         $maxsection = 0;
-        while ($linenum <= $previewrows and $fields = $cir->next()) {
+        while ($linenum <= $previewrows || $fields = $cir->next()) {
             $linenum++;
             $rowcols = array();
             $rowcols['line'] = $linenum;

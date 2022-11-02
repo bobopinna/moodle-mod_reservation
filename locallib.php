@@ -852,7 +852,7 @@ function reservation_validate_upload_columns(csv_import_reader $cir, $fields, $r
     $required = 0;
     foreach ($columns as $key => $field) {
         $lcfield = core_text::strtolower($field);
-        if (in_array($field, $fields) or in_array($lcfield, $fields)) {
+        if (in_array($field, $fields) || in_array($lcfield, $fields)) {
             // Standard fields are only lowercase.
             $newfield = $lcfield;
         } else if (preg_match('/^(field|operator|matchvalue|sublimit)\d+$/', $lcfield)) {
