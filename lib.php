@@ -22,8 +22,6 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Supported features
  *
@@ -313,7 +311,7 @@ function reservation_update_grades($reservation=null, $userid=0, $nullifnone=tru
                 }
             }
             reservation_grade_item_update($reservation, $grades);
-        } else if ($userid and $nullifnone) {
+        } else if ($userid && $nullifnone) {
             $grade = new stdClass();
             $grade->userid   = $userid;
             $grade->rawgrade = null;

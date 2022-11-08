@@ -22,8 +22,6 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Gets a full reservation record
  *
@@ -854,7 +852,7 @@ function reservation_validate_upload_columns(csv_import_reader $cir, $fields, $r
     $required = 0;
     foreach ($columns as $key => $field) {
         $lcfield = core_text::strtolower($field);
-        if (in_array($field, $fields) or in_array($lcfield, $fields)) {
+        if (in_array($field, $fields) || in_array($lcfield, $fields)) {
             // Standard fields are only lowercase.
             $newfield = $lcfield;
         } else if (preg_match('/^(field|operator|matchvalue|sublimit)\d+$/', $lcfield)) {

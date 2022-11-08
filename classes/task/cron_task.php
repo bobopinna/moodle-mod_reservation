@@ -22,7 +22,6 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 namespace mod_reservation\task;
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * A schedule task for reservation cron.
@@ -200,7 +199,7 @@ class cron_task extends \core\task\scheduled_task {
                         $enrolledteachers = get_enrolled_users($context, 'mod/reservation:addinstance', 0, 'u.id');
                         foreach ($enrolledteachers as $enrolledteacher) {
                             if (! has_capability('mod/reservation:reserve', $context, $enrolledteacher)) {
-                                $teachers[] = $enrolledteacher->id;       
+                                $teachers[] = $enrolledteacher->id;
                             }
                         }
                     }
