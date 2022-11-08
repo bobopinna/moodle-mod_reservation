@@ -199,7 +199,7 @@ class cron_task extends \core\task\scheduled_task {
                         $enrolledteachers = get_enrolled_users($context, 'mod/reservation:addinstance', 0, 'u.id');
                         foreach ($enrolledteachers as $enrolledteacher) {
                             if (! has_capability('mod/reservation:reserve', $context, $enrolledteacher)) {
-                                $teachers[] = $enrolledteacher->id;       
+                                $teachers[] = $enrolledteacher->id;
                             }
                         }
                     }
