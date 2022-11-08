@@ -163,11 +163,6 @@ class cron_task extends \core\task\scheduled_task {
         if ($reservations = $this->get_unmailed_reservations($starttime, $endtime)) {
             foreach ($reservations as $reservation) {
                 mtrace('Process reservation id '.$reservation->id.'.');
-                // Mark as mailed just to prevent double mail sending.
-                if (! $DB->set_field('reservation', 'mailed', '1', array('id' => $reservation->id))) {
-                    mtrace('Could not update the mailed field for reservation id '.$reservation->id.'.');
-                }
-
                 if (! $course = $DB->get_record('course', array('id' => $reservation->course))) {
                     mtrace('Could not find course '.$reservation->course);
                     continue;
@@ -181,6 +176,11 @@ class cron_task extends \core\task\scheduled_task {
                 if (! $mod->visible) {
                     // Hold mail notification for hidden reservations until later.
                     continue;
+                }
+
+                // Mark as mailed just to prevent double mail sending.
+                if (! $DB->set_field('reservation', 'mailed', '1', array('id' => $reservation->id))) {
+                    mtrace('Could not update the mailed field for reservation id '.$reservation->id.'.');
                 }
 
                 $reservationinfo = new \stdClass();
