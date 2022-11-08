@@ -1,4 +1,4 @@
-moodle-mod_reservation [![Build Status](https://travis-ci.org/bobopinna/moodle-mod_reservation.svg?branch=master)](https://travis-ci.org/bobopinna/moodle-mod_reservation)
+moodle-mod_reservation
 ======================
 Reservation module
 
@@ -21,31 +21,7 @@ Reservation list may be downloaded in various formats.
 - reservation can be connected to another reservation so students can reserve to only one of them;
 - managers and administrators can upload list of reservation through a CSV file;
 
-## Changelog
-* v3.6
-  * Full code revision
-  * Added option to make Note field required
-* v3.5
-  * Added Moodle Privacy API support
-  * Fixed note display to students
-* v3.4
-  * Disabled overbooking when no reservation limit is set
-  * Added option to do not show reservation number to students
-  * No time limit to manual reservation 
-* v3.3
-  * Update to Moodle 3.3
-  * Added options in what student can view in reservation page (number, list and when)
-* v3.2
-  * Added options to choose which calendar events must be created with reservation
-  * Moved italian translation on AMOS
-  * Fixed long sheet name in excel downloading error
-* v3.1
-  * Added Global Search support
-* v3.0
-  * Fixed compatibility with Moodle 2.7/2.8
-  * Changed plugin icon
-* v2.9
-  * Added support on activity completion with rule reserved
+## [Changelog](CHANGES.md)
 
 ## Install
 
