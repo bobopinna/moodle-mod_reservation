@@ -191,19 +191,23 @@ class cron_task extends \core\task\scheduled_task {
                 if (in_array('teachers', $notifies)) {
                     $context = \context_module::instance($mod->id);
                     // Notify to teachers.
+                    $teachers = array();
                     if (!empty($reservation->teachers)) {
                         $teachers = explode(',', $reservation->teachers);
                     } else {
-                        // If no teachers are defined in reservation notify to all editing teachers and managers.
-                        $teachers = array_keys(get_users_by_capability($context, 'mod/reservation:addinstance', 'u.id'));
+                        // If no teachers are defined in reservation notify to all enrolled teachers.
+                        $enrolledteachers = get_enrolled_users($context, 'mod/reservation:addinstance', 0, 'u.id');
+                        foreach ($enrolledteachers as $enrolledteacher) {
+                            if (! has_capability('mod/reservation:reserve', $context, $enrolledteacher)) {
+                                $teachers[] = $enrolledteacher->id;       
+                            }
+                        }
                     }
                     if (!empty($teachers)) {
                         foreach ($teachers as $teacherid) {
                             mtrace('Processing reservation teacher '.$teacherid);
                             if (! $teacher = $DB->get_record('user', array('id' => $teacherid))) {
                                 mtrace('Could not find user '.$teacherid);
-                                continue;
-                            } else if (has_capability('mod/reservation:reserve', $context, $teacherid)) {
                                 continue;
                             } else if ($teacher->emailstop == 1) {
                                 mtrace('Email sending disabled by user '.$user->username);
