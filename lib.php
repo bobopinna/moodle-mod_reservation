@@ -202,7 +202,7 @@ function reservation_get_completion_state($course, $cm, $userid, $type) {
 function reservation_user_outline($course, $user, $mod, $reservation) {
     global $DB;
 
-    $return = null;
+    $return = new stdClass();
     $queryparameters = array('reservation' => $reservation->id, 'userid' => $user->id, 'timecancelled' => '0');
     if ($userrequest = $DB->get_record('reservation_request', $queryparameters)) {
         if ($userrequest->timegraded != 0) {
