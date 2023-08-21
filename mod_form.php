@@ -68,7 +68,7 @@ class mod_reservation_mod_form extends moodleform_mod {
         if (!empty($this->_cm)) {
             $context = context_module::instance($this->_cm->id);
             // Fix for tutors.
-            $capability = 'mod/reservation:addinstance';
+            $capability = 'mod/reservation:viewrequest';
         }
         if ($teacherusers = get_enrolled_users($context, $capability, 0, 'u.*', 'u.lastname ASC')) {
             $availableteachers = array();
