@@ -1,3 +1,5 @@
+## Reservation upload with CSV file
+
 Reservations may be uploaded via text file. 
 The format of the file should be as follows:
 - Each line of the file contains one record
