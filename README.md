@@ -19,7 +19,7 @@ Reservation list may be downloaded in various formats.
 - teacher can send messages to reserved users;
 - admin can define which profile fields are shown in reservation list table in reservation module settings;
 - reservation can be connected to another reservation so students can reserve to only one of them;
-- managers and administrators can upload list of reservation through a CSV file;
+- managers and administrators can upload list of reservation through a CSV file [Upload info](UPLOAD.md);
 
 ## [Changelog](CHANGES.md)
 
