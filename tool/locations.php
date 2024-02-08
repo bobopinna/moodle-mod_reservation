@@ -30,8 +30,7 @@ $url = new moodle_url('/mod/reservation/locations.php');
 
 $PAGE->set_url($url);
 
-// This is hacky, tehre should be a special hidden page for it.
-admin_externalpage_setup('managemodules');
+admin_externalpage_setup('reservationlocations');
 
 // Get the current list of locations.
 if (!$locations = $DB->get_records_menu('reservation_location')) {

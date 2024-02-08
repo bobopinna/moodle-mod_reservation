@@ -24,16 +24,20 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$settings->add(new admin_setting_heading('reservation_tools', get_string('tools', 'reservation'), ''));
-if (!empty($USER->sesskey)) {
-    $url = new moodle_url('/mod/reservation/tool/locations.php', array('sesskey' => $USER->sesskey));
-    $settings->add(new \mod_reservation\admin_setting_link('reservationlocations',
-            get_string('locations', 'reservation'), get_string('configlocations', 'reservation'),
-            get_string('locations', 'reservation'), $url, ''));
-}
-$settings->add(new \mod_reservation\admin_setting_link('reservationupload',
-        get_string('upload', 'reservation'), get_string('configupload', 'reservation'),
-        get_string('upload', 'reservation'), new moodle_url('/mod/reservation/tool/upload.php'), ''));
+
+$reservationfolder = new admin_category('modreservationfolder', 
+        get_string('pluginname', 'reservation'), $module->is_enabled() === false);
+$ADMIN->add('modsettings', $reservationfolder);
+
+// Reservation Tools.
+$ADMIN->add('modreservationfolder', new admin_externalpage('reservationlocations', get_string('locations', 'reservation'),
+        new moodle_url('/mod/reservation/tool/locations.php')));
+
+$ADMIN->add('modreservationfolder', new admin_externalpage('reservationupload', get_string('upload', 'reservation'),
+        new moodle_url('/mod/reservation/tool/upload.php')));
+
+// Reservation General Settings.
+$settings = new admin_settingpage('modsettingreservation', get_string('generalsettings', 'admin'), 'moodle/site:config');
 
 $settings->add(new admin_setting_heading('reservation_settings', get_string('reservation_settings', 'reservation'), ''));
 
@@ -168,3 +172,7 @@ $defaultevents = array('reservation' => 1, 'event' => 1);
 $settings->add(new admin_setting_configmulticheckbox('reservation/events', get_string('events', 'reservation'),
         get_string('configevents', 'reservation'), $defaultevents, $choices));
 
+$ADMIN->add('modreservationfolder', $settings);
+
+// Tell core we already added the settings structure.
+$settings = null;

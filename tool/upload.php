@@ -40,7 +40,7 @@ $previewrows = optional_param('previewrows', 10, PARAM_INT);
 raise_memory_limit(MEMORY_HUGE);
 
 require_login();
-admin_externalpage_setup('managemodules');
+admin_externalpage_setup('reservationupload');
 
 $systemcontext = context_system::instance();
 
