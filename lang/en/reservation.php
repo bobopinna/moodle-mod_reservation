@@ -82,6 +82,7 @@ $string['showuserrequest'] = 'Users can view';
 $string['configlocations'] = 'Manage standard locations for reservations in this Moodle site';
 $string['locations'] = 'Manage Locations';
 $string['locationslist'] = 'Locations List';
+$string['nolocations'] = 'No locations defined';
 $string['newlocation'] = 'New Location';
 $string['resetreservation'] = 'Remove all reservations';
 $string['withselected'] = 'With selected...';

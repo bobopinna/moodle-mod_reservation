@@ -32,25 +32,24 @@ $PAGE->set_url($url);
 
 admin_externalpage_setup('reservationlocations');
 
+$add = optional_param('add', null, PARAM_ALPHA);
+$delete = optional_param('delete', null, PARAM_ALPHA);
+
 // Get the current list of locations.
 if (!$locations = $DB->get_records_menu('reservation_location')) {
     $locations = array();
 }
 
 // Print the header of the page.
-$strmodulename = get_string('modulename', 'reservation');
-$strlocations = get_string('locations', 'reservation');
-
 echo $OUTPUT->header();
 
-echo $OUTPUT->heading($strmodulename . ': ' . $strlocations);
+echo $OUTPUT->heading(get_string('locations', 'reservation'));
 
 echo $OUTPUT->box(get_string('configlocations', 'reservation'), 'generalbox boxaligncenter boxwidthnormal');
 
 // First, process any inputs there may be.
-if (confirm_sesskey()) {
-    $add = optional_param('add', null, PARAM_ALPHA);
-    if (isset($add)) {
+if (!empty($add)) {
+    if (confirm_sesskey()) {
         $location = optional_param('name', null, PARAM_TEXT);  // Location Name.
         if (isset($location) && !empty($location) && !in_array($location, $locations)) {
             $loc = new stdClass();
@@ -59,8 +58,9 @@ if (confirm_sesskey()) {
             $locations[$id] = $location;
         }
     }
-    $delete = optional_param('delete', null, PARAM_ALPHA);
-    if (isset($delete)) {
+}
+if (!empty($delete)) {
+    if (confirm_sesskey()) {
         $selectedlocations = optional_param_array('locations', array(), PARAM_INT);  // Location id.
         foreach ($selectedlocations as $selectedlocation) {
             if (isset($selectedlocation) && !isset($locations[$selectedlocation])) {
@@ -90,6 +90,8 @@ echo $OUTPUT->box_start('locationform');
                 foreach ($locations as $id => $location) {
                     echo '<option value="'.$id.'">'.$location."</option>\n";
                 }
+            } else {
+                echo '<option value="" disabled>' . get_string('nolocations', 'reservation') . "</option>\n";
             }
             ?>
          </select>

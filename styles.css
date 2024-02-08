@@ -127,6 +127,10 @@
     width: 100%;
 }
 
+.path-admin-mod-reservation .locationform .locationedit #locations {
+    min-width: 15ex;
+}
+
 /**
  * Editing page
  */
