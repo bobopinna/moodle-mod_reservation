@@ -64,7 +64,7 @@ $fields = array(
         'dummy'
 );
 
-$requiredfields = array('section', 'name', 'timestart');
+$requiredfields = array('section', 'name', 'timestart', 'timeclose');
 
 $errorstr = get_string('error');
 
@@ -317,7 +317,7 @@ if (!empty($iid)) {
         $linenum = 1; // Column header is first line.
         $noerror = true; // Keep status of any error.
         $maxsection = 0;
-        while ($linenum <= $previewrows || $fields = $cir->next()) {
+        while ($linenum <= $previewrows && $fields = $cir->next()) {
             $linenum++;
             $rowcols = array();
             $rowcols['line'] = $linenum;
