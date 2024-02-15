@@ -26,10 +26,6 @@ require_once('../../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
 require_once('../locallib.php');
 
-$url = new moodle_url('/mod/reservation/locations.php');
-
-$PAGE->set_url($url);
-
 admin_externalpage_setup('reservationlocations');
 
 $add = optional_param('add', null, PARAM_ALPHA);
