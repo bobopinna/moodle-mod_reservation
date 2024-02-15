@@ -72,7 +72,11 @@ if (!empty($delete)) {
 
 $sesskey = !empty($USER->id) ? $USER->sesskey : '';
 
-natsort($locations);
+if (extension_loaded('intl') === true) {
+    collator_asort(collator_create('root'), $locations);
+} else {
+    natcasesort($locations);
+}
 
 // Print out the complete form.
 echo $OUTPUT->box_start('locationform');
