@@ -71,7 +71,7 @@ class mod_reservation_mod_form extends moodleform_mod {
             $capability = 'mod/reservation:viewrequest';
         }
         if ($teacherusers = get_enrolled_users($context, $capability, 0, 'u.*', 'u.lastname ASC')) {
-            $availableteachers = array();
+            $availableteachers = [];
             foreach ($teacherusers as $teacheruser) {
                 if (! has_capability('mod/reservation:reserve', $context, $teacheruser)) {
                     $availableteachers[$teacheruser->id] = fullname($teacheruser);
@@ -85,15 +85,15 @@ class mod_reservation_mod_form extends moodleform_mod {
             $mform->setType('teachers', PARAM_TEXT);
         }
 
-        $locationgrp = array();
+        $locationgrp = [];
         $locationsize = 60;
         if ($locations = $DB->get_records_menu('reservation_location')) {
-            $associativelocations = array();
+            $associativelocations = [];
             foreach ($locations as $location) {
                 $associativelocations[$location] = $location;
             }
             natsort($associativelocations);
-            $locations = array_merge(array(0 => get_string('otherlocation', 'reservation')), $associativelocations);
+            $locations = array_merge([0 => get_string('otherlocation', 'reservation')), $associativelocations];
             $onchange = 'onchange="getElementById(\'id_locationtext\').value=\'\'"';
             $locationgrp[] = &$mform->createElement('select', 'location', null, $locations, $onchange);
             $locationsize = 40;
@@ -104,7 +104,7 @@ class mod_reservation_mod_form extends moodleform_mod {
         $mform->addGroup($locationgrp, 'locationgrp', get_string('location', 'reservation'), ' ', false);
 
         $mform->addElement('date_time_selector', 'timestart', get_string('timestart', 'reservation'));
-        $mform->addElement('date_time_selector', 'timeend', get_string('timeend', 'reservation'), array('optional' => true));
+        $mform->addElement('date_time_selector', 'timeend', get_string('timeend', 'reservation'), ['optional' => true]);
 
         if (!empty($reservationconfig->check_clashes)) {
             $mform->addElement('static', 'collision', '',
@@ -116,10 +116,10 @@ class mod_reservation_mod_form extends moodleform_mod {
         $mform->addElement('header', 'reservationsettings', get_string('reservationsettings', 'reservation'));
         $mform->setExpanded('reservationsettings');
 
-        $mform->addElement('date_time_selector', 'timeopen', get_string('timeopen', 'reservation'), array('optional' => true));
+        $mform->addElement('date_time_selector', 'timeopen', get_string('timeopen', 'reservation'), ['optional' => true]);
         $mform->addElement('date_time_selector', 'timeclose', get_string('timeclose', 'reservation'));
 
-        $choices = array();
+        $choices = [];
         $choices[0] = get_string('no');
         $choices[1] = get_string('optional', 'reservation');
         $choices[2] = get_string('required', 'reservation');
@@ -128,13 +128,13 @@ class mod_reservation_mod_form extends moodleform_mod {
         if (!isset($reservationconfig->max_requests)) {
             $reservationconfig->max_requests = '100';
         }
-        $values = array(0 => get_string('nolimit', 'reservation'));
+        $values = [0 => get_string('nolimit', 'reservation')];
         for ($i = 1; $i <= $reservationconfig->max_requests; $i++) {
              $values[$i] = "$i";
         }
         $mform->addElement('select', 'maxrequest', get_string('maxrequest', 'reservation'), $values);
 
-        $choices = array();
+        $choices = [];
         $choices[0] = get_string('numberafterclose', 'reservation');
         $choices[1] = get_string('listafterclose', 'reservation');
         $choices[2] = get_string('listalways', 'reservation');
@@ -145,7 +145,7 @@ class mod_reservation_mod_form extends moodleform_mod {
         $reservationid = $this->_instance;
         if ($reservations = reservation_get_parentable($reservationid)) {
             if (isset($reservationconfig->connect_to) && ($reservationconfig->connect_to == 'site')) {
-                $displaylist = array();
+                $displaylist = [];
                 if (class_exists('core_course_category')) {
                     $displaylist = core_course_category::make_categories_list();
                 } else {
@@ -153,7 +153,7 @@ class mod_reservation_mod_form extends moodleform_mod {
                     $displaylist = coursecat::make_categories_list();
                 }
             }
-            $values = array(0 => get_string('noparent', 'reservation'));
+            $values = [0 => get_string('noparent', 'reservation')];
             foreach ($reservations as $reservation) {
                 $value = $reservation->coursename.': '.$reservation->name;
                 if (isset($reservationconfig->connect_to) && ($reservationconfig->connect_to == 'site')) {
@@ -162,9 +162,9 @@ class mod_reservation_mod_form extends moodleform_mod {
                 $values[$reservation->id] = $value;
             }
 
-            $attrs = array();
+            $attrs = [];
             if (!empty($reservationid)) {
-                if ($reservation = $DB->get_record('reservation', array('id' => $reservationid))) {
+                if ($reservation = $DB->get_record('reservation', ['id' => $reservationid])) {
                     if (reservation_get_requests($reservation)) {
                         // Set read only if exists requests to avoid multiple request on connected reservations.
                         $attrs['readonly'] = 'readonly';
@@ -185,7 +185,7 @@ class mod_reservation_mod_form extends moodleform_mod {
             $reservationconfig->overbook_step = 5;
         }
 
-        $values = array(0 => get_string('nooverbook', 'reservation'));
+        $values = [0 => get_string('nooverbook', 'reservation')];
         $step = $reservationconfig->overbook_step;
         for ($i = $step; $i <= $reservationconfig->max_overbook; $i += $step) {
              $values[$i] = "$i%";
@@ -195,11 +195,11 @@ class mod_reservation_mod_form extends moodleform_mod {
         $mform->setAdvanced('overbook');
 
         if (!empty($reservationconfig->sublimits)) {
-            $sublimitgrps = array();
+            $sublimitgrps = [];
             for ($i = 1; $i <= $reservationconfig->sublimits; $i++) {
-                $sublimitgrps[$i] = array();
+                $sublimitgrps[$i] = [];
 
-                $values = array();
+                $values = [];
                 for ($j = 0; $j <= $reservationconfig->max_requests; $j++) {
                      $values[$j] = "$j";
                 }
@@ -208,7 +208,8 @@ class mod_reservation_mod_form extends moodleform_mod {
                 $sublimitgrps[$i][] = &$mform->createElement('static', 'with_'.$i, null, get_string('with', 'reservation'));
 
                 unset($fields);
-                $fields = array('-' => get_string('choose'));
+                $fields = [];
+                $fields['-'] = get_string('choose');
                 $fields['group'] = get_string('group');
                 $fields['city'] = get_string('city');
                 $fields['institution'] = get_string('institution');
@@ -225,7 +226,7 @@ class mod_reservation_mod_form extends moodleform_mod {
                 $sublimitgrps[$i][] = &$mform->createElement('select', 'field_'.$i, null, $fields, $attributes);
 
                 unset($operators);
-                $operators = array();
+                $operators = [];
                 $operators[] = get_string('equal', 'reservation');
                 $operators[] = get_string('notequal', 'reservation');
                 $sublimitgrps[$i][] = &$mform->createElement('select', 'operator_'.$i, null, $operators);
@@ -263,7 +264,7 @@ class mod_reservation_mod_form extends moodleform_mod {
                 $defaultvalues['teachers'] = $teachers;
             }
             if (!$locations = $DB->get_records_menu('reservation_location')) {
-                $locations = array();
+                $locations = [];
             }
             if (! in_array($defaultvalues['location'], $locations)) {
                 $defaultvalues['locationtext'] = $defaultvalues['location'];
@@ -271,7 +272,7 @@ class mod_reservation_mod_form extends moodleform_mod {
             } else {
                 $defaultvalues['locationtext'] = '';
             }
-            $queryparameters = array('reservationid' => $defaultvalues['instance']);
+            $queryparameters = ['reservationid' => $defaultvalues['instance']];
             if ($reservationlimits = $DB->get_records('reservation_limit', $queryparameters, 'id')) {
                 $i = 1;
                 foreach ($reservationlimits as $reservationlimit) {
@@ -346,7 +347,7 @@ class mod_reservation_mod_form extends moodleform_mod {
                            'completionreserved',
                            '',
                            get_string('completionreserved', 'reservation'));
-        return array('completionreserved');
+        return ['completionreserved'];
     }
 
     /**

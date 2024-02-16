@@ -41,29 +41,26 @@ class backup_reservation_activity_structure_step extends backup_activity_structu
         $userinfo = $this->get_setting_value('userinfo');
 
         // Define each element separated.
-        $reservation = new backup_nested_element('reservation', array('id'), array(
+        $reservation = new backup_nested_element('reservation', ['id'], [
             'name', 'intro', 'introformat', 'teachers',
             'location', 'timestart', 'timeend', 'grade',
             'timeopen', 'timeclose', 'note', 'maxrequest',
             'overbook', 'showrequest', 'parent', 'mailed',
-            'completionreserved', 'timemodified'));
+            'completionreserved', 'timemodified', ]);
 
         $limits = new backup_nested_element('limits');
 
-        $limit = new backup_nested_element('limit', array('id'), array(
-            'field', 'operator', 'matchvalue',
-            'requestlimit'));
+        $limit = new backup_nested_element('limit', ['id'], ['field', 'operator', 'matchvalue', 'requestlimit']);
 
         $requests = new backup_nested_element('requests');
 
-        $request = new backup_nested_element('request', array('id'), array(
+        $request = new backup_nested_element('request', ['id'], [
             'userid', 'timecreated', 'timecancelled',
-            'teacher', 'grade', 'timegraded', 'mailed'));
+            'teacher', 'grade', 'timegraded', 'mailed', ]);
 
         $notes = new backup_nested_element('notes');
 
-        $note = new backup_nested_element('note', array('id'), array(
-            'request', 'note'));
+        $note = new backup_nested_element('note', ['id'], ['request', 'note']);
 
         // Build the tree.
         $reservation->add_child($limits);
@@ -76,13 +73,13 @@ class backup_reservation_activity_structure_step extends backup_activity_structu
         $notes->add_child($note);
 
         // Define sources.
-        $reservation->set_source_table('reservation', array('id' => backup::VAR_ACTIVITYID));
+        $reservation->set_source_table('reservation', ['id' => backup::VAR_ACTIVITYID]);
 
         $limit->set_source_sql('
             SELECT *
               FROM {reservation_limit}
               WHERE reservationid = ?',
-            array(backup::VAR_PARENTID));
+            [backup::VAR_PARENTID]);
 
         // All the rest of elements only happen if we are including user info.
         if ($userinfo) {
@@ -90,7 +87,7 @@ class backup_reservation_activity_structure_step extends backup_activity_structu
                 SELECT *
                   FROM {reservation_request}
                   WHERE reservation = ?',
-                array(backup::VAR_PARENTID));
+                [backup::VAR_PARENTID]);
 
             // Define id annotations.
             $request->annotate_ids('user', 'userid');
@@ -99,7 +96,7 @@ class backup_reservation_activity_structure_step extends backup_activity_structu
                 SELECT *
                   FROM {reservation_note}
                   WHERE request = ?',
-                array(backup::VAR_PARENTID));
+                [backup::VAR_PARENTID]);
         }
 
         // Define id annotations.

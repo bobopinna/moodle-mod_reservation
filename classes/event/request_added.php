@@ -46,10 +46,10 @@ class request_added extends \core\event\base {
      */
     public static function create_from_request(\stdClass $reservation, \context_module $context,
                                                \stdClass $request, \stdClass $requestnote) {
-        $data = array(
+        $data = [
             'context' => $context,
             'objectid' => $request->id,
-        );
+        ];
         /** @var request_added $event */
         $event = self::create($data);
         $event->add_record_snapshot('reservation', $reservation);
@@ -77,14 +77,14 @@ class request_added extends \core\event\base {
      */
     protected function get_legacy_logdata() {
         $request = $this->get_record_snapshot('reservation_request', $this->objectid);
-        return array(
+        return [
             $this->courseid,
             'reservation',
             'reserve',
             'view.php?id='.$this->contextinstanceid,
             $request->userid,
-            $this->contextinstanceid
-        );
+            $this->contextinstanceid,
+        ];
     }
 
     /**
@@ -102,7 +102,7 @@ class request_added extends \core\event\base {
      * @return \moodle_url
      */
     public function get_url() {
-        return new \moodle_url('/mod/reservation/view.php', array('id' => $this->contextinstanceid));
+        return new \moodle_url('/mod/reservation/view.php', ['id' => $this->contextinstanceid]);
     }
 
     /**

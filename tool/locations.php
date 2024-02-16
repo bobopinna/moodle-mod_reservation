@@ -33,7 +33,7 @@ $delete = optional_param('delete', null, PARAM_ALPHA);
 
 // Get the current list of locations.
 if (!$locations = $DB->get_records_menu('reservation_location')) {
-    $locations = array();
+    $locations = [];
 }
 
 // Print the header of the page.
@@ -57,13 +57,13 @@ if (!empty($add)) {
 }
 if (!empty($delete)) {
     if (confirm_sesskey()) {
-        $selectedlocations = optional_param_array('locations', array(), PARAM_INT);  // Location id.
+        $selectedlocations = optional_param_array('locations', [], PARAM_INT);  // Location id.
         foreach ($selectedlocations as $selectedlocation) {
             if (isset($selectedlocation) && !isset($locations[$selectedlocation])) {
                 $selectedlocation = null;
             }
             if (isset($selectedlocation)) {
-                $DB->delete_records('reservation_location', array('id' => $selectedlocation));
+                $DB->delete_records('reservation_location', ['id' => $selectedlocation]);
                 unset($locations[$selectedlocation]);
             }
         }

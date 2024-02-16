@@ -38,7 +38,7 @@ class ur_progress_tracker {
     private $_row;
 
     /** @var array $columns List of columns */
-    public $columns = array('status', 'line', 'course', 'section', 'name', 'timestart', 'timeclose');
+    public $columns = ['status', 'line', 'course', 'section', 'name', 'timestart', 'timeclose'];
 
     /**
      * Print table header.
@@ -69,9 +69,9 @@ class ur_progress_tracker {
     public function flush() {
         if (empty($this->_row) || empty($this->_row['line']['normal'])) {
             // Nothing to print - each line has to have at least number.
-            $this->_row = array();
+            $this->_row = [];
             foreach ($this->columns as $col) {
-                $this->_row[$col] = array('normal' => '', 'info' => '', 'warning' => '', 'error' => '');
+                $this->_row[$col] = ['normal' => '', 'info' => '', 'warning' => '', 'error' => ''];
             }
             return;
         }
@@ -97,7 +97,7 @@ class ur_progress_tracker {
         }
         echo '</tr>';
         foreach ($this->columns as $col) {
-            $this->_row[$col] = array('normal' => '', 'info' => '', 'warning' => '', 'error' => '');
+            $this->_row[$col] = ['normal' => '', 'info' => '', 'warning' => '', 'error' => ''];
         }
     }
 

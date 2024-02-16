@@ -30,7 +30,7 @@ require_once(__DIR__ . '/locallib.php');
 $id = required_param('id', PARAM_INT);
 $download = optional_param('download', null, PARAM_ALPHA);
 
-$course = $DB->get_record('course', array('id' => $id), '*', MUST_EXIST);
+$course = $DB->get_record('course', ['id' => $id], '*', MUST_EXIST);
 
 $coursecontext = context_course::instance($course->id);
 
@@ -44,7 +44,7 @@ if (($publiclists === false) || isloggedin()) {
 $PAGE->set_pagelayout('incourse');
 
 // Trigger instances list viewed event.
-$event = \mod_reservation\event\course_module_instance_list_viewed::create(array('context' => $coursecontext));
+$event = \mod_reservation\event\course_module_instance_list_viewed::create(['context' => $coursecontext]);
 $event->add_record_snapshot('course', $course);
 $event->trigger();
 
@@ -62,11 +62,11 @@ $strclose  = get_string('timeclose', 'reservation');
 // Define the table headers.
 $usesections = course_format_uses_sections($course->format);
 if ($usesections) {
-    $tableheaders  = array ($strsectionname, $strname, $streventdate, $strteachers, $strlocation, $strintro, $strclose);
-    $tablecolumns = array ('section', 'name', 'startdate', 'teachers', 'location', 'intro', 'timeclose');
+    $tableheaders  = [$strsectionname, $strname, $streventdate, $strteachers, $strlocation, $strintro, $strclose]);
+    $tablecolumns = ['section', 'name', 'startdate', 'teachers', 'location', 'intro', 'timeclose'];
 } else {
-    $tableheaders  = array ($strname, $streventdate, $strteachers, $strlocation, $strintro, $strclose);
-    $tablecolumns = array ('name', 'startdate', 'teachers', 'location', 'intro', 'timeclose');
+    $tableheaders  = [$strname, $streventdate, $strteachers, $strlocation, $strintro, $strclose];
+    $tablecolumns = ['name', 'startdate', 'teachers', 'location', 'intro', 'timeclose'];
 }
 
 if (isloggedin() && !isguestuser()) {
@@ -78,7 +78,7 @@ if (isloggedin() && !isguestuser()) {
 $table = new flexible_table('mod-reservation');
 
 $table->is_downloadable(true);
-$table->show_download_buttons_at(array(TABLE_P_TOP, TABLE_P_BOTTOM));
+$table->show_download_buttons_at([TABLE_P_TOP, TABLE_P_BOTTOM]);
 
 $table->is_downloading($download, clean_filename("$course->shortname $strreservations"), "$course->shortname $strreservations");
 
@@ -100,9 +100,9 @@ $table->setup();
 
 // Get all the appropriate data.
 if ($reservations = get_all_instances_in_course('reservation', $course)) {
-    $resnames = array();
-    $restimestarts = array();
-    $ressections = array();
+    $resnames = [];
+    $restimestarts = [];
+    $ressections = [];
     $listsort = get_config('reservation', 'list_sort');
     foreach ($reservations as $key => $row) {
         $resnames[$key]  = $row->name;
@@ -128,7 +128,7 @@ if ($reservations = get_all_instances_in_course('reservation', $course)) {
 
 // Print the header.
 if (!$table->is_downloading()) {
-    $PAGE->set_url('/mod/reservation/index.php', array('id' => $id));
+    $PAGE->set_url('/mod/reservation/index.php', ['id' => $id]);
     $PAGE->set_title($course->shortname.': '.$strreservations);
     $PAGE->set_heading($course->fullname);
     $PAGE->navbar->add($strreservations);
@@ -147,7 +147,7 @@ foreach ($reservations as $reservation) {
     $cm = $modinfo->cms[$reservation->coursemodule];
     if ($usesections) {
         if ($reservation->section !== $currentsection) {
-            $section = $DB->get_record('course_sections', array('course' => $course->id, 'section' => $reservation->section));
+            $section = $DB->get_record('course_sections', ['course' => $course->id, 'section' => $reservation->section]);
             $printsection = get_section_name($course, $section);
             $currentsection = $reservation->section;
         }
@@ -201,20 +201,20 @@ foreach ($reservations as $reservation) {
         $link = trim($reservation->name);
     }
 
-    $row = array();
+    $row = [];
 
     $context = context_module::instance($reservation->coursemodule);
     if ((has_capability('mod/reservation:viewrequest', $context)) || (empty($dimmed))) {
         if ($usesections) {
-            $row = array ($printsection, $link, $eventdate, $teachername, $place, $description, $timeclose);
+            $row = [$printsection, $link, $eventdate, $teachername, $place, $description, $timeclose];
         } else {
-            $row = array ($link, $eventdate, $teachername, $place, $description, $timeclose);
+            $row = [$link, $eventdate, $teachername, $place, $description, $timeclose];
         }
         if (has_capability('mod/reservation:viewrequest', $context)) {
-            $row[] = $DB->count_records('reservation_request', array('reservation' => $reservation->id, 'timecancelled' => 0))
+            $row[] = $DB->count_records('reservation_request', ['reservation' => $reservation->id, 'timecancelled' => 0])
                      .' '. get_string('students');
         } else if (has_capability('mod/reservation:reserve', $context)) {
-            $queryparameters = array('reservation' => $reservation->id, 'userid' => $USER->id, 'timecancelled' => 0);
+            $queryparameters = ['reservation' => $reservation->id, 'userid' => $USER->id, 'timecancelled' => 0];
             if ($DB->get_record('reservation_request', $queryparameters)) {
                 $row[] = get_string('yes');
             } else {

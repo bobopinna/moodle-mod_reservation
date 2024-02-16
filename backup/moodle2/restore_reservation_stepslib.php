@@ -38,7 +38,7 @@ class restore_reservation_activity_structure_step extends restore_activity_struc
      */
     protected function define_structure() {
 
-        $paths = array();
+        $paths = [];
         $userinfo = $this->get_setting_value('userinfo');
 
         $paths[] = new restore_path_element('reservation', '/activity/reservation');
@@ -75,7 +75,7 @@ class restore_reservation_activity_structure_step extends restore_activity_struc
         $data->course = $this->get_courseid();
 
         $data->teachers = '';
-        $newteachers = array();
+        $newteachers = [];
         if (!empty($data->teachers)) {
             $teachers = explode(',', $data->teachers);
             foreach ($teachers as $teacher) {
@@ -189,15 +189,15 @@ class restore_reservation_activity_structure_step extends restore_activity_struc
                   JOIN {backup_ids_temp} bi ON bi.newitemid = r.id
                  WHERE bi.backupid = ?
                    AND bi.itemname = 'reservation'",
-                array($this->get_restoreid()));
+                [$this->get_restoreid()]);
 
         foreach ($rs as $rec) {
             if ($rec->parent < 0) {
                 $newparentid = $this->get_mappingid('reservation', -$rec->parent);
                 if ($newparentid !== false) {
-                    $DB->set_field('reservation', 'parent', $newparentid, array('id' => $rec->id));
+                    $DB->set_field('reservation', 'parent', $newparentid, ['id' => $rec->id]);
                 } else {
-                    $DB->set_field('reservation', 'parent', 0, array('id' => $rec->id));
+                    $DB->set_field('reservation', 'parent', 0, ['id' => $rec->id]);
                     $OUTPUT->notification(get_string('badparent', 'reservation'));
                 }
             }

@@ -60,7 +60,7 @@ class reservation_upload_form extends moodleform {
         $mform->addElement('select', 'encoding', get_string('encoding', 'tool_uploaduser'), $choices);
         $mform->setDefault('encoding', 'UTF-8');
 
-        $choices = array('10' => 10, '20' => 20, '100' => 100, '1000' => 1000, '100000' => 100000);
+        $choices = ['10' => 10, '20' => 20, '100' => 100, '1000' => 1000, '100000' => 100000];
         $mform->addElement('select', 'previewrows', get_string('rowpreviewnum', 'tool_uploaduser'), $choices);
         $mform->setType('previewrows', PARAM_INT);
 
@@ -89,7 +89,7 @@ class reservation_upload_confirm_form extends moodleform {
 
         $mform->addElement('header', 'settingsheader', get_string('general'));
         if (!in_array('course', $columns)) {
-            $displaylist = array();
+            $displaylist = [];
             if (class_exists('core_course_category')) {
                 $displaylist = core_course_category::make_categories_list();
             } else {
@@ -99,7 +99,7 @@ class reservation_upload_confirm_form extends moodleform {
 
             $courses = $DB->get_records('course');
             if ($courses) {
-                $choices = array();
+                $choices = [];
                 foreach ($courses as $course) {
                     $coursenumsections = 0;
                     if (course_get_format($course)->uses_sections()) {
@@ -135,7 +135,7 @@ class reservation_upload_confirm_form extends moodleform {
 
         }
         if ($noerror) {
-            $choices = array();
+            $choices = [];
             $choices[0] = get_string('no');
             $choices[1] = get_string('optional', 'reservation');
             $choices[2] = get_string('required', 'reservation');
