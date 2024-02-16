@@ -92,8 +92,14 @@ class mod_reservation_mod_form extends moodleform_mod {
             foreach ($locations as $location) {
                 $associativelocations[$location] = $location;
             }
-            natsort($associativelocations);
-            $locations = array_merge([0 => get_string('otherlocation', 'reservation')), $associativelocations];
+
+            if (extension_loaded('intl') === true) {
+                collator_asort(collator_create('root'), $associativelocations);
+            } else {
+                natcasesort($associativelocations);
+            }
+
+            $locations = array_merge([0 => get_string('otherlocation', 'reservation')], $associativelocations);
             $onchange = 'onchange="getElementById(\'id_locationtext\').value=\'\'"';
             $locationgrp[] = &$mform->createElement('select', 'location', null, $locations, $onchange);
             $locationsize = 40;
