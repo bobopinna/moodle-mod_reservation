@@ -206,11 +206,13 @@ $notice = '';
 // Do a user action.
 if (isset($status->action) && confirm_sesskey()) {
     $request = null;
+    $redirectqueries = [];
     switch($status->action) {
         case 'manualreserve':  // Add a reservation for selected user.
             if (has_capability('mod/reservation:manualreserve', $context) && ($status->mode == 'manage') && !empty($userid)) {
                 $request = new stdClass();
                 $request->userid = $userid;
+                $redirectqueries['mode'] = 'manage';
             } else {
                 $notice = 'reservationdenied';
             }
@@ -229,7 +231,9 @@ if (isset($status->action) && confirm_sesskey()) {
             $note = optional_param('note', null, PARAM_TEXT);
             $result = reservation_reserve($reservation, $seats, $note, $userid);
             if ($result['status'] == true) {
-                redirect ($CFG->wwwroot.'/mod/reservation/view.php?id='.$cm->id, get_string('reserved', 'reservation'), 2);
+                $redirectqueries['id'] = $cm->id;
+                $redirecturl = new moodle_url('/mod/reservation/view.php', $redirectqueries);
+                redirect ($redirecturl, get_string('reserved', 'reservation'), 2);
             } else {
                 $notice = $result['error'];
             }
@@ -238,7 +242,9 @@ if (isset($status->action) && confirm_sesskey()) {
             if (has_capability('mod/reservation:reserve', $context)) {
                 if (reservation_cancel($reservation, $course, $cm, $context)) {
                     $strcancelled = get_string('reservationcancelled', 'reservation');
-                    redirect ($CFG->wwwroot.'/mod/reservation/view.php?id='.$cm->id, $strcancelled, 2);
+                    $redirectqueries['id'] = $cm->id;
+                    $redirecturl = new moodle_url('/mod/reservation/view.php', $redirectqueries);
+                    redirect ($redirecturl, $strcancelled, 2);
                 } else {
                     $notice = 'notbooked';
                 }
