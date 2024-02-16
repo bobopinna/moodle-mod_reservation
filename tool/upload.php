@@ -176,15 +176,17 @@ if (!empty($iid)) {
                         $coursenumsections = (int)max(array_keys($sections));
                     }
 
+                    $data->section = clean_param(trim($data->section), PARAM_INT);
                     if (($coursenumsections > 0) && ($data->section > $coursenumsections) || ($data->section < 0)) {
-                        $upt->track('section', $errorstr, 'error');
+                        $upt->track('status', $errorstr, 'error');
+                        $upt->track('section', get_string('badcoursesection', 'reservation'), 'error');
                     } else {
                         $cw = get_fast_modinfo($course->id)->get_section_info($data->section);
 
                         $reservation = new stdClass();
                         // Create the course module.
                         $reservation->cmidnumber = null;
-                        $reservation->section = clean_param($data->section, PARAM_INT);
+                        $reservation->section = $data->section;
 
                         // Create the reservation database entry.
                         $reservation->course = $course->id;
@@ -316,7 +318,7 @@ if (!empty($iid)) {
         $cir->init();
         $linenum = 1; // Column header is first line.
         $noerror = true; // Keep status of any error.
-        $maxsection = 0;
+
         while ($linenum <= $previewrows && $fields = $cir->next()) {
             $linenum++;
             $rowcols = [];
@@ -335,21 +337,35 @@ if (!empty($iid)) {
                     $courseviewurl = new moodle_url('/course/view.php', ['id' => $course->id]);
                     $rowcols['course'] = html_writer::link($courseviewurl, $course->fullname);
                     if (isset($rowcols['section'])) {
-                        $rowcols['section'] = trim($rowcols['section']);
-                        // Compartibility with course formats using field 'numsections'.
-                        $courseformatoptions = course_get_format($course)->get_format_options();
+                        $rowcols['section'] = clean_param(trim($rowcols['section']), PARAM_INT);
                         if (empty($rowcols['section'])) {
                             $rowcols['status'][] = get_string('fieldrequired', 'error', 'section');
                             $noerror = false;
-                        } else if (array_key_exists('numsections', $courseformatoptions) &&
-                                   $rowcols['section'] > $courseformatoptions['numsections']) {
-                            $rowcols['status'][] = get_string('badsection', 'reservation', $course->fullname);
-                            $noerror = false;
+                        } else {
+                            $coursenumsections = 0;
+                            $sections = get_fast_modinfo($course->id)->get_section_info_all();
+                            if (!empty($sections)) {
+                                $coursenumsections = (int)max(array_keys($sections));
+                            }
+
+                            // Check if a section record exists.
+                            if (($coursenumsections == 0) || ($rowcols['section'] > $coursenumsections)) {
+                                $rowcols['status'][] = get_string('badcoursesection', 'reservation');
+                                $noerror = false;
+                            }
                         }
                     }
                 } else {
                     $rowcols['status'][] = get_string('badcourse', 'reservation');
                     $noerror = false;
+                }
+            } else {
+                if (isset($rowcols['section'])) {
+                    $rowcols['section'] = clean_param(trim($rowcols['section']), PARAM_INT);
+                    if (empty($rowcols['section']) && (!isset($rowcols['course']) || empty($rowcols['course']))) {
+                        $rowcols['status'][] = get_string('fieldrequired', 'error', 'section');
+                        $noerror = false;
+                    }
                 }
             }
 
@@ -418,16 +434,6 @@ if (!empty($iid)) {
                 if ($timeclose === false) {
                     $rowcols['status'][] = get_string('badtimeclose', 'reservation');
                     $noerror = false;
-                }
-            }
-
-            if (isset($rowcols['section'])) {
-                $rowcols['section'] = clean_param(trim($rowcols['section']), PARAM_INT);
-                if (empty($rowcols['section']) && (!isset($rowcols['course']) || empty($rowcols['course']))) {
-                    $rowcols['status'][] = get_string('fieldrequired', 'error', 'section');
-                    $noerror = false;
-                } else {
-                    $maxsection = max($maxsection, $rowcols['section']);
                 }
             }
 
