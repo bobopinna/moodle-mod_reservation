@@ -948,7 +948,7 @@ function reservation_remove_user_event($reservation, $request) {
         if (in_array('userevent', $enabledevents)) {
             require_once($CFG->dirroot.'/calendar/lib.php');
 
-            $events = calendar_get_events_by_id([request->eventid]);
+            $events = calendar_get_events_by_id([$request->eventid]);
             if (!empty($events)) {
                 $deleted = false;
                 foreach ($events as $event) {
