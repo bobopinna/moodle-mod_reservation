@@ -62,7 +62,7 @@ $strclose  = get_string('timeclose', 'reservation');
 // Define the table headers.
 $usesections = course_format_uses_sections($course->format);
 if ($usesections) {
-    $tableheaders  = [$strsectionname, $strname, $streventdate, $strteachers, $strlocation, $strintro, $strclose]);
+    $tableheaders  = [$strsectionname, $strname, $streventdate, $strteachers, $strlocation, $strintro, $strclose];
     $tablecolumns = ['section', 'name', 'startdate', 'teachers', 'location', 'intro', 'timeclose'];
 } else {
     $tableheaders  = [$strname, $streventdate, $strteachers, $strlocation, $strintro, $strclose];
