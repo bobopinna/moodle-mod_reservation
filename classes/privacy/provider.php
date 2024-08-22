@@ -119,7 +119,7 @@ class provider implements
         }
 
         // Fetch all reservation requests.
-        $sql = "SELECT ca.userid
+        $sql = "SELECT rr.userid
                   FROM {course_modules} cm
                   JOIN {modules} m ON m.id = cm.module AND m.name = :modname
                   JOIN {reservation} r ON r.id = cm.instance
