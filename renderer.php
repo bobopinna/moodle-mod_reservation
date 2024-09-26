@@ -41,11 +41,11 @@ class mod_reservation_renderer extends plugin_renderer_base {
      * @param string $mode the current selected tab (overview or manage)
      */
     public function display_tabs($reservation, $mode) {
-        $tabs = [];
-        $row = [];
+        $tabs = array();
+        $row = array();
 
         $baseurl = 'view.php';
-        $queries = ['r' => $reservation->id];
+        $queries = array('r' => $reservation->id);
 
         $queries['mode'] = 'overview';
         $url = new moodle_url($baseurl, $queries);
@@ -78,54 +78,54 @@ class mod_reservation_renderer extends plugin_renderer_base {
             $teacherroles = get_archetype_roles('editingteacher');
             $teacherrole = array_shift($teacherroles);
             $teacherstr = role_get_name($teacherrole, $coursecontext);
-            echo html_writer::start_tag('div', ['class' => 'teachername']);
-            echo html_writer::tag('label', $teacherstr.': ', ['class' => 'bold']);
+            echo html_writer::start_tag('div', array('class' => 'teachername'));
+            echo html_writer::tag('label', $teacherstr.': ', array('class' => 'bold'));
             echo html_writer::tag('span', $teachername);
             echo html_writer::end_tag('div');
         }
         if (!empty($reservation->location)) {
-            echo html_writer::start_tag('div', ['class' => 'location']);
-            echo html_writer::tag('label', get_string('location', 'reservation').': ', ['class' => 'bold']);
+            echo html_writer::start_tag('div', array('class' => 'location'));
+            echo html_writer::tag('label', get_string('location', 'reservation').': ', array('class' => 'bold'));
             echo html_writer::tag('span', $reservation->location);
             echo html_writer::end_tag('div');
         }
         $strftimedaydatetime = get_string('strftimedaydatetime');
-        echo html_writer::start_tag('div', ['class' => 'timestart']);
+        echo html_writer::start_tag('div', array('class' => 'timestart'));
         if (!empty($reservation->timeend)) {
-            echo html_writer::tag('label', get_string('timestart', 'reservation').': ', ['class' => 'bold']);
+            echo html_writer::tag('label', get_string('timestart', 'reservation').': ', array('class' => 'bold'));
         } else {
-            echo html_writer::tag('label', get_string('date').': ', ['class' => 'bold']);
+            echo html_writer::tag('label', get_string('date').': ', array('class' => 'bold'));
         }
         echo html_writer::tag('span', userdate($reservation->timestart, $strftimedaydatetime));
         echo html_writer::end_tag('div');
         if (!empty($reservation->timeend)) {
-            echo html_writer::start_tag('div', ['class' => 'timeend']);
-            echo html_writer::tag('label', get_string('timeend', 'reservation').': ', ['class' => 'bold']);
+            echo html_writer::start_tag('div', array('class' => 'timeend'));
+            echo html_writer::tag('label', get_string('timeend', 'reservation').': ', array('class' => 'bold'));
             echo html_writer::tag('span', userdate($reservation->timeend, $strftimedaydatetime));
             echo html_writer::end_tag('div');
         }
 
-        echo html_writer::empty_tag('hr', ['class' => 'clearfloat']);
+        echo html_writer::empty_tag('hr', array('class' => 'clearfloat'));
 
         if (!empty($reservation->timeopen)) {
-            echo html_writer::start_tag('div', ['class' => 'timeopen']);
-            echo html_writer::tag('label', get_string('timeopen', 'reservation').': ', ['class' => 'bold']);
+            echo html_writer::start_tag('div', array('class' => 'timeopen'));
+            echo html_writer::tag('label', get_string('timeopen', 'reservation').': ', array('class' => 'bold'));
             if ($now < $reservation->timeopen) {
                 echo html_writer::tag('span',
                                       userdate($reservation->timeopen, $strftimedaydatetime),
-                                      ['class' => 'notopened']);
+                                      array('class' => 'notopened'));
                 echo html_writer::tag('span', ' '.get_string('reservationnotopened', 'reservation'),
-                                      ['class' => 'alert bg-warning']);
+                                      array('class' => 'alert bg-warning'));
             } else {
                 echo html_writer::tag('span', userdate($reservation->timeopen, $strftimedaydatetime));
             }
             echo html_writer::end_tag('div');
         }
-        echo html_writer::start_tag('div', ['class' => 'timeclose']);
-        echo html_writer::tag('label', get_string('timeclose', 'reservation').': ', ['class' => 'bold']);
+        echo html_writer::start_tag('div', array('class' => 'timeclose'));
+        echo html_writer::tag('label', get_string('timeclose', 'reservation').': ', array('class' => 'bold'));
         if ($now > $reservation->timeclose) {
-            echo html_writer::tag('span', userdate($reservation->timeclose, $strftimedaydatetime), ['class' => 'notopened']);
-            echo html_writer::tag('span', ' '.get_string('reservationclosed', 'reservation'), ['class' => 'alert bg-warning']);
+            echo html_writer::tag('span', userdate($reservation->timeclose, $strftimedaydatetime), array('class' => 'notopened'));
+            echo html_writer::tag('span', ' '.get_string('reservationclosed', 'reservation'), array('class' => 'alert bg-warning'));
         } else {
             echo html_writer::tag('span', userdate($reservation->timeclose, $strftimedaydatetime));
         }
@@ -142,7 +142,7 @@ class mod_reservation_renderer extends plugin_renderer_base {
 
         $connectto = get_config('reservation', 'connect_to');
         if ($connectto == 'site') {
-            $displaylist = [];
+            $displaylist = array();
             if (class_exists('core_course_category')) {
                 $displaylist = core_course_category::make_categories_list();
             } else {
@@ -152,20 +152,22 @@ class mod_reservation_renderer extends plugin_renderer_base {
         }
         // Show connected reservations.
         if ($connectedreservs = reservation_get_connected($reservation)) {
-            $connectedlist = html_writer::tag('label', get_string('connectedto', 'reservation').': ', ['class' => 'bold']);
-            $connectedlist .= html_writer::start_tag('ul', ['class' => 'connectedreservations']);
+            $connectedlist = html_writer::tag('label',
+                                               get_string('connectedto', 'reservation').': ',
+                                               array('class' => 'bold'));
+            $connectedlist .= html_writer::start_tag('ul', array('class' => 'connectedreservations'));
             foreach ($connectedreservs as $cr) {
                 $linktext = $cr->coursename . ': ' . $cr->name;
                 if ($connectto == 'site') {
                     $linktext = $displaylist[$cr->category] .'/'. $linktext;
                 }
-                $linkurl = new moodle_url('/mod/reservation/view.php', ['r' => $cr->id]);
-                $link = html_writer::tag('a', $linktext, ['href' => $linkurl, 'class' => 'connectedlink']);
+                $linkurl = new moodle_url('/mod/reservation/view.php', array('r' => $cr->id));
+                $link = html_writer::tag('a', $linktext, array('href' => $linkurl, 'class' => 'connectedlink'));
                 $connectedlist .= html_writer::tag('li', $link);
             }
             $connectedlist .= html_writer::end_tag('ul');
 
-            echo html_writer::tag('div', $connectedlist, ['class' => 'connected']);
+            echo html_writer::tag('div', $connectedlist, array('class' => 'connected'));
         }
     }
 
@@ -180,7 +182,7 @@ class mod_reservation_renderer extends plugin_renderer_base {
         $linktext = $cr->coursename . ': ' . $cr->name;
         $connectto = get_config('reservation', 'connect_to');
         if ($connectto == 'site') {
-            $displaylist = [];
+            $displaylist = array();
             if (class_exists('core_course_category')) {
                 $displaylist = core_course_category::make_categories_list();
             } else {
@@ -190,8 +192,8 @@ class mod_reservation_renderer extends plugin_renderer_base {
             $linktext = $displaylist[$cr->category] .'/'. $linktext;
         }
 
-        $linkurl = new moodle_url('/mod/reservation/view.php', ['id' => $cr->id]);
-        $link = html_writer::tag('a', $linktext, ['href' => $linkurl, 'class' => 'connectedlink']);
+        $linkurl = new moodle_url('/mod/reservation/view.php', array('id' => $cr->id));
+        $link = html_writer::tag('a', $linktext, array('href' => $linkurl, 'class' => 'connectedlink'));
 
         $html = get_string('reservedonconnected', 'reservation', $link);
         echo html_writer::tag('p', $html);
@@ -209,21 +211,21 @@ class mod_reservation_renderer extends plugin_renderer_base {
         $overview->tablealign = 'center';
         $overview->attributes['class'] = 'requestoverview';
         $overview->summary = get_string('requestoverview', 'reservation');
-        $overview->data = [];
+        $overview->data = array();
 
-        $overview->head = [];
+        $overview->head = array();
         $overview->head[] = get_string('requests', 'reservation');
         for ($i = 1; $i < count($counters); $i++) {
             $operatorstr = (!$counters[$i]->operator) ? get_string('equal', 'reservation') : get_string('notequal', 'reservation');
             $overview->head[] = $counters[$i]->fieldname.' '.$operatorstr.' '.$counters[$i]->matchvalue;
         }
 
-        $columns = [];
+        $columns = array();
         $overbookstr = '';
         if (!empty($reservation->overbook) && ($reservation->maxrequest > 0)) {
             $overbookseats = round($reservation->maxrequest * $reservation->overbook / 100);
             $overbookstr = ' '.html_writer::tag('span', '('.$counters[0]->overbooked.'/'.$overbookseats.')',
-                    ['class' => 'overbooked']);
+                    array('class' => 'overbooked'));
         }
         $availablestr = $counters[0]->count.'/'.(($reservation->maxrequest > 0) ? $reservation->maxrequest : '&infin;');
         $columns[] = $availablestr.$overbookstr;
@@ -233,14 +235,14 @@ class mod_reservation_renderer extends plugin_renderer_base {
             if (!empty($reservation->overbook)) {
                 $overbookseats = round($counters[$i]->requestlimit * $reservation->overbook / 100);
                 $overbookstr = ' '.html_writer::tag('span', '('.$counters[$i]->overbooked.'/'.$overbookseats.')',
-                        ['class' => 'overbooked']);
+                        array('class' => 'overbooked'));
             }
             $availablestr = $counters[$i]->count.'/'.$counters[$i]->requestlimit;
             $columns[] = $availablestr.$overbookstr;
         }
         $overview->data[] = $columns;
 
-        echo html_writer::tag('div', html_writer::table($overview), ['class' => 'counters']);
+        echo html_writer::tag('div', html_writer::table($overview), array('class' => 'counters'));
     }
 
     /**
@@ -254,14 +256,14 @@ class mod_reservation_renderer extends plugin_renderer_base {
         if (isset($currentuser->number) && ($currentuser->number > 0)) {
             $note = '';
             if (!empty($currentuser->note)) {
-                $notelabel = html_writer::tag('span', get_string('yournote', 'reservation'), ['class' => 'notelabel']);
-                $notetext = html_writer::tag('span', format_string($currentuser->note), ['class' => 'notetext']);
-                $note = html_writer::tag('div', $notelabel.' '.$notetext, ['class' => 'usernote']);
+                $notelabel = html_writer::tag('span', get_string('yournote', 'reservation'), array('class' => 'notelabel'));
+                $notetext = html_writer::tag('span', format_string($currentuser->note), array('class' => 'notetext'));
+                $note = html_writer::tag('div', $notelabel.' '.$notetext, array('class' => 'usernote'));
             }
             $canviewnumbernow = ($reservation->showrequest == 0) && ($now > $reservation->timeclose);
             $canviewnumberalways = ($reservation->showrequest == 3);
             if ($canviewnumbernow || $canviewnumberalways) {
-                $numberspan = html_writer::tag('span', $currentuser->number, ['class' => 'justbookednumber']);
+                $numberspan = html_writer::tag('span', $currentuser->number, array('class' => 'justbookednumber'));
                 if (($reservation->maxrequest > 0) && ($currentuser->number > $reservation->maxrequest)) {
                     $strjustbooked = get_string('justoverbooked', 'reservation', html_writer::tag('span', $numberspan));
                     echo $this->output->box($strjustbooked.$note, 'justbooked overbooked');
@@ -296,15 +298,16 @@ class mod_reservation_renderer extends plugin_renderer_base {
     public function display_note_field($reservation) {
         $html = '';
         if ($reservation->note >= 1) {
-            $html .= html_writer::start_tag('div', ['class' => 'note']);
+            $html .= html_writer::start_tag('div', array('class' => 'note'));
             $required = '';
             if ($reservation->note == 2) {
                 $required = '<span class="req">' .
                        $this->output->pix_icon('req', get_string('requiredelement', 'form')) . '</span>';
             }
             $html .= html_writer::tag('label',
-                                      get_string('note', 'reservation').$required, ['for' => 'note', 'class' => 'notelabel']);
-            $html .= html_writer::tag('textarea', '', ['id' => 'note', 'name' => 'note', 'rows' => '5', 'cols' => '30']);
+                                      get_string('note', 'reservation').$required,
+                                      array('for' => 'note', 'class' => 'notelabel'));
+            $html .= html_writer::tag('textarea', '', array('id' => 'note', 'name' => 'note', 'rows' => '5', 'cols' => '30'));
             $html .= html_writer::end_tag('div');
         }
         return $html;
@@ -322,19 +325,24 @@ class mod_reservation_renderer extends plugin_renderer_base {
     public function display_availability($reservation, $seats) {
         $html = '';
         if (($reservation->maxrequest == 0) && ($seats->available > 0)) {
-            $html = html_writer::tag('span', get_string('availablerequests', 'reservation'), ['class' => 'available']);
+            $html = html_writer::tag('span', get_string('availablerequests', 'reservation'), array('class' => 'available'));
         } else if (($seats->available > 0) || ($seats->total > 0)) {
             if ($seats->available > 0) {
                 $html = html_writer::tag('span',
-                                          get_string('availablerequests', 'reservation').': ', ['class' => 'available']);
-                $html .= html_writer::tag('span', $seats->available, ['class' => 'availablenumber']);
+                                          get_string('availablerequests', 'reservation').': ',
+                                          array('class' => 'available'));
+                $html .= html_writer::tag('span', $seats->available, array('class' => 'availablenumber'));
             } else {
-                $html = html_writer::tag('span', get_string('overbookonly', 'reservation'), ['class' => 'overbook']);
+                $html = html_writer::tag('span',
+                                          get_string('overbookonly', 'reservation'),
+                                          array('class' => 'overbook'));
             }
         } else {
-            $html = html_writer::tag('span', get_string('nomorerequest', 'reservation'), ['class' => 'nomoreavailable']);
+            $html = html_writer::tag('span',
+                                     get_string('nomorerequest', 'reservation'),
+                                     array('class' => 'nomoreavailable'));
         }
-        return html_writer::tag('div', $html, ['class' => 'availability']);
+        return html_writer::tag('div', $html, array('class' => 'availability'));
     }
 
     /**
@@ -348,7 +356,7 @@ class mod_reservation_renderer extends plugin_renderer_base {
         global $USER;
 
         $html = '';
-        $formattributes = [];
+        $formattributes = array();
         $formattributes['id'] = 'manualreserve';
         $formattributes['enctype'] = 'multipart/form-data';
         $formattributes['method'] = 'post';
@@ -367,26 +375,30 @@ class mod_reservation_renderer extends plugin_renderer_base {
                    '}';
         }
         $html .= html_writer::start_tag('form', $formattributes);
-        $html .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'reservation', 'value' => $reservation->id]);
-        $html .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => $USER->sesskey]);
+        $html .= html_writer::empty_tag('input', array('type' => 'hidden',
+                                                       'name' => 'reservation',
+                                                       'value' => $reservation->id));
+        $html .= html_writer::empty_tag('input', array('type' => 'hidden',
+                                                       'name' => 'sesskey',
+                                                       'value' => $USER->sesskey));
         $html .= html_writer::start_tag('div');
         $required = '<span class="req">' . $this->output->pix_icon('req', get_string('requiredelement', 'form')) . '</span>';
         $html .= html_writer::tag('label',
                                   get_string('addparticipant', 'reservation').$required,
-                                  ['for' => 'newparticipant', 'class' => 'addparticipant']);
+                                  array('for' => 'newparticipant', 'class' => 'addparticipant'));
         $html .= html_writer::select($addableusers, 'newparticipant');
         $html .= html_writer::end_tag('div');
 
         $html .= $this->display_note_field($reservation);
 
-        $html .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'reserve', 'value' => 'reserve']);
+        $html .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'reserve', 'value' => 'reserve'));
 
         $html .= html_writer::tag('button', get_string('reserve', 'reservation'),
-                                   ['type' => 'submit', 'class' => 'btn btn-primary reservebtn']);
+                                   array('type' => 'submit', 'class' => 'btn btn-primary reservebtn'));
 
         $html .= html_writer::end_tag('form');
 
-        echo html_writer::tag('div', $html, ['class' => 'manualreserve']);
+        echo html_writer::tag('div', $html, array('class' => 'manualreserve'));
     }
 
     /**
@@ -402,7 +414,7 @@ class mod_reservation_renderer extends plugin_renderer_base {
 
         $html = '';
 
-        $formattributes = [];
+        $formattributes = array();
         $formattributes['id'] = 'reserve';
         $formattributes['enctype'] = 'multipart/form-data';
         $formattributes['method'] = 'post';
@@ -417,23 +429,27 @@ class mod_reservation_renderer extends plugin_renderer_base {
                    '}';
         }
         $html .= html_writer::start_tag('form', $formattributes);
-        $html .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'reservation', 'value' => $reservation->id]);
-        $html .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => $USER->sesskey]);
+        $html .= html_writer::empty_tag('input', array('type' => 'hidden',
+                                                       'name' => 'reservation',
+                                                       'value' => $reservation->id));
+        $html .= html_writer::empty_tag('input', array('type' => 'hidden',
+                                                       'name' => 'sesskey',
+                                                       'value' => $USER->sesskey));
         if (isset($currentuser->number) && ($currentuser->number > 0)) {
-            $html .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'cancel', 'value' => 'cancel']);
+            $html .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'cancel', 'value' => 'cancel'));
 
             $html .= html_writer::tag('button', get_string('reservecancel', 'reservation'),
-                                   ['type' => 'submit', 'class' => 'btn btn-primary reservebtn']);
+                                   array('type' => 'submit', 'class' => 'btn btn-primary reservebtn'));
         } else if (($reservation->maxrequest == 0) || ($seats->available > 0) || ($seats->total > 0)) {
             $html .= $this->display_note_field($reservation);
 
-            $html .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'reserve', 'value' => 'reserve']);
+            $html .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'reserve', 'value' => 'reserve'));
 
             $html .= html_writer::tag('button', get_string('reserve', 'reservation'),
-                                   ['type' => 'submit', 'class' => 'btn btn-primary reservebtn']);
+                                   array('type' => 'submit', 'class' => 'btn btn-primary reservebtn'));
         }
         $html .= html_writer::end_tag('form');
-        echo html_writer::tag('div', $html, ['class' => 'reserve']);
+        echo html_writer::tag('div', $html, array('class' => 'reserve'));
     }
 
     /**
@@ -443,26 +459,24 @@ class mod_reservation_renderer extends plugin_renderer_base {
      * @param array $counters
      */
     public function print_viewtype_form($status, $counters) {
-        $html = html_writer::start_tag('form', ['enctype' => 'multipart/form-data',
-                                                 'method' => 'post',
-                                                 'action' => $status->url,
-                                                 'id' => 'viewtype',
-                                               ]
-                                       );
+        $html = html_writer::start_tag('form', array('enctype' => 'multipart/form-data',
+                                                     'method' => 'post',
+                                                     'action' => $status->url,
+                                                     'id' => 'viewtype'));
         $html .= html_writer::start_tag('fieldset');
         if ($status->view == 'full') {
-            $html .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'view', 'value' => 'clean']);
+            $html .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'view', 'value' => 'clean'));
             $html .= html_writer::tag('button', get_string('cleanview', 'reservation'),
-                                   ['type' => 'submit', 'class' => 'btn btn-secondary']);
+                                   array('type' => 'submit', 'class' => 'btn btn-secondary'));
         } else if ($counters[0]->deletedrequests > 0) {
-            $html .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'view', 'value' => 'full']);
+            $html .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'view', 'value' => 'full'));
             $html .= html_writer::tag('button', get_string('fullview', 'reservation'),
-                                   ['type' => 'submit', 'class' => 'btn btn-secondary']);
+                                   array('type' => 'submit', 'class' => 'btn btn-secondary'));
         }
         $html .= html_writer::end_tag('fieldset');
         $html .= html_writer::end_tag('form');
 
-        echo html_writer::tag('div', $html, ['class' => 'viewtype']);
+        echo html_writer::tag('div', $html, array('class' => 'viewtype'));
     }
 
     /**
@@ -480,25 +494,19 @@ class mod_reservation_renderer extends plugin_renderer_base {
 
         $now = time();
 
-        echo html_writer::start_tag('div', ['id' => 'tablecontainer']);
+        echo html_writer::start_tag('div', array('id' => 'tablecontainer'));
         if (($status->mode == 'manage') && has_capability('mod/reservation:viewrequest', $context)) {
-            echo html_writer::start_tag('form', ['id' => 'requestactions',
-                                                 'enctype' => 'multipart/form-data',
-                                                 'method' => 'post',
-                                                 'action' => $status->url,
-                                                ]
-                                       );
-            echo html_writer::empty_tag('input', ['type' => 'hidden',
-                                                  'name' => 'sesskey',
-                                                  'value' => $USER->sesskey,
-                                                 ]
-                                       );
+            echo html_writer::start_tag('form', array('id' => 'requestactions',
+                                                      'enctype' => 'multipart/form-data',
+                                                      'method' => 'post',
+                                                      'action' => $status->url));
+            echo html_writer::empty_tag('input', array('type' => 'hidden',
+                                                       'name' => 'sesskey',
+                                                       'value' => $USER->sesskey));
             if (isset($status->view) && !empty($status->view)) {
-                echo html_writer::empty_tag('input', ['type' => 'hidden',
-                                                      'name' => 'view',
-                                                      'value' => $status->view,
-                                                     ]
-                                           );
+                echo html_writer::empty_tag('input', array('type' => 'hidden',
+                                                           'name' => 'view',
+                                                           'value' => $status->view));
             }
         }
 
@@ -514,33 +522,33 @@ class mod_reservation_renderer extends plugin_renderer_base {
            ((($reservation->grade != 0) && ($now > $reservation->timestart) && ($counters[0]->count > 0))
             || ($counters[0]->count > 0) || ($counters[0]->deletedrequests > 0))) {
             if (($reservation->grade != 0) && ($now > $reservation->timestart) && ($counters[0]->count > 0)) {
-                $html = html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'savegrades', 'value' => 'save']);
+                $html = html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'savegrades', 'value' => 'save'));
 
                 $html .= html_writer::tag('button', get_string('save', 'reservation'),
-                                          ['type' => 'submit', 'class' => 'btn btn-primary']);
+                                          array('type' => 'submit', 'class' => 'btn btn-primary'));
 
-                echo html_writer::tag('div', $html, ['class' => 'savegrades']);
+                echo html_writer::tag('div', $html, array('class' => 'savegrades'));
             }
             // Print "Select all" etc.
             if (!empty($status->actions) && (($counters[0]->count > 0) ||
                (($status->view == 'full') && ($counters[0]->deletedrequests > 0)))) {
                 $html = '';
-                $html .= html_writer::start_tag('div', ['class' => 'btn-group']);
+                $html .= html_writer::start_tag('div', array('class' => 'btn-group'));
                 $html .= html_writer::tag('button', get_string('selectall'),
-                                          ['id' => 'checkall', 'type' => 'button', 'class' => 'btn btn-secondary']);
+                                          array('id' => 'checkall', 'type' => 'button', 'class' => 'btn btn-secondary'));
                 $html .= html_writer::tag('button', get_string('deselectall'),
-                                          ['id' => 'checknone', 'type' => 'button', 'class' => 'btn btn-secondary']);
+                                          array('id' => 'checknone', 'type' => 'button', 'class' => 'btn btn-secondary'));
 
                 $html .= html_writer::end_tag('div');
                 $html .= html_writer::select($status->actions, 'action', '0',
-                                             ['0' => get_string('withselected', 'reservation')]);
-                $okbutton = html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'selectedaction', 'value' => 'ok']);
+                                             array('0' => get_string('withselected', 'reservation')));
+                $okbutton = html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'selectedaction', 'value' => 'ok'));
 
                 $okbutton .= html_writer::tag('button', get_string('ok'),
-                                          ['type' => 'submit', 'class' => 'btn btn-secondary m-r-1']);
+                                          array('type' => 'submit', 'class' => 'btn btn-secondary m-r-1'));
 
                 $html .= html_writer::tag('noscript', $okbutton);
-                echo html_writer::tag('div', $html, ['class' => 'form-buttons']);
+                echo html_writer::tag('div', $html, array('class' => 'form-buttons'));
 
                 $options = new stdClass();
                 $options->reservationid = $reservation->id;

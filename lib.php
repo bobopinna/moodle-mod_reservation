@@ -101,7 +101,7 @@ function reservation_update_instance($reservation) {
 
         reservation_set_sublimits($reservation);
 
-        $DB->delete_records('event', ['modulename' => 'reservation', 'instance' => $reservation->id]);
+        $DB->delete_records('event', array('modulename' => 'reservation', 'instance' => $reservation->id));
         reservation_set_events($reservation);
 
         if (!empty($reservation->grade)) {
@@ -125,7 +125,7 @@ function reservation_update_instance($reservation) {
 function reservation_delete_instance($id) {
     global $DB;
 
-    if (! $reservation = $DB->get_record('reservation', ['id' => $id])) {
+    if (! $reservation = $DB->get_record('reservation', array('id' => $id))) {
         return false;
     }
 
@@ -137,29 +137,29 @@ function reservation_delete_instance($id) {
     $allrequestsql = 'SELECT rq.id
                       FROM {reservation_request} rq
                       WHERE reservation = ?';
-    if (! $DB->delete_records_select('reservation_note', 'request IN ('.$allrequestsql.')', [$reservation->id])) {
+    if (! $DB->delete_records_select('reservation_note', 'request IN ('.$allrequestsql.')', array($reservation->id))) {
         $result = false;
     }
 
-    if ($requests = $DB->get_records('reservation_request', ['reservation' => $reservation->id])) {
+    if ($requests = $DB->get_records('reservation_request', array('reservation' => $reservation->id))) {
         foreach ($requests as $request) {
             if (isset($request->eventid) && !empty($request->eventid)) {
                 require_once(__DIR__.'/locallib.php');
                 reservation_remove_user_event($reservation, $request);
             }
         }
-        $DB->delete_records('reservation_request', ['reservation' => $reservation->id]);
+        $DB->delete_records('reservation_request', array('reservation' => $reservation->id));
     }
 
-    if (! $DB->delete_records('reservation_limit', ['reservationid' => $reservation->id])) {
+    if (! $DB->delete_records('reservation_limit', array('reservationid' => $reservation->id))) {
         $result = false;
     }
 
-    if (! $DB->delete_records('reservation', ['id' => $reservation->id])) {
+    if (! $DB->delete_records('reservation', array('id' => $reservation->id))) {
         $result = false;
     }
 
-    if (! $DB->delete_records('event', ['modulename' => 'reservation', 'instance' => $reservation->id])) {
+    if (! $DB->delete_records('event', array('modulename' => 'reservation', 'instance' => $reservation->id))) {
         $result = false;
     }
 
@@ -178,13 +178,12 @@ function reservation_delete_instance($id) {
  */
 function reservation_get_completion_state($course, $cm, $userid, $type) {
     global $DB;
-
     // Get reservation details.
-    $reservation = $DB->get_record('reservation', ['id' => $cm->instance], '*', MUST_EXIST);
+    $reservation = $DB->get_record('reservation', array('id' => $cm->instance), '*', MUST_EXIST);
 
     // If completion option is enabled, evaluate it and return true/false.
     if ($reservation->completionreserved) {
-        $params = ['userid' => $userid, 'reservation' => $reservation->id, 'timecancelled' => 0];
+        $params = array('userid' => $userid, 'reservation' => $reservation->id, 'timecancelled' => 0);
         return $DB->record_exists('reservation_request', $params);
     } else {
         // Completion option is not enabled so just return $type.
@@ -204,8 +203,8 @@ function reservation_get_completion_state($course, $cm, $userid, $type) {
 function reservation_user_outline($course, $user, $mod, $reservation) {
     global $DB;
 
-    $return = new stdClass();
-    $queryparameters = ['reservation' => $reservation->id, 'userid' => $user->id, 'timecancelled' => '0'];
+    $return = null;
+    $queryparameters = array('reservation' => $reservation->id, 'userid' => $user->id, 'timecancelled' => '0');
     if ($userrequest = $DB->get_record('reservation_request', $queryparameters)) {
         if ($userrequest->timegraded != 0) {
             $return->info = get_string('grade') . ': ' . $userrequest->grade;
@@ -231,12 +230,12 @@ function reservation_user_outline($course, $user, $mod, $reservation) {
 function reservation_user_complete($course, $user, $mod, $reservation) {
     global $DB;
 
-    $queryparameters = ['reservation' => $reservation->id, 'userid' => $user->id, 'timecancelled' => '0'];
+    $queryparameters = array('reservation' => $reservation->id, 'userid' => $user->id, 'timecancelled' => '0');
     if ($userrequest = $DB->get_record('reservation_request', $queryparameters)) {
         echo get_string('reservedon', 'reservation') . ' ' .
                 userdate($userrequest->timecreated, get_string('strftimedatetime')) . '<br />';
         if ($userrequest->timegraded != 0) {
-            if (! $teacher = $DB->get_record('user', ['id' => $userrequest->teacher])) {
+            if (! $teacher = $DB->get_record('user', array('id' => $userrequest->teacher))) {
                 echo 'Could not find teacher '.$userrequest->teacher."\n";
             } else {
                 echo get_string('grade').': '.$userrequest->grade . ' (' .
@@ -274,7 +273,7 @@ function reservation_print_recent_activity($course, $viewfullnames, $timestart) 
 function reservation_get_user_grades($reservation, $userid=0) {
     global $DB;
 
-    $param = [];
+    $param = array();
     $user = '';
     if ($userid) {
         $user = ' AND u.id = :userid';
@@ -356,7 +355,7 @@ function reservation_grade_item_update($reservation, $grades=null) {
         $reservation->courseid = $reservation->course;
     }
 
-    $params = ['itemname' => $reservation->name, 'idnumber' => $reservation->id];
+    $params = array('itemname' => $reservation->name, 'idnumber' => $reservation->id);
 
     if ($reservation->grade > 0) {
         $params['gradetype'] = GRADE_TYPE_VALUE;
@@ -396,7 +395,7 @@ function reservation_grade_item_delete($reservation) {
     }
 
     return grade_update('mod/reservation', $reservation->courseid, 'mod', 'reservation',
-            $reservation->id, 0, null, ['deleted' => 1]);
+            $reservation->id, 0, null, array('deleted' => 1));
 }
 
 /**
@@ -412,7 +411,7 @@ function reservation_refresh_events($courseid = 0) {
     global $DB;
 
     if ($courseid) {
-        if (! $reservations = $DB->get_records('reservation', ['course' => $courseid])) {
+        if (! $reservations = $DB->get_records('reservation', array('course' => $courseid))) {
             return true;
         }
     } else {
@@ -424,12 +423,12 @@ function reservation_refresh_events($courseid = 0) {
     require_once(__DIR__.'/locallib.php');
     $events = explode(',', get_config('reservation', 'events'));
     foreach ($reservations as $reservation) {
-        $DB->delete_records('event', ['modulename' => 'reservation', 'instance' => $reservation->id]);
+        $DB->delete_records('event', array('modulename' => 'reservation', 'instance' => $reservation->id));
 
         $reservation->coursemodule = get_coursemodule_from_instance('reservation', $reservation->id)->id;
         reservation_set_events($reservation);
 
-        if (! $requests = $DB->get_records('reservation_request', ['reservation' => $reservation->id])) {
+        if (! $requests = $DB->get_records('reservation_request', array('reservation' => $reservation->id))) {
             $usereventsenabled = false;
             if (!empty($events)) {
                 $usereventsenabled = in_array('userevent', $events);
@@ -457,7 +456,7 @@ function reservation_refresh_events($courseid = 0) {
 function reservation_reset_userdata($data) {
     global $DB;
 
-    $status = [];
+    $status = array();
 
     $allreservationsql = 'SELECT r.id
                          FROM {reservation} r
@@ -468,17 +467,17 @@ function reservation_reset_userdata($data) {
 
     if (!empty($data->reset_reservation_request)) {
         $query = 'reservation IN ('.$allreservationsql.')';
-        $queryparameters = ['courseid' => $data->courseid];
+        $queryparameters = array('courseid' => $data->courseid);
         if ($requests = $DB->get_records_select('reservation_request', $query, $queryparameters)) {
             $DB->delete_records_select('reservation_request', 'reservation IN ('.$allreservationsql.')', $queryparameters);
             $DB->delete_records_select('reservation_note', 'request IN ('.$allrequestsql.')', $queryparameters);
 
             require_once(__DIR__.'/locallib.php');
-            $reservations[] = [];
+            $reservations[] = array();
             foreach ($requests as $request) {
                 if (isset($request->eventid) && !empty($request->eventid)) {
                     if (!isset($reservations[$request->reservation])) {
-                        $reservations[$request->reservation] = $DB->get_record('reservation', ['id' => $request->reservation]);
+                        $reservations[$request->reservation] = $DB->get_record('reservation', array('id' => $request->reservation));
                     }
                     if (isset($reservations[$request->reservation])) {
                         reservation_remove_user_event($reservations[$request->reservation], $request);
@@ -487,11 +486,11 @@ function reservation_reset_userdata($data) {
             }
         }
 
-        $status[] = [
+        $status[] = array(
                'component' => get_string('modulenameplural', 'reservation'),
                'item' => get_string('requests', 'reservation'),
-               'error' => false,
-        ];
+               'error' => false
+        );
     }
 
     return $status;
@@ -515,7 +514,7 @@ function reservation_reset_course_form_definition(&$mform) {
  * @return array
  */
 function reservation_reset_course_form_defaults($course) {
-    return ['reset_reservation_request' => 1];
+    return array('reset_reservation_request' => 1);
 }
 
 /**
@@ -563,7 +562,7 @@ function reservation_set_sublimits($reservation) {
     $sublimits = get_config('reservation', 'sublimits');
     if (!empty($sublimits)) {
 
-        $DB->delete_records('reservation_limit', ['reservationid' => $reservation->id]);
+        $DB->delete_records('reservation_limit', array('reservationid' => $reservation->id));
 
         for ($i = 1; $i <= $sublimits; $i++) {
             $field = 'field_'.$i;
@@ -629,7 +628,7 @@ function reservation_set_events($reservation) {
         }
 
         $event2->name .= ' ('.get_string('reservations', 'reservation').')';
-        $event2->description           = [];
+        $event2->description           = array();
         $event2->description['format'] = FORMAT_HTML;
         $event2->description['text']   = userdate($reservation->timestart,
                 get_string('strftimedaydatetime')).'<br />'.$reservation->location.'<br />'.
@@ -657,7 +656,7 @@ function reservation_set_events($reservation) {
  * @return array
  */
 function reservation_get_view_actions() {
-    return ['view', 'view all'];
+    return array('view', 'view all');
 }
 
 /**
@@ -671,5 +670,43 @@ function reservation_get_view_actions() {
  * @return array
  */
 function reservation_get_post_actions() {
-    return ['reserve', 'cancel'. 'grade'];
+    return array('reserve', 'cancel'. 'grade');
+}
+
+
+/**
+ * ARIADNE FIX
+ * Add a get_coursemodule_info function in case any reservation type wants to add 'extra' information
+ * for the course (see resource).
+ *
+ * Given a course_module object, this function returns any "extra" information that may be needed
+ * when printing this activity in a course listing.  See get_array_of_activities() in course/lib.php.
+ *
+ * @param stdClass $coursemodule The coursemodule object (record).
+ * @return cached_cm_info An object on information that the courses
+ *                        will know about (most noticeably, an icon).
+ */
+function reservation_get_coursemodule_info($coursemodule) {
+    global $DB;
+
+    $dbparams = ['id' => $coursemodule->instance];
+    $fields = 'id, name, intro, introformat, completionreserved';
+    if (!$reservation = $DB->get_record('reservation', $dbparams, $fields)) {
+        return false;
+    }
+
+    $result = new cached_cm_info();
+    $result->name = $reservation->name;
+
+    if ($coursemodule->showdescription) {
+        // Convert intro to html. Do not filter cached version, filters run at display time.
+        $result->content = format_module_intro('reservation', $reservation, $coursemodule->id, false);
+    }
+
+    // Populate the custom completion rules as key => value pairs, but only if the completion mode is 'automatic'.
+    if ($coursemodule->completion == COMPLETION_TRACKING_AUTOMATIC) {
+        $result->customdata['customcompletionrules']['completionreserved'] = $reservation->completionreserved;
+    }
+
+    return $result;
 }

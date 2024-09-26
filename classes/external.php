@@ -41,12 +41,12 @@ class external extends \external_api {
      */
     public static function get_requests_users_parameters() {
         return new \external_function_parameters(
-            [
+            array(
                 'reservationid' => new \external_value(PARAM_INT, 'Reservation id'),
                 'requestids' => new \external_multiple_structure(
                        new \external_value(PARAM_INT, 'Request ids')
-                ),
-            ]
+                )
+            )
         );
     }
 
@@ -61,14 +61,14 @@ class external extends \external_api {
     public static function get_requests_users($reservationid, $requestids) {
         global $DB;
 
-        $params = [
+        $params = array(
             'reservationid' => $reservationid,
             'requestids' => $requestids,
-        ];
+        );
         self::validate_parameters(self::get_requests_users_parameters(), $params);
 
-        if ($reservation = $DB->get_record('reservation', ['id' => $reservationid])) {
-            if ($course = $DB->get_record('course', ['id' => $reservation->course])) {
+        if ($reservation = $DB->get_record('reservation', array('id' => $reservationid))) {
+            if ($course = $DB->get_record('course', array('id' => $reservation->course))) {
                 if ($cm = get_coursemodule_from_instance('reservation', $reservation->id, $course->id)) {
                     self::validate_context(\context_module::instance($cm->id));
                 } else {
@@ -91,11 +91,11 @@ class external extends \external_api {
             }
         }
 
-        $userids = [];
+        $userids = array();
         foreach ($requestids as $requestid) {
-            $request = $DB->get_record('reservation_request', ['id' => $requestid]);
+            $request = $DB->get_record('reservation_request', array('id' => $requestid));
             if ($request && ($request->reservation == $reservationid)) {
-                $user = $DB->get_record('user', ['id' => $request->userid]);
+                $user = $DB->get_record('user', array('id' => $request->userid));
                 if ($user) {
                     $userids[] = $user->id;
                 }
@@ -125,10 +125,10 @@ class external extends \external_api {
      */
     public static function get_matchvalues_parameters() {
         return new \external_function_parameters(
-            [
+            array(
                 'courseid' => new \external_value(PARAM_INT, 'Course id'),
-                'fieldname' => new \external_value(PARAM_ALPHANUMEXT, 'Field name'),
-            ]
+                'fieldname' => new \external_value(PARAM_ALPHANUMEXT, 'Field name')
+            )
         );
     }
 
@@ -143,24 +143,24 @@ class external extends \external_api {
     public static function get_matchvalues($courseid, $fieldname) {
         global $DB;
 
-        $params = [
+        $params = array(
             'courseid' => $courseid,
             'fieldname' => $fieldname,
-        ];
+        );
         self::validate_parameters(self::get_matchvalues_parameters(), $params);
 
         self::validate_context(\context_course::instance($courseid));
 
         require_once(__DIR__ . '/../locallib.php');
 
-        $values = [];
+        $values = array();
 
         $customfields = reservation_get_profilefields();
 
         // Get the list of used values for requested field.
         if (isset($customfields[$fieldname])) {
             // Retrieve custom field values.
-            $queryparameters = ['fieldid' => $customfields[$fieldname]->id];
+            $queryparameters = array('fieldid' => $customfields[$fieldname]->id);
             if ($datas = $DB->get_records('user_info_data', $queryparameters, 'data ASC', 'DISTINCT data')) {
                 foreach ($datas as $data) {
                     if (!empty($data->data)) {
@@ -178,7 +178,7 @@ class external extends \external_api {
             }
         } else {
             // One of standard fields.
-            if (in_array($fieldname, ['city', 'institution', 'department', 'address'])) {
+            if (in_array($fieldname, array('city', 'institution', 'department', 'address'))) {
                 $datas = $DB->get_records_select('user', 'deleted=0 AND '.$fieldname.'<>""', null,
                         $fieldname.' ASC', 'DISTINCT '.$fieldname);
                 foreach ($datas as $data) {
@@ -208,13 +208,13 @@ class external extends \external_api {
      */
     public static function get_clashes_parameters() {
         return new \external_function_parameters(
-            [
+            array(
                 'courseid' => new \external_value(PARAM_INT, 'Course id'),
                 'place' => new \external_value(PARAM_NOTAGS, 'Location string', VALUE_DEFAULT, ''),
                 'timestart' => new \external_value(PARAM_ALPHANUMEXT, 'Timestamp of event start time'),
                 'timeend' => new \external_value(PARAM_ALPHANUMEXT, 'Timestamp of event end time'),
                 'reservationid' => new \external_value(PARAM_ALPHANUM, 'Reservation id'),
-            ]
+            )
         );
     }
 
@@ -238,13 +238,13 @@ class external extends \external_api {
             }
         }
 
-        $params = [
+        $params = array(
             'courseid' => $courseid,
             'place' => $place,
             'timestart' => $timestartstr,
             'timeend' => $timeendstr,
             'reservationid' => $reservationid,
-        ];
+        );
 
         self::validate_parameters(self::get_clashes_parameters(), $params);
 
@@ -277,9 +277,9 @@ class external extends \external_api {
                         $collisiontable->tablealign = 'center';
                         $collisiontable->attributes['class'] = 'collisions ';
                         $collisiontable->summary = get_string('clashesreport', 'reservation');
-                        $collisiontable->data = [];
+                        $collisiontable->data = array();
 
-                        $collisiontable->head = [];
+                        $collisiontable->head = array();
                         $collisiontable->head[] = get_string('course');
                         $collisiontable->head[] = get_string('modulename', 'reservation');
                         $collisiontable->head[] = get_string('location', 'reservation');
@@ -316,7 +316,7 @@ class external extends \external_api {
                                 }
                             }
                             if ($collision) {
-                                $columns = [];
+                                $columns = array();
                                 $columns[] = format_string($reservation->coursename);
                                 $columns[] = format_string($reservation->name);
                                 $columns[] = format_string($reservation->location);
@@ -325,7 +325,7 @@ class external extends \external_api {
                                     $columns[] = userdate($reservation->timeend, $strftimedaydatetime);
                                 } else {
                                     $columns[] = \html_writer::tag('em', userdate($extimeend, $strftimedaydatetime),
-                                            ['class' => 'stimed']);
+                                            array('class' => 'stimed'));
                                 }
                                 $collisiontable->data[] = $columns;
                             }

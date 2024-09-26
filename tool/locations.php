@@ -26,26 +26,32 @@ require_once('../../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
 require_once('../locallib.php');
 
-admin_externalpage_setup('reservationlocations');
+$url = new moodle_url('/mod/reservation/locations.php');
 
-$add = optional_param('add', null, PARAM_ALPHA);
-$delete = optional_param('delete', null, PARAM_ALPHA);
+$PAGE->set_url($url);
+
+// This is hacky, tehre should be a special hidden page for it.
+admin_externalpage_setup('managemodules');
 
 // Get the current list of locations.
 if (!$locations = $DB->get_records_menu('reservation_location')) {
-    $locations = [];
+    $locations = array();
 }
 
 // Print the header of the page.
+$strmodulename = get_string('modulename', 'reservation');
+$strlocations = get_string('locations', 'reservation');
+
 echo $OUTPUT->header();
 
-echo $OUTPUT->heading(get_string('locations', 'reservation'));
+echo $OUTPUT->heading($strmodulename . ': ' . $strlocations);
 
 echo $OUTPUT->box(get_string('configlocations', 'reservation'), 'generalbox boxaligncenter boxwidthnormal');
 
 // First, process any inputs there may be.
-if (!empty($add)) {
-    if (confirm_sesskey()) {
+if (confirm_sesskey()) {
+    $add = optional_param('add', null, PARAM_ALPHA);
+    if (isset($add)) {
         $location = optional_param('name', null, PARAM_TEXT);  // Location Name.
         if (isset($location) && !empty($location) && !in_array($location, $locations)) {
             $loc = new stdClass();
@@ -54,16 +60,15 @@ if (!empty($add)) {
             $locations[$id] = $location;
         }
     }
-}
-if (!empty($delete)) {
-    if (confirm_sesskey()) {
-        $selectedlocations = optional_param_array('locations', [], PARAM_INT);  // Location id.
+    $delete = optional_param('delete', null, PARAM_ALPHA);
+    if (isset($delete)) {
+        $selectedlocations = optional_param_array('locations', array(), PARAM_INT);  // Location id.
         foreach ($selectedlocations as $selectedlocation) {
             if (isset($selectedlocation) && !isset($locations[$selectedlocation])) {
                 $selectedlocation = null;
             }
             if (isset($selectedlocation)) {
-                $DB->delete_records('reservation_location', ['id' => $selectedlocation]);
+                $DB->delete_records('reservation_location', array('id' => $selectedlocation));
                 unset($locations[$selectedlocation]);
             }
         }
@@ -72,11 +77,7 @@ if (!empty($delete)) {
 
 $sesskey = !empty($USER->id) ? $USER->sesskey : '';
 
-if (extension_loaded('intl') === true) {
-    collator_asort(collator_create('root'), $locations);
-} else {
-    natcasesort($locations);
-}
+natsort($locations);
 
 // Print out the complete form.
 echo $OUTPUT->box_start('locationform');
@@ -90,8 +91,6 @@ echo $OUTPUT->box_start('locationform');
                 foreach ($locations as $id => $location) {
                     echo '<option value="'.$id.'">'.$location."</option>\n";
                 }
-            } else {
-                echo '<option value="" disabled>' . get_string('nolocations', 'reservation') . "</option>\n";
             }
             ?>
          </select>
