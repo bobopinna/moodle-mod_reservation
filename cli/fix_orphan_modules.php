@@ -29,14 +29,14 @@ require_once($CFG->libdir . '/clilib.php');
 
 // Now get cli options.
 list($options, $unrecognized) = cli_get_params(
-        [
+        array(
                 'help' => false,
-                'check' => false,
-        ],
-        [
+                'check' => false
+        ),
+        array(
                 'h' => 'help',
-                'c' => 'check',
-        ],
+                'c' => 'check'
+        )
 );
 
 if ($unrecognized) {
@@ -60,12 +60,12 @@ Example:
 // Turn on debugging so we can see the detailed progress.
 set_debugging(DEBUG_DEVELOPER, true);
 
-$module = $DB->get_record('modules', ['name' => 'reservation']);
-$coursemodules = $DB->get_records('course_modules', ['module' => $module->id]);
+$module = $DB->get_record('modules', array('name' => 'reservation'));
+$coursemodules = $DB->get_records('course_modules', array('module' => $module->id));
 if (!empty($coursemodules)) {
     foreach ($coursemodules as $coursemodule) {
         // Cleanup orphans records.
-        if (!$DB->record_exists('reservation', ['id' => $coursemodule->instance])) {
+        if (!$DB->record_exists('reservation', array('id' => $coursemodule->instance))) {
             cli_writeln('Missing reservation: '. $coursemodule->instance);
             if (! $options['check']) {
                 $reservation = new stdClass();
@@ -76,7 +76,7 @@ if (!empty($coursemodules)) {
                 $reservation->location = '';
                 $reservation->timemodified = $coursemodule->added;
                 $newid = $DB->insert_record('reservation', $reservation);
-                $DB->set_field('course_modules', 'instance', $newid, ['id' => $coursemodule->id]);
+                $DB->set_field('course_modules', 'instance', $newid, array('id' => $coursemodule->id));
 
                 require_once($CFG->dirroot . '/course/lib.php');
                 course_delete_module($coursemodule->id);

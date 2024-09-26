@@ -57,9 +57,9 @@ class restore_reservation_activity_task extends restore_activity_task {
      * @return array
      */
     public static function define_decode_contents() {
-        $contents = [];
+        $contents = array();
 
-        $contents[] = new restore_decode_content('reservation', ['intro'], 'reservation');
+        $contents[] = new restore_decode_content('reservation', array('intro'), 'reservation');
 
         return $contents;
     }
@@ -71,7 +71,7 @@ class restore_reservation_activity_task extends restore_activity_task {
      * @return array of restore_decode_rule
      */
     public static function define_decode_rules() {
-        $rules = [];
+        $rules = array();
 
         $rules[] = new restore_decode_rule('RESERVATIONVIEWBYID', '/mod/reservation/view.php?id=$1', 'course_module');
         $rules[] = new restore_decode_rule('RESERVATIONINDEX', '/mod/reservation/index.php?id=$1', 'course');
@@ -89,7 +89,7 @@ class restore_reservation_activity_task extends restore_activity_task {
      * @return array of restore_log_rule
      */
     public static function define_restore_log_rules() {
-        $rules = [];
+        $rules = array();
 
         $rules[] = new restore_log_rule('reservation', 'add', 'view.php?id={course_module}', '{reservation}');
         $rules[] = new restore_log_rule('reservation', 'update', 'view.php?id={course_module}', '{reservation}');
@@ -114,7 +114,7 @@ class restore_reservation_activity_task extends restore_activity_task {
      * @return array
      */
     public static function define_restore_log_rules_for_course() {
-        $rules = [];
+        $rules = array();
 
         // Fix old wrong uses (missing extension).
         $rules[] = new restore_log_rule('reservation', 'view all', 'index?id={course}', null,

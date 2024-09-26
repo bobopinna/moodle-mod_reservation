@@ -33,17 +33,17 @@ if (!empty($id)) {
     if (! $cm = get_coursemodule_from_id('reservation', $id)) {
         throw new moodle_exception('invalidcoursemodule');
     }
-    if (! $course = $DB->get_record('course', ['id' => $cm->course])) {
+    if (! $course = $DB->get_record('course', array('id' => $cm->course))) {
         throw new moodle_exception('coursemisconf');
     }
-    if (! $reservation = $DB->get_record('reservation', ['id' => $cm->instance])) {
+    if (! $reservation = $DB->get_record('reservation', array('id' => $cm->instance))) {
         throw new moodle_exception('invalidreservationid', 'reservation');
     }
 } else if (!empty($r)) {
-    if (! $reservation = $DB->get_record('reservation', ['id' => $r])) {
+    if (! $reservation = $DB->get_record('reservation', array('id' => $r))) {
         throw new moodle_exception('invalidreservationid', 'reservation');
     }
-    if (! $course = $DB->get_record('course', ['id' => $reservation->course])) {
+    if (! $course = $DB->get_record('course', array('id' => $reservation->course))) {
         throw new moodle_exception('invalidcourseid');
     }
     if (! $cm = get_coursemodule_from_instance('reservation', $reservation->id, $course->id)) {
@@ -83,7 +83,7 @@ if ($status->groupmode != NOGROUPS) {
     $status->group = groups_get_activity_group($cm, true);
 }
 
-$queries = ['id' => $cm->id];
+$queries = array('id' => $cm->id);
 if ($status->groupmode != NOGROUPS) {
     if ($status->group !== false) {
         $queries['group'] = $status->group;
@@ -104,10 +104,10 @@ $context = context_module::instance($cm->id);
 
 $coursecontext = context_course::instance($reservation->course);
 
-$params = [
+$params = array(
     'context' => $context,
-    'objectid' => $reservation->id,
-];
+    'objectid' => $reservation->id
+);
 $event = \mod_reservation\event\course_module_viewed::create($params);
 $event->add_record_snapshot('course_modules', $cm);
 $event->add_record_snapshot('course', $course);
@@ -119,13 +119,13 @@ if (isset($status->action) && confirm_sesskey()) {
     switch($status->action) {
         case 'savegrades': // Store grades if set.
             if (has_capability('mod/reservation:grade', $context)) {
-                $grades = optional_param_array('grades', [], PARAM_INT);
+                $grades = optional_param_array('grades', array(), PARAM_INT);
                 reservation_set_grades($reservation, $USER->id, $grades);
             }
         break;
         case 'deleterequest': // Some requests need to be deleted.
             if (has_capability('mod/reservation:manualdelete', $context)) {
-                $requestids = optional_param_array('requestid', [], PARAM_INT);
+                $requestids = optional_param_array('requestid', array(), PARAM_INT);
                 reservation_delete_requests($reservation, $requestids);
             }
         break;
@@ -135,7 +135,7 @@ if (isset($status->action) && confirm_sesskey()) {
 // Get profile custom fields array.
 $customfields = reservation_get_profilefields();
 
-$fields = [];
+$fields = array();
 if (has_capability('mod/reservation:viewrequest', $context)) {
     $fields = reservation_get_fields($customfields, $status);
 }
@@ -146,7 +146,7 @@ $counters = reservation_setup_counters($reservation, $customfields);
 // Add sublimits fields to used fields.
 $fields = reservation_setup_sublimit_fields($counters, $customfields, $fields);
 
-$addableusers = [];
+$addableusers = array();
 if ($status->mode == 'manage') {
     // Get list of users available for manual reserve.
     $addableusers = reservation_get_addableusers($reservation, $status);
@@ -154,7 +154,7 @@ if ($status->mode == 'manage') {
 
 // Get all reservation requests.
 $requests = reservation_get_requests($reservation, true, $fields, $status);
-$rows = [];
+$rows = array();
 if (!empty($requests)) {
     // Check for requests full view.
     if (has_capability('mod/reservation:viewrequest', $context)) {
@@ -170,7 +170,7 @@ if (!empty($requests)) {
     }
 
     if ($status->mode == 'manage') {
-        $status->actions = [];
+        $status->actions = array();
         if (has_capability('mod/reservation:viewrequest', $context)) {
             $status->actions['#messageselect'] = get_string('sendmessage', 'message');
         }
@@ -206,13 +206,11 @@ $notice = '';
 // Do a user action.
 if (isset($status->action) && confirm_sesskey()) {
     $request = null;
-    $redirectqueries = [];
     switch($status->action) {
         case 'manualreserve':  // Add a reservation for selected user.
             if (has_capability('mod/reservation:manualreserve', $context) && ($status->mode == 'manage') && !empty($userid)) {
                 $request = new stdClass();
                 $request->userid = $userid;
-                $redirectqueries['mode'] = 'manage';
             } else {
                 $notice = 'reservationdenied';
             }
@@ -231,9 +229,7 @@ if (isset($status->action) && confirm_sesskey()) {
             $note = optional_param('note', null, PARAM_TEXT);
             $result = reservation_reserve($reservation, $seats, $note, $userid);
             if ($result['status'] == true) {
-                $redirectqueries['id'] = $cm->id;
-                $redirecturl = new moodle_url('/mod/reservation/view.php', $redirectqueries);
-                redirect ($redirecturl, get_string('reserved', 'reservation'), 2);
+                redirect ($CFG->wwwroot.'/mod/reservation/view.php?id='.$cm->id, get_string('reserved', 'reservation'), 2);
             } else {
                 $notice = $result['error'];
             }
@@ -242,9 +238,7 @@ if (isset($status->action) && confirm_sesskey()) {
             if (has_capability('mod/reservation:reserve', $context)) {
                 if (reservation_cancel($reservation, $course, $cm, $context)) {
                     $strcancelled = get_string('reservationcancelled', 'reservation');
-                    $redirectqueries['id'] = $cm->id;
-                    $redirecturl = new moodle_url('/mod/reservation/view.php', $redirectqueries);
-                    redirect ($redirecturl, $strcancelled, 2);
+                    redirect ($CFG->wwwroot.'/mod/reservation/view.php?id='.$cm->id, $strcancelled, 2);
                 } else {
                     $notice = 'notbooked';
                 }

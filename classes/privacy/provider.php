@@ -119,7 +119,7 @@ class provider implements
         }
 
         // Fetch all reservation requests.
-        $sql = "SELECT rr.userid
+        $sql = "SELECT ca.userid
                   FROM {course_modules} cm
                   JOIN {modules} m ON m.id = cm.module AND m.name = :modname
                   JOIN {reservation} r ON r.id = cm.instance
@@ -168,12 +168,10 @@ class provider implements
                        AND (rr.userid = :userid OR rr.teacher = :graderid)
               ORDER BY cm.id";
 
-        $params = [
-                      'modname' => 'reservation',
-                      'contextlevel' => CONTEXT_MODULE,
-                      'userid' => $user->id,
-                      'graderid' => $user->id,
-                  ] + $contextparams;
+        $params = ['modname' => 'reservation',
+                   'contextlevel' => CONTEXT_MODULE,
+                   'userid' => $user->id,
+                   'graderid' => $user->id] + $contextparams;
 
         $lastcmid = null;
 
@@ -185,7 +183,7 @@ class provider implements
                     self::export_reservation_data_for_user($reservationdata, $context, $user);
                 }
                 $reservationdata = [
-                    'requests' => [],
+                    'requests' => []
                 ];
             }
             $requestdata = new \stdClass();

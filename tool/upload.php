@@ -40,7 +40,7 @@ $previewrows = optional_param('previewrows', 10, PARAM_INT);
 raise_memory_limit(MEMORY_HUGE);
 
 require_login();
-admin_externalpage_setup('reservationupload');
+admin_externalpage_setup('managemodules');
 
 $systemcontext = context_system::instance();
 
@@ -48,7 +48,7 @@ require_capability('mod/reservation:uploadreservations', $systemcontext);
 
 $returnurl = new moodle_url('/mod/reservation/tool/upload.php');
 
-$fields = [
+$fields = array(
         'course',
         'section',
         'name',
@@ -61,10 +61,10 @@ $fields = [
         'timeopen',
         'timeclose',
         'maxrequest',
-        'dummy',
-];
+        'dummy'
+);
 
-$requiredfields = ['section', 'name', 'timestart', 'timeclose'];
+$requiredfields = array('section', 'name', 'timestart');
 
 $errorstr = get_string('error');
 
@@ -101,8 +101,8 @@ if (!empty($iid)) {
     $cir = new csv_import_reader($iid, 'uploadreservation');
     $filecolumns = reservation_validate_upload_columns($cir, $fields, $requiredfields, $returnurl);
 
-    $formdata = ['iid' => $iid, 'previewrows' => $previewrows];
-    $mformconfirm = new reservation_upload_confirm_form(null, ['columns' => $filecolumns, 'data' => $formdata]);
+    $formdata = array('iid' => $iid, 'previewrows' => $previewrows);
+    $mformconfirm = new reservation_upload_confirm_form(null, array('columns' => $filecolumns, 'data' => $formdata));
     // If a file has been uploaded, then process it.
     if ($formdata = $mformconfirm->is_cancelled()) {
         $cir->cleanup(true);
@@ -113,7 +113,7 @@ if (!empty($iid)) {
         echo $OUTPUT->header();
         echo $OUTPUT->heading(get_string('uploadreservationsresult', 'reservation'));
 
-        $courses = [];
+        $courses = array();
 
         $cir->init();
         $linenum = 1; // Column header is first line.
@@ -153,7 +153,7 @@ if (!empty($iid)) {
             }
             if (!isset($data->course)) {
                 $courseshortname = optional_param('course', '', PARAM_RAW);
-                if (!empty($courseshortname) && ($DB->get_record('course', ['shortname' => $courseshortname]))) {
+                if (!empty($courseshortname) && ($DB->get_record('course', array('shortname' => $courseshortname)))) {
                     $data->course = $courseshortname;
                     $upt->track('course', s($courseshortname), 'normal');
                 } else {
@@ -167,7 +167,7 @@ if (!empty($iid)) {
                 if (isset($formdata->note)) {
                     $data->note = $formdata->note;
                 }
-                if (!$course = $DB->get_record('course', ['shortname' => $data->course])) {
+                if (!$course = $DB->get_record('course', array('shortname' => $data->course))) {
                     $upt->track('course', $errorstr, 'error');
                 } else {
                     $coursenumsections = 0;
@@ -176,17 +176,15 @@ if (!empty($iid)) {
                         $coursenumsections = (int)max(array_keys($sections));
                     }
 
-                    $data->section = clean_param(trim($data->section), PARAM_INT);
                     if (($coursenumsections > 0) && ($data->section > $coursenumsections) || ($data->section < 0)) {
-                        $upt->track('status', $errorstr, 'error');
-                        $upt->track('section', get_string('badcoursesection', 'reservation'), 'error');
+                        $upt->track('section', $errorstr, 'error');
                     } else {
                         $cw = get_fast_modinfo($course->id)->get_section_info($data->section);
 
                         $reservation = new stdClass();
                         // Create the course module.
                         $reservation->cmidnumber = null;
-                        $reservation->section = $data->section;
+                        $reservation->section = clean_param($data->section, PARAM_INT);
 
                         // Create the reservation database entry.
                         $reservation->course = $course->id;
@@ -201,10 +199,10 @@ if (!empty($iid)) {
 
                         if (isset($data->teachers) && !empty($data->teachers)) {
                             $teachersmail = explode(':', $data->teachers);
-                            $teachers = [];
+                            $teachers = array();
                             foreach ($teachersmail as $teachermail) {
                                 if ($teachermail == clean_param($teachermail, PARAM_EMAIL)) {
-                                    if ($teacher = $DB->get_record('user', ['email' => $teachermail])) {
+                                    if ($teacher = $DB->get_record('user', array('email' => $teachermail))) {
                                         $teachers[] = $teacher->id;
                                     } else {
                                         $upt->track('teachers', $errorstr, 'error');
@@ -279,7 +277,7 @@ if (!empty($iid)) {
                         $reservation->instance = 0;
                         $reservation->field_1 = '-';
 
-                        $reservation->module = $DB->get_field('modules', 'id', ['name' => 'reservation', 'visible' => 1]);
+                        $reservation->module = $DB->get_field('modules', 'id', array('name' => 'reservation', 'visible' => 1));
                         $reservation->modulename = 'reservation';
 
                         add_moduleinfo($reservation, $course);
@@ -314,58 +312,44 @@ if (!empty($iid)) {
         // we definitely must not process the whole file!
 
         // Preview table data.
-        $data = [];
+        $data = array();
         $cir->init();
         $linenum = 1; // Column header is first line.
         $noerror = true; // Keep status of any error.
-
-        while ($linenum <= $previewrows && $fields = $cir->next()) {
+        $maxsection = 0;
+        while ($linenum <= $previewrows || $fields = $cir->next()) {
             $linenum++;
-            $rowcols = [];
+            $rowcols = array();
             $rowcols['line'] = $linenum;
             foreach ($fields as $key => $field) {
                 $rowcols[$filecolumns[$key]] = s($field);
             }
-            $rowcols['status'] = [];
+            $rowcols['status'] = array();
 
             if (isset($rowcols['course'])) {
                 $rowcols['course'] = trim($rowcols['course']);
                 if (empty($rowcols['course'])) {
                     $rowcols['status'][] = get_string('fieldrequired', 'error', 'course');
                     $noerror = false;
-                } else if ($course = $DB->get_record('course', ['shortname' => $rowcols['course']])) {
-                    $courseviewurl = new moodle_url('/course/view.php', ['id' => $course->id]);
+                } else if ($course = $DB->get_record('course', array('shortname' => $rowcols['course']))) {
+                    $courseviewurl = new moodle_url('/course/view.php', array('id' => $course->id));
                     $rowcols['course'] = html_writer::link($courseviewurl, $course->fullname);
                     if (isset($rowcols['section'])) {
-                        $rowcols['section'] = clean_param(trim($rowcols['section']), PARAM_INT);
+                        $rowcols['section'] = trim($rowcols['section']);
+                        // Compartibility with course formats using field 'numsections'.
+                        $courseformatoptions = course_get_format($course)->get_format_options();
                         if (empty($rowcols['section'])) {
                             $rowcols['status'][] = get_string('fieldrequired', 'error', 'section');
                             $noerror = false;
-                        } else {
-                            $coursenumsections = 0;
-                            $sections = get_fast_modinfo($course->id)->get_section_info_all();
-                            if (!empty($sections)) {
-                                $coursenumsections = (int)max(array_keys($sections));
-                            }
-
-                            // Check if a section record exists.
-                            if (($coursenumsections == 0) || ($rowcols['section'] > $coursenumsections)) {
-                                $rowcols['status'][] = get_string('badcoursesection', 'reservation');
-                                $noerror = false;
-                            }
+                        } else if (array_key_exists('numsections', $courseformatoptions) &&
+                                   $rowcols['section'] > $courseformatoptions['numsections']) {
+                            $rowcols['status'][] = get_string('badsection', 'reservation', $course->fullname);
+                            $noerror = false;
                         }
                     }
                 } else {
                     $rowcols['status'][] = get_string('badcourse', 'reservation');
                     $noerror = false;
-                }
-            } else {
-                if (isset($rowcols['section'])) {
-                    $rowcols['section'] = clean_param(trim($rowcols['section']), PARAM_INT);
-                    if (empty($rowcols['section']) && (!isset($rowcols['course']) || empty($rowcols['course']))) {
-                        $rowcols['status'][] = get_string('fieldrequired', 'error', 'section');
-                        $noerror = false;
-                    }
                 }
             }
 
@@ -381,11 +365,11 @@ if (!empty($iid)) {
                 $rowcols['teachers'] = trim($rowcols['teachers']);
                 if (!empty($rowcols['teachers'])) {
                     $teachersmail = explode(':', $rowcols['teachers']);
-                    $teachers = [];
+                    $teachers = array();
                     foreach ($teachersmail as $teachermail) {
                         if ($teachermail == clean_param($teachermail, PARAM_EMAIL)) {
-                            if ($teacher = $DB->get_record('user', ['email' => $teachermail])) {
-                                $userviewurl = new moodle_url('/user/view.php', ['id' => $teacher->id]);
+                            if ($teacher = $DB->get_record('user', array('email' => $teachermail))) {
+                                $userviewurl = new moodle_url('/user/view.php', array('id' => $teacher->id));
                                 $teachers[] = html_writer::link($userviewurl, fullname($teacher));
                             } else {
                                 $rowcols['status'][] = get_string('badteachers', 'reservation', $teachermail);
@@ -437,6 +421,16 @@ if (!empty($iid)) {
                 }
             }
 
+            if (isset($rowcols['section'])) {
+                $rowcols['section'] = clean_param(trim($rowcols['section']), PARAM_INT);
+                if (empty($rowcols['section']) && (!isset($rowcols['course']) || empty($rowcols['course']))) {
+                    $rowcols['status'][] = get_string('fieldrequired', 'error', 'section');
+                    $noerror = false;
+                } else {
+                    $maxsection = max($maxsection, $rowcols['section']);
+                }
+            }
+
             $rowcols['status'] = implode('<br />', $rowcols['status']);
             $data[] = $rowcols;
         }
@@ -450,7 +444,7 @@ if (!empty($iid)) {
         $table->attributes['class'] = 'generaltable';
         $table->tablealign = 'center';
         $table->summary = get_string('uploadreservationspreview', 'reservation');
-        $table->head = [];
+        $table->head = array();
         $table->data = $data;
 
         $table->head[] = get_string('linenumber', 'reservation');
@@ -459,7 +453,7 @@ if (!empty($iid)) {
         }
         $table->head[] = get_string('status');
 
-        echo html_writer::tag('div', html_writer::table($table), ['class' => 'flexible-wrap']);
+        echo html_writer::tag('div', html_writer::table($table), array('class' => 'flexible-wrap'));
 
         // Print the form if valid values are available.
         if ($noerror) {

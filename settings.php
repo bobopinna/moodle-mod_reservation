@@ -24,20 +24,16 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-
-$reservationfolder = new admin_category('modreservationfolder',
-        get_string('pluginname', 'reservation'), $module->is_enabled() === false);
-$ADMIN->add('modsettings', $reservationfolder);
-
-// Reservation Tools.
-$ADMIN->add('modreservationfolder', new admin_externalpage('reservationlocations', get_string('locations', 'reservation'),
-        new moodle_url('/mod/reservation/tool/locations.php')));
-
-$ADMIN->add('modreservationfolder', new admin_externalpage('reservationupload', get_string('upload', 'reservation'),
-        new moodle_url('/mod/reservation/tool/upload.php')));
-
-// Reservation General Settings.
-$settings = new admin_settingpage('modsettingreservation', get_string('generalsettings', 'admin'), 'moodle/site:config');
+$settings->add(new admin_setting_heading('reservation_tools', get_string('tools', 'reservation'), ''));
+if (!empty($USER->sesskey)) {
+    $url = new moodle_url('/mod/reservation/tool/locations.php', array('sesskey' => $USER->sesskey));
+    $settings->add(new \mod_reservation\admin_setting_link('reservationlocations',
+            get_string('locations', 'reservation'), get_string('configlocations', 'reservation'),
+            get_string('locations', 'reservation'), $url, ''));
+}
+$settings->add(new \mod_reservation\admin_setting_link('reservationupload',
+        get_string('upload', 'reservation'), get_string('configupload', 'reservation'),
+        get_string('upload', 'reservation'), new moodle_url('/mod/reservation/tool/upload.php'), ''));
 
 $settings->add(new admin_setting_heading('reservation_settings', get_string('reservation_settings', 'reservation'), ''));
 
@@ -45,7 +41,7 @@ $settings->add(new admin_setting_configtext('reservation/max_requests', get_stri
         get_string('configmaxrequests', 'reservation'), '100'), PARAM_INT, 5);
 
 unset($choices);
-$choices = [];
+$choices = array();
 $choices['course'] = get_string('course');
 $choices['site'] = get_string('site');
 $settings->add(new admin_setting_configselect('reservation/connect_to', get_string('connectto', 'reservation'),
@@ -55,7 +51,7 @@ $settings->add(new admin_setting_configcheckbox('reservation/check_clashes', get
         get_string('configcheckclashes', 'reservation'), '0'));
 
 unset($choices);
-$choices = [];
+$choices = array();
 $choices['300'] = get_string('duration5min', 'reservation');
 $choices['600'] = get_string('duration10min', 'reservation');
 $choices['900'] = get_string('duration15min', 'reservation');
@@ -89,7 +85,7 @@ $settings->add(new admin_setting_configtext('reservation/sublimits', get_string(
 
 $settings->add(new admin_setting_heading('reservation_listing', get_string('reservation_listing', 'reservation'), ''));
 unset($choices);
-$choices = [];
+$choices = array();
 $choices['section'] = get_string('bysection', 'reservation');
 $choices['date'] = get_string('bydate', 'reservation');
 $choices['name'] = get_string('byname', 'reservation');
@@ -100,7 +96,7 @@ $settings->add(new admin_setting_configcheckbox('reservation/publiclists', get_s
         get_string('configpubliclists', 'reservation'), '0'));
 
 unset($choices);
-$choices = [];
+$choices = array();
 $choices['-1'] = get_string('never');
 $choices['0'] = get_string('atstart', 'reservation');
 $choices['360'] = get_string('after5min', 'reservation');
@@ -122,7 +118,7 @@ $settings->add(new admin_setting_configselect('reservation/deltatime', get_strin
 
 $settings->add(new admin_setting_heading('reservation_view', get_string('reservation_view', 'reservation'), ''));
 unset($choices);
-$choices = [];
+$choices = array();
 $choices['username'] = get_string('username');
 $choices['email'] = get_string('email');
 $choices['city'] = get_string('city');
@@ -140,12 +136,12 @@ if (!empty($customfields)) {
         $choices[$customfield->shortname] = $customfield->name;
     }
 }
-$defaultfields = [];
+$defaultfields = array();
 $settings->add(new admin_setting_configmulticheckbox('reservation/fields', get_string('fields', 'reservation'),
         get_string('configfields', 'reservation'), $defaultfields, $choices));
 
 unset($choices);
-$choices = [];
+$choices = array();
 $choices['course'] = get_string('course');
 $choices['site'] = get_string('site');
 $settings->add(new admin_setting_configselect('reservation/manual_users', get_string('manualusers', 'reservation'),
@@ -153,26 +149,22 @@ $settings->add(new admin_setting_configselect('reservation/manual_users', get_st
 
 $settings->add(new admin_setting_heading('reservation_other', get_string('reservation_other', 'reservation'), ''));
 unset($choices);
-$choices = [];
+$choices = array();
 $choices['reservers'] = get_string('notifyreservers', 'reservation');
 $choices['cancellers'] = get_string('notifycancellers', 'reservation');
 $choices['teachers'] = get_string('notifyteachers', 'reservation');
 $choices['students'] = get_string('notifystudents', 'reservation');
 $choices['grades'] = get_string('notifygrades', 'reservation');
-$defaultnotifies = ['teachers' => 1, 'students' => 1, 'grades' => 1];
+$defaultnotifies = array('teachers' => 1, 'students' => 1, 'grades' => 1);
 $settings->add(new admin_setting_configmulticheckbox('reservation/notifies', get_string('notifies', 'reservation'),
         get_string('confignotifies', 'reservation'), $defaultnotifies, $choices));
 
 unset($choices);
-$choices = [];
+$choices = array();
 $choices['reservation'] = get_string('reservationevent', 'reservation');
 $choices['event'] = get_string('eventevent', 'reservation');
 $choices['userevent'] = get_string('userevent', 'reservation');
-$defaultevents = ['reservation' => 1, 'event' => 1];
+$defaultevents = array('reservation' => 1, 'event' => 1);
 $settings->add(new admin_setting_configmulticheckbox('reservation/events', get_string('events', 'reservation'),
         get_string('configevents', 'reservation'), $defaultevents, $choices));
 
-$ADMIN->add('modreservationfolder', $settings);
-
-// Tell core we already added the settings structure.
-$settings = null;

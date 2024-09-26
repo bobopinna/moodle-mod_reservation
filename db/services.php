@@ -25,35 +25,35 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-$functions = [
+$functions = array(
 
-    'mod_reservation_get_requests_users' => [
+    'mod_reservation_get_requests_users' => array(
         'classname'     => 'mod_reservation\external',
         'methodname'    => 'get_requests_users',
         'description'   => 'Retrieve users ids for given requests ids.',
         'type'          => 'read',
         'capabilities'  => 'mod/reservation:viewrequest',
         'ajax'          => true,
-        'services'      => [MOODLE_OFFICIAL_MOBILE_SERVICE],
-    ],
+        'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
+    ),
 
-    'mod_reservation_get_matchvalues' => [
+    'mod_reservation_get_matchvalues' => array(
         'classname'     => 'mod_reservation\external',
         'methodname'    => 'get_matchvalues',
         'description'   => 'Retrieve values from users profile given field.',
         'type'          => 'read',
         'capabilities'  => 'moodle/course:manageactivities',
         'ajax'          => true,
-        'services'      => [MOODLE_OFFICIAL_MOBILE_SERVICE],
-    ],
+        'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
+    ),
 
-    'mod_reservation_get_clashes' => [
+    'mod_reservation_get_clashes' => array(
         'classname'     => 'mod_reservation\external',
         'methodname'    => 'get_clashes',
         'description'   => 'Retrieve time and place clashes.',
         'type'          => 'read',
         'capabilities'  => 'moodle/course:manageactivities',
         'ajax'          => true,
-        'services'      => [MOODLE_OFFICIAL_MOBILE_SERVICE],
-    ],
-];
+        'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
+    ),
+);

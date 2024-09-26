@@ -44,10 +44,10 @@ class request_cancelled extends \core\event\base {
      * @return request_cancelled
      */
     public static function create_from_request(\stdClass $reservation, \context_module $context, \stdClass $request) {
-        $data = [
+        $data = array(
             'context' => $context,
             'objectid' => $request->id,
-        ];
+        );
         /** @var request_cancelled $event */
         $event = self::create($data);
         $event->add_record_snapshot('reservation', $reservation);
@@ -73,14 +73,14 @@ class request_cancelled extends \core\event\base {
      */
     protected function get_legacy_logdata() {
         $request = $this->get_record_snapshot('reservation_request', $this->objectid);
-        return [
+        return array(
             $this->courseid,
             'reservation',
             'cancel',
             'view.php?id='.$this->contextinstanceid,
             $request->userid,
-            $this->contextinstanceid,
-        ];
+            $this->contextinstanceid
+        );
     }
 
     /**
@@ -98,7 +98,7 @@ class request_cancelled extends \core\event\base {
      * @return \moodle_url
      */
     public function get_url() {
-        return new \moodle_url('/mod/reservation/view.php', ['id' => $this->contextinstanceid]);
+        return new \moodle_url('/mod/reservation/view.php', array('id' => $this->contextinstanceid));
     }
 
     /**

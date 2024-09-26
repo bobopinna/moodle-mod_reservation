@@ -24,12 +24,12 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$logs = [
-    ['module' => 'reservation', 'action' => 'view', 'mtable' => 'reservation', 'field' => 'name'],
-    ['module' => 'reservation', 'action' => 'update', 'mtable' => 'reservation', 'field' => 'name'],
-    ['module' => 'reservation', 'action' => 'add', 'mtable' => 'reservation', 'field' => 'name'],
-    ['module' => 'reservation', 'action' => 'grade', 'mtable' => 'reservation_request', 'field' => 'name'],
-    ['module' => 'reservation', 'action' => 'reserve', 'mtable' => 'reservation_request', 'field' => 'timecreated'],
-    ['module' => 'reservation', 'action' => 'delete', 'mtable' => 'reservation_request', 'field' => 'userid'],
-    ['module' => 'reservation', 'action' => 'cancel', 'mtable' => 'reservation_request', 'field' => 'timecancelled'],
-];
+$logs = array(
+    array('module' => 'reservation', 'action' => 'view', 'mtable' => 'reservation', 'field' => 'name'),
+    array('module' => 'reservation', 'action' => 'update', 'mtable' => 'reservation', 'field' => 'name'),
+    array('module' => 'reservation', 'action' => 'add', 'mtable' => 'reservation', 'field' => 'name'),
+    array('module' => 'reservation', 'action' => 'grade', 'mtable' => 'reservation_request', 'field' => 'name'),
+    array('module' => 'reservation', 'action' => 'reserve', 'mtable' => 'reservation_request', 'field' => 'timecreated'),
+    array('module' => 'reservation', 'action' => 'delete', 'mtable' => 'reservation_request', 'field' => 'userid'),
+    array('module' => 'reservation', 'action' => 'cancel', 'mtable' => 'reservation_request', 'field' => 'timecancelled'),
+);

@@ -31,8 +31,8 @@
 function reservation_get_reservation($reservationid) {
     global $DB;
 
-    if ($reservation = $DB->get_record('reservation', ['id' => $reservationid])) {
-        if ($sublimits = $DB->get_records('reservation_limit', ['reservationid' => $reservationid], 'id')) {
+    if ($reservation = $DB->get_record('reservation', array('id' => $reservationid))) {
+        if ($sublimits = $DB->get_records('reservation_limit', array('reservationid' => $reservationid), 'id')) {
             $i = 1;
             foreach ($sublimits as $sublimit) {
                 $reservation->sublimits[$i] = new stdClass();
@@ -57,7 +57,7 @@ function reservation_get_reservation($reservationid) {
 function reservation_get_reservations_by_course($courseid, $location='') {
     global  $DB;
 
-    $searchfields = ['courseid' => $courseid];
+    $searchfields = array('courseid' => $courseid);
 
     $locationquery = ')';
     if (!empty($location)) {
@@ -82,7 +82,7 @@ function reservation_get_reservations_by_course($courseid, $location='') {
 function reservation_get_parentable($reservationid) {
     global $DB, $COURSE;
 
-    $searchfields = [];
+    $searchfields = array();
     $additionalquery = '';
 
     $connectto = get_config('reservation', 'connect_to');
@@ -94,8 +94,8 @@ function reservation_get_parentable($reservationid) {
     if (!empty($reservationid)) {
         $searchfields['reservationid'] = $reservationid;
         $additionalquery .= ' AND (res.id <> :reservationid)';
-        if ($DB->get_records('reservation', ['parent' => $reservationid])) {
-            return [];
+        if ($DB->get_records('reservation', array('parent' => $reservationid))) {
+            return array();
         }
     }
 
@@ -115,7 +115,7 @@ function reservation_get_parentable($reservationid) {
 function reservation_get_connected($reservation) {
     global $DB;
 
-    $searchfields = ['reservationid' => $reservation->id];
+    $searchfields = array('reservationid' => $reservation->id);
     $additionalquery = '';
 
     if (!empty($reservation->parent)) {
@@ -149,16 +149,15 @@ function reservation_get_connected($reservation) {
 function reservation_reserve($reservation, $seats, $note='', $userid=0) {
     global $DB, $USER;
 
-    $result = [];
+    $result = array();
     $result['status'] = false;
     $result['error'] = '';
 
     if (($seats->available > 0) || ($seats->total > 0)) {
         if (!empty($userid)) {
-            $queryparameters = ['userid' => $userid,
-                                'reservation' => $reservation->id,
-                                'timecancelled' => '0',
-                               ];
+            $queryparameters = array('userid' => $userid,
+                                     'reservation' => $reservation->id,
+                                     'timecancelled' => '0');
 
             if (!$DB->get_record('reservation_request', $queryparameters)) {
                 $cr = reservation_reserved_on_connected($reservation, $userid);
@@ -175,9 +174,9 @@ function reservation_reserve($reservation, $seats, $note='', $userid=0) {
                             $usernote->note = strip_tags($note);
                             $DB->insert_record('reservation_note', $usernote);
                         }
-                        $request = $DB->get_record('reservation_request', ['id' => $requestid]);
+                        $request = $DB->get_record('reservation_request', array('id' => $requestid));
 
-                        $course = $DB->get_record('course', ['id' => $reservation->course]);
+                        $course = $DB->get_record('course', array('id' => $reservation->course));
                         $cm = get_coursemodule_from_instance('reservation', $reservation->id, $course->id);
 
                         $context = context_module::instance($cm->id);
@@ -192,7 +191,7 @@ function reservation_reserve($reservation, $seats, $note='', $userid=0) {
                             $completion->update_state($cm, COMPLETION_COMPLETE, $userid);
                         }
 
-                        $user = $DB->get_record('user', ['id' => $userid]);
+                        $user = $DB->get_record('user', array('id' => $userid));
                         reservation_notify('reservers', $user, $reservation, $course, $cm);
 
                         $result['status'] = true;
@@ -227,9 +226,9 @@ function reservation_reserve($reservation, $seats, $note='', $userid=0) {
 function reservation_cancel($reservation, $course, $cm, $context) {
     global $USER, $DB;
 
-    $queryparameters = ['userid' => $USER->id, 'reservation' => $reservation->id, 'timecancelled' => '0'];
+    $queryparameters = array('userid' => $USER->id, 'reservation' => $reservation->id, 'timecancelled' => '0');
     if ($request = $DB->get_record('reservation_request', $queryparameters)) {
-        $DB->set_field('reservation_request', 'timecancelled', time(), ['id' => $request->id]);
+        $DB->set_field('reservation_request', 'timecancelled', time(), array('id' => $request->id));
 
         \mod_reservation\event\request_cancelled::create_from_request($reservation, $context, $request)->trigger();
 
@@ -310,7 +309,7 @@ function reservation_notify($notify, $user, $reservation, $course, $cm) {
 function reservation_reserved_on_connected($reservation, $userid) {
     global $DB;
 
-    $searchfields = ['reservationid' => $reservation->id, 'userid' => $userid];
+    $searchfields = array('reservationid' => $reservation->id, 'userid' => $userid);
     $additionalquery = '';
 
     if (!empty($reservation->parent)) {
@@ -331,7 +330,7 @@ function reservation_reserved_on_connected($reservation, $userid) {
                      AND (res.id <> :reservationid)'.$additionalquery, $searchfields);
 
     if ($res) {
-        if ($course = $DB->get_record('course', ['id' => $res->course])) {
+        if ($course = $DB->get_record('course', array('id' => $res->course))) {
             if ($cm = get_coursemodule_from_instance('reservation', $res->id, $res->course)) {
                 $result = new stdClass();
                 $result->id = $cm->id;
@@ -369,7 +368,7 @@ function reservation_get_requests($reservation, $full=false, $fields=null, $grou
     $requests = $DB->get_records_sql('SELECT u.*, r.*'.
                                      ' FROM {reservation_request} r, {user} u'.
                                      ' WHERE u.deleted = 0 AND r.reservation = :reservationid'.$clear.
-                                     ' AND r.userid = u.id ORDER BY r.id', ['reservationid' => $reservation->id]);
+                                     ' AND r.userid = u.id ORDER BY r.id', array('reservationid' => $reservation->id));
 
     if (!empty($requests)) {
         if (!empty($fields)) {
@@ -406,7 +405,7 @@ function reservation_get_requests($reservation, $full=false, $fields=null, $grou
 
             // Add user note.
             if ($reservation->note >= 1) {
-                $requests[$requestid]->note = $DB->get_field('reservation_note', 'note', ['request' => $requestid]);
+                $requests[$requestid]->note = $DB->get_field('reservation_note', 'note', array('request' => $requestid));
             }
 
             // Set user groups.
@@ -414,7 +413,7 @@ function reservation_get_requests($reservation, $full=false, $fields=null, $grou
                 if (($groupid == 0) || groups_is_member($groupid, $request->userid)) {
                     $groups = groups_get_user_groups($reservation->course, $request->userid);
                     if (!empty($groups['0'])) {
-                        $usergroups = [];
+                        $usergroups = array();
                         foreach ($groups['0'] as $group) {
                             $usergroups[] = format_string(groups_get_group_name($group));
                         }
@@ -478,7 +477,7 @@ function reservation_set_grades($reservation, $teacherid, $grades) {
 
     if (!empty($grades)) {
         $now = time();
-        $requests = $DB->get_records('reservation_request', ['reservation' => $reservation->id]);
+        $requests = $DB->get_records('reservation_request', array('reservation' => $reservation->id));
         foreach ($grades as $requestid => $grade) {
             $request = $requests[$requestid];
             if ($grade != $request->grade) {
@@ -503,7 +502,7 @@ function reservation_set_grades($reservation, $teacherid, $grades) {
 function reservation_delete_requests($reservation, $requestids) {
     global $DB;
 
-    $course = $DB->get_record('course', ['id' => $reservation->course]);
+    $course = $DB->get_record('course', array('id' => $reservation->course));
     $cm = get_coursemodule_from_instance('reservation', $reservation->id, $course->id);
     $context = context_module::instance($cm->id);
     if (is_array($requestids) && !empty($requestids)) {
@@ -511,18 +510,18 @@ function reservation_delete_requests($reservation, $requestids) {
         foreach ($requestids as $num => $requestid) {
             if (!empty($requestid)) {
                 unset($requestids[$num]);
-                $request = $DB->get_record('reservation_request', ['id' => $requestid]);
-                $requestnote = $DB->get_record('reservation_note', ['request' => $requestid]);
+                $request = $DB->get_record('reservation_request', array('id' => $requestid));
+                $requestnote = $DB->get_record('reservation_note', array('request' => $requestid));
                 $requestnote = !empty($requestnote) ? $requestnote : new stdClass();
 
-                $DB->set_field('reservation_request', 'grade', -1, ['id' => $requestid]);
-                $userid = $DB->get_field('reservation_request', 'userid', ['id' => $requestid]);
+                $DB->set_field('reservation_request', 'grade', -1, array('id' => $requestid));
+                $userid = $DB->get_field('reservation_request', 'userid', array('id' => $requestid));
                 reservation_update_grades($reservation, $userid);
 
                 reservation_remove_user_event($reservation, $request);
 
-                $DB->delete_records('reservation_request', ['id' => $requestid]);
-                $DB->delete_records('reservation_note', ['request' => $requestid]);
+                $DB->delete_records('reservation_request', array('id' => $requestid));
+                $DB->delete_records('reservation_note', array('request' => $requestid));
 
                 // Update completion state.
                 $completion = new completion_info($course);
@@ -549,7 +548,7 @@ function reservation_delete_requests($reservation, $requestids) {
 function reservation_get_teacher_names($reservation, $cmid=null) {
     global $DB;
 
-    $teachernames = [];
+    $teachernames = array();
     if (strlen($reservation->teachers) > 0) {
         $context = context_course::instance($reservation->course);
         $capability = 'moodle/course:viewhiddenactivities';
@@ -563,7 +562,7 @@ function reservation_get_teacher_names($reservation, $cmid=null) {
         $teachers = explode(',', $reservation->teachers);
         foreach ($teachers as $teacherid) {
             if (!empty($teacherid)) {
-                if ($teacher = $DB->get_record('user', ['id' => $teacherid])) {
+                if ($teacher = $DB->get_record('user', array('id' => $teacherid))) {
                     if (has_capability($capability, $context, $teacherid)) {
                         $teachernames[] = fullname($teacher);
                     }
@@ -583,7 +582,7 @@ function reservation_get_profilefields() {
     global $DB;
 
     $infofields = $DB->get_records('user_info_field');
-    $customfields = [];
+    $customfields = array();
     foreach ($infofields as $infofield) {
         $customfields[$infofield->shortname] = new stdClass();
         $customfields[$infofield->shortname]->name = $infofield->name;
@@ -601,7 +600,7 @@ function reservation_get_profilefields() {
 function reservation_get_userdata($userid) {
     global $DB, $CFG;
 
-    if ($userdata = $DB->get_record('user', ['id' => $userid])) {
+    if ($userdata = $DB->get_record('user', array('id' => $userid))) {
         require_once($CFG->dirroot.'/user/profile/lib.php');
         $profiledata = profile_user_record($userid);
         if (!empty($profiledata)) {
@@ -623,12 +622,12 @@ function reservation_get_userdata($userid) {
 function reservation_setup_counters($reservation, $customfields) {
     global $DB;
 
-    $counters = [];
+    $counters = array();
     $counters[0] = new stdClass();
     $counters[0]->count = 0;
     $counters[0]->overbooked = 0;
     $counters[0]->deletedrequests = 0;
-    if ($reservationlimits = $DB->get_records('reservation_limit', ['reservationid' => $reservation->id])) {
+    if ($reservationlimits = $DB->get_records('reservation_limit', array('reservationid' => $reservation->id))) {
         $i = 1;
         foreach ($reservationlimits as $reservationlimit) {
             $counters[$i] = $reservationlimit;
@@ -685,7 +684,7 @@ function reservation_update_counters($reservation, $counters, $request) {
             } else if ($fieldname == 'group') {
                 $groups = groups_get_user_groups($reservation->course, $request->userid);
                 if (!empty($groups) && !empty($groups['0'])) {
-                    $groupsnames = [];
+                    $groupsnames = array();
                     foreach ($groups['0'] as $groupid) {
                         $groupsnames[] = groups_get_group_name($groupid);
                     }
@@ -712,7 +711,7 @@ function reservation_update_counters($reservation, $counters, $request) {
  * @param array $fields
  * @return array Sublimits fields
  */
-function reservation_setup_sublimit_fields($counters, $customfields, $fields = []) {
+function reservation_setup_sublimit_fields($counters, $customfields, $fields = array()) {
     foreach ($counters as $counter) {
         if (isset($counter->field)) {
             if (isset($customfields[$counter->field])) {
@@ -783,7 +782,7 @@ function reservation_get_availability($reservation, $counters, $context) {
                 } else {
                     $groups = groups_get_user_groups($reservation->course, $USER->id);
                     if (!empty($groups) && !empty($groups['0'])) {
-                        $groupsnames = [];
+                        $groupsnames = array();
                         foreach ($groups['0'] as $groupid) {
                             $groupsnames[] = groups_get_group_name($groupid);
                         }
@@ -849,7 +848,7 @@ function reservation_validate_upload_columns(csv_import_reader $cir, $fields, $r
     }
 
     // Test columns.
-    $processed = [];
+    $processed = array();
     $required = 0;
     foreach ($columns as $key => $field) {
         $lcfield = core_text::strtolower($field);
@@ -899,7 +898,7 @@ function reservation_set_user_event($reservation, $request) {
         $events = 'reservation,event';
     }
 
-    if ($DB->get_record('user', ['id' => $request->userid]) && !empty($events)) {
+    if ($DB->get_record('user', array('id' => $request->userid)) && !empty($events)) {
         $enabledevents = explode(',', $events);
         if (in_array('userevent', $enabledevents)) {
             require_once($CFG->dirroot.'/calendar/lib.php');
@@ -923,7 +922,7 @@ function reservation_set_user_event($reservation, $request) {
             }
             $newevent = calendar_event::create($event, $selfreserve);
 
-            $DB->set_field('reservation_request', 'eventid', $newevent->id, ['id' => $request->id]);
+            $DB->set_field('reservation_request', 'eventid', $newevent->id, array('id' => $request->id));
         }
     }
 }
@@ -943,12 +942,12 @@ function reservation_remove_user_event($reservation, $request) {
         $events = 'reservation,event';
     }
 
-    if ($DB->get_record('user', ['id' => $request->userid, 'deleted' => 0]) && !empty($events)) {
+    if ($DB->get_record('user', array('id' => $request->userid, 'deleted' => 0)) && !empty($events)) {
         $enabledevents = explode(',', $events);
         if (in_array('userevent', $enabledevents)) {
             require_once($CFG->dirroot.'/calendar/lib.php');
 
-            $events = calendar_get_events_by_id([$request->eventid]);
+            $events = calendar_get_events_by_id(array($request->eventid));
             if (!empty($events)) {
                 $deleted = false;
                 foreach ($events as $event) {
@@ -972,7 +971,7 @@ function reservation_remove_user_event($reservation, $request) {
  * @return array
  */
 function reservation_get_fields($customfields, $status) {
-    $fields = [];
+    $fields = array();
 
     // Get request table display fields.
     $fieldslist = get_config('reservation', 'fields');
@@ -1025,23 +1024,23 @@ function reservation_get_addableusers($reservation, $status) {
     $coursecontext = context_course::instance($reservation->course);
 
     // Get list of users available for manual reserve.
-    $addableusers = [];
+    $addableusers = array();
 
     if (has_capability('mod/reservation:manualreserve', $context)) {
-        $participants = [];
+        $participants = array();
         $manualusers = get_config('reservation', 'manual_users');
         if ($manualusers === false) {
             $manualusers = 'course';
         }
 
         if ($manualusers == 'site') {
-            $participants = $DB->get_records('user', ['deleted' => 0, 'suspended' => 0], 'lastname ASC', '*');
+            $participants = $DB->get_records('user', array('deleted' => 0, 'suspended' => 0), 'lastname ASC', '*');
         } else {
             $participants = get_enrolled_users($coursecontext, null, 0, 'u.*', 'u.lastname ASC');
         }
         if (!empty($participants)) {
             foreach ($participants as $participant) {
-                if (!in_array($participant->username, ['guest', 'admin'])) {
+                if (!in_array($participant->username, array('guest', 'admin'))) {
                     if ($status->groupmode == SEPARATEGROUPS) {
                         if (($status->group != 0) && (has_capability('mod/reservation:viewrequest', $context))) {
                             $groups = groups_get_user_groups($reservation->course, $participant->id);
@@ -1092,7 +1091,7 @@ function reservation_get_current_user($reservation, &$requests) {
         $currentuser->number = $requests[0]->number;
         if (($reservation->grade != 0 ) && ($now > $reservation->timestart) && ($requests[0]->grade >= 0)) {
             if ($reservation->grade < 0) {
-                if ($scale = $DB->get_record('scale', ['id' => -$reservation->grade])) {
+                if ($scale = $DB->get_record('scale', array('id' => -$reservation->grade))) {
                     $values = explode(',', $scale->scale);
                     $currentuser->grade = get_string('yourscale', 'reservation', $values[$requests[0]->grade - 1]);
                 }
@@ -1124,7 +1123,7 @@ function reservation_get_current_user($reservation, &$requests) {
 function reservation_setup_request_table($reservation, $fields, $status) {
     global $DB;
 
-    $course = $DB->get_record('course', ['id' => $reservation->course]);
+    $course = $DB->get_record('course', array('id' => $reservation->course));
     $cm = get_coursemodule_from_instance('reservation', $reservation->id, $course->id);
     $context = context_module::instance($cm->id);
 
@@ -1137,7 +1136,7 @@ function reservation_setup_request_table($reservation, $fields, $status) {
     if ($status->mode == 'overview') {
         if (has_capability('mod/reservation:downloadrequests', $context)) {
             $table->is_downloadable(true);
-            $table->show_download_buttons_at([TABLE_P_TOP, TABLE_P_BOTTOM]);
+            $table->show_download_buttons_at(array(TABLE_P_TOP, TABLE_P_BOTTOM));
         }
 
         $table->is_downloading($status->download,
@@ -1147,11 +1146,11 @@ function reservation_setup_request_table($reservation, $fields, $status) {
 
     // Define Table headers.
     if (empty($status->download)) {
-        $tableheaders = ['#', '', get_string('fullname')];
-        $tablecolumns = ['number', 'picture', 'fullname'];
+        $tableheaders = array('#', '', get_string('fullname'));
+        $tablecolumns = array('number', 'picture', 'fullname');
     } else {
-        $tableheaders = ['#', get_string('firstname'), get_string('lastname')];
-        $tablecolumns = ['number', 'firstname', 'lastname'];
+        $tableheaders = array('#', get_string('firstname'), get_string('lastname'));
+        $tablecolumns = array('number', 'firstname', 'lastname');
     }
     if (has_capability('mod/reservation:viewrequest', $context)) {
         if (!empty($fields)) {
@@ -1230,14 +1229,14 @@ function reservation_get_table_data($reservation, $requests, &$addableusers, &$c
 
     $now = time();
 
-    $rows = [];
+    $rows = array();
     if (!empty($requests)) {
         if (isset($fields['country'])) {
             $countrynames = get_string_manager()->get_list_of_countries();
         }
         foreach ($requests as $request) {
-            $row = [];
-            $rowclasses = [];
+            $row = array();
+            $rowclasses = array();
 
             // Remove already reserved users from manual reservation list of users.
             if (($status->mode == 'manage') && isset($addableusers) &&
@@ -1299,10 +1298,10 @@ function reservation_get_table_data($reservation, $requests, &$addableusers, &$c
                 }
 
                 if (empty($status->download)) {
-                    $userlink = new moodle_url('/user/view.php', ['id' => $request->userid, 'course' => $reservation->course]);
-                    $user = $DB->get_record('user', ['id' => $request->userid]);
-                    $row[] = $OUTPUT->user_picture($user, ['courseid' => $reservation->course]);
-                    $attributes = ['href' => $userlink, 'class' => 'fullname '.$rowclass];
+                    $userlink = new moodle_url('/user/view.php', array('id' => $request->userid, 'course' => $reservation->course));
+                    $user = $DB->get_record('user', array('id' => $request->userid));
+                    $row[] = $OUTPUT->user_picture($user, array('courseid' => $reservation->course));
+                    $attributes = array('href' => $userlink, 'class' => 'fullname '.$rowclass);
                     $row[] = html_writer::tag('a', fullname($request), $attributes);
                 } else {
                     $row[] = $request->firstname;
@@ -1327,7 +1326,7 @@ function reservation_get_table_data($reservation, $requests, &$addableusers, &$c
                                     break;
                                     case 'groups':
                                         $groups = groups_get_user_groups($reservation->course, $request->userid);
-                                        $groupsnames = [];
+                                        $groupsnames = array();
                                         foreach ($groups['0'] as $groupid) {
                                             $groupsnames[] = groups_get_group_name($groupid);
                                         }
@@ -1339,7 +1338,7 @@ function reservation_get_table_data($reservation, $requests, &$addableusers, &$c
                                 }
 
                                 if (empty($status->download)) {
-                                    $row[] = html_writer::tag('div', $fieldvalue, ['class' => $fieldid.' '.$rowclass]);
+                                    $row[] = html_writer::tag('div', $fieldvalue, array('class' => $fieldid.' '.$rowclass));
                                 } else {
                                     $row[] = $fieldvalue;
                                 }
@@ -1350,7 +1349,7 @@ function reservation_get_table_data($reservation, $requests, &$addableusers, &$c
                     if (empty($status->download)) {
                         $row[] = html_writer::tag('div',
                                                   trim(userdate($request->timecreated, get_string('strftimedatetime'))),
-                                                  ['class' => 'timecreated '.$rowclass]);
+                                                  array('class' => 'timecreated '.$rowclass));
                     } else {
                         $row[] = trim(userdate($request->timecreated, get_string('strftimedatetime')));
                     }
@@ -1361,7 +1360,7 @@ function reservation_get_table_data($reservation, $requests, &$addableusers, &$c
                             if (empty($status->download)) {
                                 $row[] = html_writer::tag('div',
                                                           trim(userdate($request->timecancelled, get_string('strftimedatetime'))),
-                                                          ['class' => 'timecancelled '.$rowclass]);
+                                                          array('class' => 'timecancelled '.$rowclass));
                             } else {
                                 $row[] = trim(userdate($request->timecancelled, get_string('strftimedatetime')));
                             }
@@ -1374,13 +1373,13 @@ function reservation_get_table_data($reservation, $requests, &$addableusers, &$c
                         if (($status->view == 'full') || ($request->timecancelled == 0)) {
                             if (isset($request->note) && !empty($request->note)) {
                                 if (empty($status->download)) {
-                                    $row[] = html_writer::tag('div', $request->note, ['class' => 'note '.$rowclass]);
+                                    $row[] = html_writer::tag('div', $request->note, array('class' => 'note '.$rowclass));
                                 } else {
                                     $row[] = $request->note;
                                 }
                             } else {
                                 if (empty($status->download)) {
-                                    $row[] = html_writer::tag('div', '', ['class' => 'note']);
+                                    $row[] = html_writer::tag('div', '', array('class' => 'note'));
                                 } else {
                                     $row[] = '';
                                 }
@@ -1393,24 +1392,24 @@ function reservation_get_table_data($reservation, $requests, &$addableusers, &$c
                             $row[] = html_writer::select(make_grades_menu($reservation->grade),
                                                          'grades['.$request->id.']',
                                                          $request->grade,
-                                                         [-1 => get_string('nograde')]);
+                                                         array(-1 => get_string('nograde')));
                         } else {
                             if (($request->timegraded != 0) && ($request->grade != -1)) {
                                 $usergrade = $request->grade;
                                 if ($reservation->grade < 0) {
-                                    if ($scale = $DB->get_record('scale', ['id' => -$reservation->grade])) {
+                                    if ($scale = $DB->get_record('scale', array('id' => -$reservation->grade))) {
                                         $values = explode(',', $scale->scale);
                                         $usergrade = $values[$request->grade - 1];
                                     }
                                 }
                                 if (empty($status->download)) {
-                                    $row[] = html_writer::tag('div', $usergrade, ['class' => 'grade '.$rowclass]);
+                                    $row[] = html_writer::tag('div', $usergrade, array('class' => 'grade '.$rowclass));
                                 } else {
                                     $row[] = $usergrade;
                                 }
                             } else {
                                 if (empty($status->download)) {
-                                    $row[] = html_writer::tag('div', '', ['class' => 'grade '.$rowclass]);
+                                    $row[] = html_writer::tag('div', '', array('class' => 'grade '.$rowclass));
                                 } else {
                                     $row[] = '';
                                 }
@@ -1419,12 +1418,10 @@ function reservation_get_table_data($reservation, $requests, &$addableusers, &$c
                     }
                     // If some actions are available, display the selection checkbox.
                     if (($status->mode == 'manage') && !empty($status->actions) && !empty($row)) {
-                        $row[] = html_writer::empty_tag('input', ['type' => 'checkbox',
-                                                                  'name' => 'requestid[]',
-                                                                  'class' => 'request',
-                                                                  'value' => $request->id,
-                                                                 ]
-                                                       );
+                        $row[] = html_writer::empty_tag('input', array('type' => 'checkbox',
+                                                                       'name' => 'requestid[]',
+                                                                       'class' => 'request',
+                                                                       'value' => $request->id));
                     }
                 }
             }
