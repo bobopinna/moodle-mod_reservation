@@ -216,6 +216,49 @@ function reservation_reserve($reservation, $seats, $note='', $userid=0) {
 }
 
 /**
+ * Find the next person in line after a cancellation and their position.
+ *
+ * @param stdClass $reservation The reservation object
+ * @param int $request_id ID of the request being cancelled
+ * @param array $requests Array of all current requests
+ * @return array Array containing next person, their position
+ */
+
+ function reservation_find_next_person($reservation, $requestid, $requests) {
+    // If no maximum request limit, return early.
+    if ($reservation->maxrequest == 0) {
+        // Empty nextperson, position.
+        return [null, 0];
+    }
+
+    $currentposition = 0;
+    $foundcurrentrequest = false;
+
+    foreach ($requests as $request) {
+        // Ignore cancelled/deleted requests.
+        if ($request->timecancelled != 0) {
+            continue;
+        }
+
+        $currentposition++;
+
+        if ($request->id == $requestid) {
+            $foundcurrentrequest = true;
+            continue;
+        }
+
+        // After finding cancelled request, look for first person beyond maxrequest (overbooked).
+        else if ($foundcurrentrequest && $currentposition > $reservation->maxrequest) {
+            // Found nextperson and position.
+            return [$request, $currentposition];
+        }
+    }
+
+    // If no next person found.
+    return [null, $currentposition];
+}
+
+/**
  * Cancel current user active request
  *
  * @param stdClass $reservation
@@ -229,6 +272,11 @@ function reservation_cancel($reservation, $course, $cm, $context) {
 
     $queryparameters = ['userid' => $USER->id, 'reservation' => $reservation->id, 'timecancelled' => '0'];
     if ($request = $DB->get_record('reservation_request', $queryparameters)) {
+        // Find who needs to be notified (if anyone).
+        $requests = reservation_get_requests($reservation, false);
+        list($notifyperson, $currentposition) = reservation_find_next_person($reservation, $request->id, $requests);
+
+        // Cancel request and send according event.
         $DB->set_field('reservation_request', 'timecancelled', time(), ['id' => $request->id]);
 
         \mod_reservation\event\request_cancelled::create_from_request($reservation, $context, $request)->trigger();
@@ -239,6 +287,10 @@ function reservation_cancel($reservation, $course, $cm, $context) {
         $completion = new \completion_info($course);
         if ($completion->is_enabled($cm) && $reservation->completionreserved) {
             $completion->update_state($cm, COMPLETION_INCOMPLETE);
+        }
+
+        if ($notifyperson && $currentposition > $reservation->maxrequest) {
+            reservation_notify('overbookers', $notifyperson, $reservation, $course, $cm);
         }
 
         reservation_notify('cancellers', $USER, $reservation, $course, $cm);
@@ -517,6 +569,10 @@ function reservation_delete_requests($reservation, $requestids) {
 
                 $DB->set_field('reservation_request', 'grade', -1, ['id' => $requestid]);
                 $userid = $DB->get_field('reservation_request', 'userid', ['id' => $requestid]);
+                // Find who needs to be notified (if anyone).
+                $requests = reservation_get_requests($reservation, false);
+                list($notifyperson, $currentposition) = reservation_find_next_person($reservation, $requestid, $requests);
+
                 reservation_update_grades($reservation, $userid);
 
                 reservation_remove_user_event($reservation, $request);
@@ -528,6 +584,10 @@ function reservation_delete_requests($reservation, $requestids) {
                 $completion = new completion_info($course);
                 if ($completion->is_enabled($cm)) {
                     $completion->update_state($cm, COMPLETION_INCOMPLETE, $userid);
+                }
+
+                if ($notifyperson && $currentposition > $reservation->maxrequest) {
+                    reservation_notify('overbookers', $notifyperson, $reservation, $course, $cm);
                 }
 
                 \mod_reservation\event\request_deleted::create_from_request($reservation,
