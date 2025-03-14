@@ -38,7 +38,7 @@ class reservation_upload_form extends moodleform {
     /**
      * Define the reservation upload form
      */
-    public function definition () {
+    public function definition() {
         $mform = $this->_form;
 
         $mform->addElement('header', 'settingsheader', get_string('upload'));
@@ -79,7 +79,7 @@ class reservation_upload_confirm_form extends moodleform {
     /**
      * Define the confirmation form
      */
-    public function definition () {
+    public function definition() {
         global $DB;
         $mform = $this->_form;
         $noerror = true;

@@ -13,6 +13,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * Definition of reservation scheduled tasks.
  *
@@ -20,7 +21,9 @@
  * @copyright 2020 Roberto Pinna
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 defined('MOODLE_INTERNAL') || die();
+
 $tasks = [
     [
         'classname' => '\mod_reservation\task\cron_task',
