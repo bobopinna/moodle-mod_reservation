@@ -3,6 +3,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### [4.2.1] - 2024-02-15
+### Fixed
+- Completion management for Moodle 4.x - thanks to @attilioariadne1985
+
+### [4.2] - 2024-02-15
+### Fixed
+- Codings style
 
 ## [4.0.1] and [3.9.2] - 2022-11-08
 ### Fixed

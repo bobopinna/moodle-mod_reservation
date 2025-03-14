@@ -167,29 +167,74 @@ function reservation_delete_instance($id) {
 }
 
 /**
- * Obtains the automatic completion state for this reservation based on the condition
- * in reservation settings.
+ * Add a get_coursemodule_info function in case any reservation type wants to add 'extra' information
+ * for the course (see resource).
  *
- * @param object $course Course
- * @param object $cm Course-module
- * @param int $userid User ID
- * @param bool $type Type of comparison (or/and; can be used as return value if no conditions)
- * @return bool True if completed, false if not, $type if conditions not set.
+ * Given a course_module object, this function returns any "extra" information that may be needed
+ * when printing this activity in a course listing.  See get_array_of_activities() in course/lib.php.
+ *
+ * @param stdClass $coursemodule The coursemodule object (record).
+ * @return cached_cm_info An object on information that the courses
+ *                        will know about (most noticeably, an icon).
  */
-function reservation_get_completion_state($course, $cm, $userid, $type) {
+function reservation_get_coursemodule_info($coursemodule) {
     global $DB;
 
-    // Get reservation details.
-    $reservation = $DB->get_record('reservation', ['id' => $cm->instance], '*', MUST_EXIST);
-
-    // If completion option is enabled, evaluate it and return true/false.
-    if ($reservation->completionreserved) {
-        $params = ['userid' => $userid, 'reservation' => $reservation->id, 'timecancelled' => 0];
-        return $DB->record_exists('reservation_request', $params);
-    } else {
-        // Completion option is not enabled so just return $type.
-        return $type;
+    $dbparams = ['id' => $coursemodule->instance];
+    $fields = 'id, name, intro, introformat, completionreserved, timeopen, timeclose';
+    if (!$reservation = $DB->get_record('reservation', $dbparams, $fields)) {
+        return false;
     }
+
+    $result = new cached_cm_info();
+    $result->name = $reservation->name;
+
+    if ($coursemodule->showdescription) {
+        // Convert intro to html. Do not filter cached version, filters run at display time.
+        $result->content = format_module_intro('reservation', $reservation, $coursemodule->id, false);
+    }
+
+    // Populate the custom completion rules as key => value pairs, but only if the completion mode is 'automatic'.
+    if ($coursemodule->completion == COMPLETION_TRACKING_AUTOMATIC) {
+        $result->customdata['customcompletionrules']['completionreserved'] = $reservation->completionreserved;
+    }
+    // Populate some other values that can be used in calendar or on dashboard.
+    if ($reservation->timeopen) {
+        $result->customdata['timeopen'] = $reservation->timeopen;
+    }
+    if ($reservation->timeclose) {
+        $result->customdata['timeclose'] = $reservation->timeclose;
+    }
+
+    return $result;
+}
+
+/**
+ * Callback which returns human-readable strings describing the active completion custom rules for the module instance.
+ *
+ * @param cm_info|stdClass $cm object with fields ->completion and ->customdata['customcompletionrules']
+ * @return array $descriptions the array of descriptions for the custom rules.
+ */
+function mod_reservation_get_completion_active_rule_descriptions($cm) {
+    // Values will be present in cm_info, and we assume these are up to date.
+    if (empty($cm->customdata['customcompletionrules'])
+        || $cm->completion != COMPLETION_TRACKING_AUTOMATIC) {
+        return [];
+    }
+
+    $descriptions = [];
+    foreach ($cm->customdata['customcompletionrules'] as $key => $val) {
+        switch ($key) {
+            case 'completionreserved':
+                if (!empty($val)) {
+                    $descriptions[] = get_string('completionreserved', 'reservation');
+                }
+                break;
+            default:
+                break;
+        }
+    }
+    return $descriptions;
 }
 
 /**

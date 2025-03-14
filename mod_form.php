@@ -309,8 +309,9 @@ class mod_reservation_mod_form extends moodleform_mod {
         if (!empty($data->completionunlocked)) {
             // Turn off completion settings if the checkboxes aren't ticked.
             $autocompletion = !empty($data->completion) && $data->completion == COMPLETION_TRACKING_AUTOMATIC;
-            if (!$autocompletion || empty($data->completionreserved)) {
-                $data->completionreserved = 0;
+            $completionreserved = $this->get_suffixed_name('completionreserved');
+            if (!$autocompletion || empty($data->$completionreserved)) {
+                $data->$completionreserved = 0;
             }
         }
     }
@@ -350,7 +351,7 @@ class mod_reservation_mod_form extends moodleform_mod {
         $mform =& $this->_form;
 
         $mform->addElement('checkbox',
-                           'completionreserved',
+                           $this->get_suffixed_name('completionreserved'),
                            '',
                            get_string('completionreserved', 'reservation'));
         return ['completionreserved'];
@@ -363,7 +364,20 @@ class mod_reservation_mod_form extends moodleform_mod {
      * @return bool
      */
     public function completion_rule_enabled($data) {
-        return !empty($data['completionreserved']);
+        return !empty($data[$this->get_suffixed_name('completionreserved')]);
     }
 
+    /**
+     * Add suffix to completion field if supported by Moodle..
+     *
+     * @param string $fieldname
+     * @return string
+     */
+    protected function get_suffixed_name(string $fieldname): string {
+        if (method_exists($this, 'get_suffix')) {
+            return $fieldname . $this->get_suffix();
+        } else {
+            return $fieldname;
+        }
+    }
 }
